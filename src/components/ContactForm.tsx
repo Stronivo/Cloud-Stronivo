@@ -4,12 +4,13 @@ import { MagneticButton } from './Magnetic'
 
 /**
  * The form posts JSON to a real endpoint:
- *   - VITE_CONTACT_ENDPOINT if set (e.g. Formspree / Web3Forms / own API), otherwise
- *   - /api/contact — the Vercel function in /api/contact.ts (sends via Resend).
+ *   - VITE_CONTACT_ENDPOINT if set — a Formspree form URL, e.g. https://formspree.io/f/abcd1234
+ *   - otherwise /api/contact — the Vercel function in /api/contact.ts (sends via Resend).
  * Nothing is simulated: if the endpoint is not configured the user is told so
  * and given the e-mail address instead.
  */
-const ENDPOINT = (import.meta.env.VITE_CONTACT_ENDPOINT as string | undefined) || '/api/contact'
+const EXTERNAL = (import.meta.env.VITE_CONTACT_ENDPOINT as string | undefined)?.trim()
+const ENDPOINT = EXTERNAL || '/api/contact'
 
 const PROJECT_TYPES = ['Strona internetowa', 'Landing page', 'Odświeżenie strony', 'SEO i optymalizacja', 'Jeszcze nie wiem']
 
@@ -39,6 +40,38 @@ function validate(v: Values): Errors {
   if (v.message.length > 4000) e.message = 'Wiadomość może mieć maksymalnie 4000 znaków.'
   if (!v.consent) e.consent = 'Potwierdź, że zapoznałeś(-aś) się z polityką prywatności.'
   return e
+}
+
+function apiPayload(v: Values) {
+  return {
+    name: v.name.trim(),
+    email: v.email.trim(),
+    phone: v.phone.trim(),
+    company: v.company.trim(),
+    type: v.type,
+    message: v.message.trim(),
+    consent: v.consent,
+    website: v.website,
+  }
+}
+
+/**
+ * Formspree: readable Polish field names in the notification e-mail,
+ * `email` becomes the reply-to address, `_gotcha` is Formspree's honeypot
+ * (submissions with it filled are silently dropped as spam).
+ */
+function formspreePayload(v: Values) {
+  return {
+    _subject: `Nowe zapytanie ze stronivo.com — ${v.name.trim()}`,
+    'Imię i nazwisko': v.name.trim(),
+    email: v.email.trim(),
+    Telefon: v.phone.trim() || '—',
+    Firma: v.company.trim() || '—',
+    'Rodzaj projektu': v.type,
+    'Wiadomość': v.message.trim(),
+    'Polityka prywatności': 'zapoznano się',
+    _gotcha: v.website,
+  }
 }
 
 const initial: Values = { name: '', email: '', phone: '', company: '', type: PROJECT_TYPES[0], message: '', consent: false, website: '' }
@@ -78,16 +111,7 @@ export function ContactForm() {
       const res = await fetch(ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          name: values.name.trim(),
-          email: values.email.trim(),
-          phone: values.phone.trim(),
-          company: values.company.trim(),
-          type: values.type,
-          message: values.message.trim(),
-          consent: values.consent,
-          website: values.website,
-        }),
+        body: JSON.stringify(EXTERNAL ? formspreePayload(values) : apiPayload(values)),
       })
       if (res.ok) {
         setStatus('success')

@@ -27,27 +27,26 @@ api/contact.ts        Funkcja Vercel wysyłająca formularz przez Resend
 public/work/          Zrzuty ekranu projektów demonstracyjnych (WebP)
 ```
 
-## Formularz kontaktowy — wymagane przed publikacją
+## Formularz kontaktowy — Formspree
 
 Formularz wysyła prawdziwe żądanie i **niczego nie symuluje**. Dopóki usługa nie jest skonfigurowana, użytkownik widzi komunikat „Formularz nie jest jeszcze aktywny” z adresem e-mail.
 
-**Opcja A — wbudowana funkcja Vercel (`/api/contact`, Resend).** W Vercel → Settings → Environment Variables ustaw:
+1. Załóż konto na formspree.io i utwórz formularz (**+ New Form**), wpisując `kontakt@stronivo.com` jako adres docelowy. Potwierdź ten adres mailem od Formspree.
+2. Skopiuj adres formularza (np. `https://formspree.io/f/abcd1234`).
+3. Vercel → Settings → Environment Variables: `VITE_CONTACT_ENDPOINT` = ten adres.
+4. Deployments → **Redeploy** (zmienna jest wbudowywana podczas budowania).
 
-| Zmienna | Przykład |
-| --- | --- |
-| `RESEND_API_KEY` | klucz z resend.com |
-| `CONTACT_TO_EMAIL` | `kontakt@stronivo.com` |
-| `CONTACT_FROM_EMAIL` | `Stronivo <formularz@stronivo.com>` (domena zweryfikowana w Resend) |
+W mailu pola mają polskie nazwy, „Odpowiedz” trafia do nadawcy, a pole-pułapka `_gotcha` odsiewa boty. Walidacja działa po stronie przeglądarki; Formspree dodatkowo filtruje spam.
 
-**Opcja B — zewnętrzna usługa** (Formspree, Web3Forms…): ustaw `VITE_CONTACT_ENDPOINT` na adres endpointu przyjmującego JSON.
+Alternatywa: zostaw `VITE_CONTACT_ENDPOINT` puste i skonfiguruj funkcję `api/contact.ts` (Resend) zmiennymi `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`.
 
-Formularz ma walidację po stronie klienta i serwera, pole-pułapkę na boty (honeypot) oraz wymagane potwierdzenie zapoznania się z polityką prywatności (podstawa przetwarzania wg polityki: art. 6 ust. 1 lit. f RODO).
+Formularz wymaga potwierdzenia zapoznania się z polityką prywatności (podstawa przetwarzania wg polityki: art. 6 ust. 1 lit. f RODO).
 
 ## Do uzupełnienia przed publikacją
 
 - [x] Polityka prywatności (`/polityka-prywatnosci`) — treść w `src/data/privacy.ts`, dane firmy w `COMPANY` w `src/data/site.ts`.
 - [x] Informacje prawne (`/informacje-prawne`) i linki do profili społecznościowych.
-- [ ] Konfiguracja formularza (sekcja wyżej).
+- [ ] Formspree: utworzyć formularz i ustawić `VITE_CONTACT_ENDPOINT` w Vercel (sekcja wyżej).
 - [ ] **Projekty demonstracyjne** — gdy pojawią się realizacje dla klientów, dodaj je w `PROJECTS` (zrzuty do `public/work/`).
 
 ## Wdrożenie na Vercel
