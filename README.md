@@ -41,14 +41,14 @@ Formularz wysyła prawdziwe żądanie i **niczego nie symuluje**. Dopóki usług
 
 **Opcja B — zewnętrzna usługa** (Formspree, Web3Forms…): ustaw `VITE_CONTACT_ENDPOINT` na adres endpointu przyjmującego JSON.
 
-Formularz ma walidację po stronie klienta i serwera, pole-pułapkę na boty (honeypot) oraz wymaganą zgodę na przetwarzanie danych.
+Formularz ma walidację po stronie klienta i serwera, pole-pułapkę na boty (honeypot) oraz wymagane potwierdzenie zapoznania się z polityką prywatności (podstawa przetwarzania wg polityki: art. 6 ust. 1 lit. f RODO).
 
 ## Do uzupełnienia przed publikacją
 
-- [ ] **Polityka prywatności** (`/polityka-prywatnosci`) i **Informacje prawne** (`/informacje-prawne`) — obecnie to jawnie oznaczone szkielety z listą brakujących elementów, z `noindex`. Treść musi przygotować / zweryfikować osoba odpowiedzialna.
-- [ ] **Adresy profili** Instagram / TikTok / Facebook w `src/data/site.ts` — wpisane jako `…/stronivo`, sprawdź, czy są poprawne.
-- [ ] **Projekty demonstracyjne** — Easy Busy i Bella Italia są oznaczone jako „Projekt demonstracyjny”. Gdy pojawią się realizacje dla klientów, dodaj je w `PROJECTS` (zrzuty do `public/work/`).
+- [x] Polityka prywatności (`/polityka-prywatnosci`) — treść w `src/data/privacy.ts`, dane firmy w `COMPANY` w `src/data/site.ts`.
+- [x] Informacje prawne (`/informacje-prawne`) i linki do profili społecznościowych.
 - [ ] Konfiguracja formularza (sekcja wyżej).
+- [ ] **Projekty demonstracyjne** — gdy pojawią się realizacje dla klientów, dodaj je w `PROJECTS` (zrzuty do `public/work/`).
 
 ## Wdrożenie na Vercel
 

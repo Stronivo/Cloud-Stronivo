@@ -1,4 +1,4 @@
-import { CONTACT, NAV, SOCIALS } from '../data/site'
+import { COMPANY, CONTACT, NAV, SOCIALS } from '../data/site'
 import { Logo } from '../components/Logo'
 
 const YEAR = new Date().getFullYear()
@@ -86,7 +86,12 @@ export function Footer({ home = true }: { home?: boolean }) {
       </div>
 
       <div className="container-x flex flex-col gap-3 border-t border-line/60 py-8 text-sm text-mist md:flex-row md:items-center md:justify-between">
-        <p>© {YEAR} Stronivo. Wszelkie prawa zastrzeżone.</p>
+        <div className="space-y-1">
+          <p>© {YEAR} Stronivo. Wszelkie prawa zastrzeżone.</p>
+          <p className="text-xs">
+            Usługi świadczy {COMPANY.shortName}, NIP {COMPANY.nip}, {COMPANY.street}, {COMPANY.city}
+          </p>
+        </div>
         <a href="#start" className="transition-colors hover:text-paper">
           Wróć na górę ↑
         </a>

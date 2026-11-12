@@ -66,7 +66,7 @@ export async function POST(request: Request): Promise<Response> {
     '',
     message,
     '',
-    '— Zgoda na przetwarzanie danych: TAK',
+    '— Potwierdzono zapoznanie się z polityką prywatności: TAK',
   ]
     .filter((l): l is string => typeof l === 'string')
     .join('\n')

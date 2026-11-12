@@ -37,7 +37,7 @@ function validate(v: Values): Errors {
   if (v.phone.trim() && !PHONE_RE.test(v.phone.trim())) e.phone = 'Numer może zawierać cyfry, spacje, „+” i „-”.'
   if (v.message.trim().length < 20) e.message = 'Napisz kilka zdań o projekcie (min. 20 znaków).'
   if (v.message.length > 4000) e.message = 'Wiadomość może mieć maksymalnie 4000 znaków.'
-  if (!v.consent) e.consent = 'Zgoda jest potrzebna, abyśmy mogli odpowiedzieć na wiadomość.'
+  if (!v.consent) e.consent = 'Potwierdź, że zapoznałeś(-aś) się z polityką prywatności.'
   return e
 }
 
@@ -271,12 +271,12 @@ export function ContactForm() {
             className="mt-0.5 size-5 shrink-0 cursor-pointer appearance-none rounded-md border border-line bg-ink-2 bg-center bg-no-repeat transition-colors checked:border-lime checked:bg-lime checked:[background-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2020%2020%22%3E%3Cpath%20d=%22M5%2010.5l3%203%207-7%22%20fill=%22none%22%20stroke=%22%2310131A%22%20stroke-width=%222.4%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E')] aria-[invalid=true]:border-[#ff8a7a]"
           />
           <label htmlFor={fid('consent')} className="text-sm leading-relaxed text-mist">
-            Wyrażam zgodę na przetwarzanie moich danych osobowych podanych w formularzu w celu udzielenia odpowiedzi na
-            zapytanie. Zapoznałem(-am) się z{' '}
+            Zapoznałem(-am) się z{' '}
             <a href="/polityka-prywatnosci" className="text-paper underline underline-offset-4 hover:text-lime">
               polityką prywatności
-            </a>
-            . <span aria-hidden className="text-lime">*</span>
+            </a>{' '}
+            i przyjmuję do wiadomości, że podane dane będą przetwarzane w celu odpowiedzi na moje zapytanie.{' '}
+            <span aria-hidden className="text-lime">*</span>
           </label>
         </div>
         {err('consent') && (

@@ -17,11 +17,19 @@ export const CONTACT = {
   siteUrl: 'https://stronivo.com',
 }
 
-/** TODO: confirm the exact profile URLs before publishing. */
+/** The business that provides services under the Stronivo brand (data controller). */
+export const COMPANY = {
+  name: 'EASY BUSY SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ',
+  shortName: 'EASY BUSY Sp. z o.o.',
+  nip: '8961591928',
+  street: 'ul. Hebanowa 43',
+  city: '55-093 Kiełczów',
+}
+
 export const SOCIALS = [
-  { label: 'Instagram', handle: 'Stronivo', href: 'https://www.instagram.com/stronivo/' },
-  { label: 'TikTok', handle: 'Stronivo', href: 'https://www.tiktok.com/@stronivo' },
-  { label: 'Facebook', handle: 'Stronivo', href: 'https://www.facebook.com/stronivo' },
+  { label: 'Instagram', handle: 'stronivowebs', href: 'https://www.instagram.com/stronivowebs/' },
+  { label: 'TikTok', handle: '@stronivo', href: 'https://www.tiktok.com/@stronivo' },
+  { label: 'Facebook', handle: 'Stronivo', href: 'https://www.facebook.com/share/1Cs2hBayeC/' },
 ] as const
 
 export type Project = {
