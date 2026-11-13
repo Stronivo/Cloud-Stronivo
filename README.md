@@ -29,16 +29,11 @@ public/work/          Zrzuty ekranu projektów demonstracyjnych (WebP)
 
 ## Formularz kontaktowy — Formspree
 
-Formularz wysyła prawdziwe żądanie i **niczego nie symuluje**. Dopóki usługa nie jest skonfigurowana, użytkownik widzi komunikat „Formularz nie jest jeszcze aktywny” z adresem e-mail.
-
-1. Załóż konto na formspree.io i utwórz formularz (**+ New Form**), wpisując `kontakt@stronivo.com` jako adres docelowy. Potwierdź ten adres mailem od Formspree.
-2. Skopiuj adres formularza (np. `https://formspree.io/f/abcd1234`).
-3. Vercel → Settings → Environment Variables: `VITE_CONTACT_ENDPOINT` = ten adres.
-4. Deployments → **Redeploy** (zmienna jest wbudowywana podczas budowania).
+Formularz wysyła wiadomości do formularza Formspree **`https://formspree.io/f/mnpaarla`** (adres wpisany w `src/components/ContactForm.tsx`), który przekazuje je na `kontakt@stronivo.com`. Nie trzeba ustawiać żadnych zmiennych w Vercel.
 
 W mailu pola mają polskie nazwy, „Odpowiedz” trafia do nadawcy, a pole-pułapka `_gotcha` odsiewa boty. Walidacja działa po stronie przeglądarki; Formspree dodatkowo filtruje spam.
 
-Alternatywa: zostaw `VITE_CONTACT_ENDPOINT` puste i skonfiguruj funkcję `api/contact.ts` (Resend) zmiennymi `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`.
+Inny formularz Formspree można podać w zmiennej `VITE_CONTACT_ENDPOINT` (wymaga Redeploy). Alternatywnie ustaw ją na `/api/contact` i skonfiguruj funkcję `api/contact.ts` (Resend) zmiennymi `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`.
 
 Formularz wymaga potwierdzenia zapoznania się z polityką prywatności (podstawa przetwarzania wg polityki: art. 6 ust. 1 lit. f RODO).
 
@@ -46,7 +41,7 @@ Formularz wymaga potwierdzenia zapoznania się z polityką prywatności (podstaw
 
 - [x] Polityka prywatności (`/polityka-prywatnosci`) — treść w `src/data/privacy.ts`, dane firmy w `COMPANY` w `src/data/site.ts`.
 - [x] Informacje prawne (`/informacje-prawne`) i linki do profili społecznościowych.
-- [ ] Formspree: utworzyć formularz i ustawić `VITE_CONTACT_ENDPOINT` w Vercel (sekcja wyżej).
+- [x] Formularz kontaktowy podłączony do Formspree. Po wdrożeniu wyślij jedną wiadomość testową.
 - [ ] **Projekty demonstracyjne** — gdy pojawią się realizacje dla klientów, dodaj je w `PROJECTS` (zrzuty do `public/work/`).
 
 ## Wdrożenie na Vercel

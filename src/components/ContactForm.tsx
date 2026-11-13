@@ -3,14 +3,15 @@ import { CONTACT } from '../data/site'
 import { MagneticButton } from './Magnetic'
 
 /**
- * The form posts JSON to a real endpoint:
- *   - VITE_CONTACT_ENDPOINT if set — a Formspree form URL, e.g. https://formspree.io/f/abcd1234
- *   - otherwise /api/contact — the Vercel function in /api/contact.ts (sends via Resend).
+ * The form posts JSON to Stronivo's Formspree form (delivers to kontakt@stronivo.com).
+ * VITE_CONTACT_ENDPOINT can override it with another Formspree form URL; setting it
+ * to "/api/contact" switches to the Vercel function in /api/contact.ts (Resend).
  * Nothing is simulated: if the endpoint is not configured the user is told so
  * and given the e-mail address instead.
  */
-const EXTERNAL = (import.meta.env.VITE_CONTACT_ENDPOINT as string | undefined)?.trim()
-const ENDPOINT = EXTERNAL || '/api/contact'
+const FORMSPREE_URL = 'https://formspree.io/f/mnpaarla'
+const ENDPOINT = (import.meta.env.VITE_CONTACT_ENDPOINT as string | undefined)?.trim() || FORMSPREE_URL
+const EXTERNAL = /^https?:\/\//.test(ENDPOINT)
 
 const PROJECT_TYPES = ['Strona internetowa', 'Landing page', 'Odświeżenie strony', 'SEO i optymalizacja', 'Jeszcze nie wiem']
 
