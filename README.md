@@ -15,6 +15,8 @@ npm run preview
 
 ## SEO i prerendering
 
+Animacja kabla w hero (`src/intro/heroIntro.ts`) jest samodzielną funkcją bez importów: prerender wstawia ją bezpośrednio do HTML strony głównej, więc rusza bez czekania na bundle Reacta. Przy jej edycji nie wolno odwoływać się do niczego spoza funkcji.
+
 `npm run build` buduje aplikację, a następnie `scripts/prerender.mjs` zapisuje gotowy HTML każdej podstrony (`index.html`, `polityka-prywatnosci.html`, `informacje-prawne.html`, `404.html`). Metadane, canonical i dane strukturalne są w `src/seo.ts`. Domena kanoniczna to **https://www.stronivo.com** (wersja bez www przekierowuje). Raport zmian: `SEO-RAPORT.md`.
 
 Obrazy portfolio: `public/work/<nazwa>-desktop-{900,1600}` i `-mobile-{200,400,600}` w formatach `.avif` i `.webp`. Są cache'owane przez rok, więc nowy obraz musi mieć nową nazwę.
@@ -59,4 +61,5 @@ Zaimportuj repozytorium — `vercel.json` ustawia framework Vite, przepisywanie 
 - Cel: WCAG 2.2 AA — semantyczne sekcje i nagłówki, skip-link, widoczny focus, menu mobilne z pułapką fokusa i obsługą Esc, komunikaty formularza w `aria-live`.
 - `prefers-reduced-motion`: animacja hero od razu pokazuje stan „podłączony”, sekcje przewijane stają się statyczne, kursor i efekty magnetyczne są wyłączone.
 - Pętle animacji działają tylko, gdy sekcja jest widoczna, a karta aktywna. Na telefonach hero używa uproszczonej wersji bez filtrów SVG.
-- Fonty hostowane lokalnie (Fontsource, `unicode-range`), obrazy WebP z `srcset`, `loading="lazy"` i stałymi wymiarami (brak CLS).
+- Fonty w `src/assets/fonts` (Inter i Space Grotesk, OFL): podzbiór latin plus Latin Extended-A (wszystkie polskie znaki). Obrazy AVIF/WebP z `srcset`, `loading="lazy"` i stałymi wymiarami (brak CLS).
+- Szczegóły optymalizacji wydajności i wyniki pomiarów: `PERFORMANCE.md`.

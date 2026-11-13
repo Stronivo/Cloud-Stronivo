@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { STEPS } from '../data/site'
 import { Reveal, SplitText } from '../components/Reveal'
 import { useScrollProgress } from '../hooks/useScrollProgress'
@@ -10,21 +10,41 @@ export function Process() {
   const head = useRef<HTMLSpanElement>(null)
   const reduced = useReducedMotion()
 
+  // Geometry is cached when the list resizes (ResizeObserver runs after layout), so the
+  // scroll callback below only writes and never forces a reflow.
+  const geo = useRef<{ h: number; steps: { el: HTMLElement; at: number }[] }>({ h: 1, steps: [] })
+  const lastP = useRef(0)
+  const applyRef = useRef<(p: number) => void>(() => {})
+  useEffect(() => {
+    const el = list.current
+    if (!el) return
+    const measure = () => {
+      const h = el.offsetHeight || 1
+      geo.current = {
+        h,
+        steps: [...el.querySelectorAll<HTMLElement>('[data-step]')].map((s) => ({ el: s, at: (s.offsetTop + 28) / h })),
+      }
+      applyRef.current(lastP.current) // re-apply with fresh geometry
+    }
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
   const onProgress = useCallback(
     (raw: number) => {
       const p = reduced ? 1 : raw
-      const el = list.current
-      if (!el) return
-      const h = el.offsetHeight
+      lastP.current = raw
+      const { h, steps } = geo.current
       if (fill.current) fill.current.style.transform = `scaleY(${p})`
       if (head.current) head.current.style.transform = `translate3d(0, ${(p * h).toFixed(1)}px, 0)`
-      el.querySelectorAll<HTMLElement>('[data-step]').forEach((s) => {
-        const at = (s.offsetTop + 28) / h
-        s.classList.toggle('is-lit', p >= at)
-      })
+      for (const s of steps) s.el.classList.toggle('is-lit', p >= s.at)
     },
     [reduced],
   )
+  useEffect(() => {
+    applyRef.current = onProgress
+  }, [onProgress])
   useScrollProgress(list, onProgress, { start: 0.7, end: 0.6 })
 
   return (

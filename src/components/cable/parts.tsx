@@ -67,11 +67,11 @@ export function CableDefs({ id, filters = true }: { id: string; filters?: boolea
   )
 }
 
-type PlugProps = { id: string; filters?: boolean; className?: string }
+type PlugProps = { id: string; filters?: boolean; className?: string; 'data-c'?: string }
 
-export const Plug = forwardRef(function Plug({ id, filters = true, className }: PlugProps, ref: Ref<SVGGElement>) {
+export const Plug = forwardRef(function Plug({ id, filters = true, className, 'data-c': dataC }: PlugProps, ref: Ref<SVGGElement>) {
   return (
-    <g ref={ref} className={className}>
+    <g ref={ref} className={className} data-c={dataC}>
       <g filter={filters ? `url(#${id}-drop)` : undefined}>
         {/* strain relief with ridges */}
         <path d="M-150 -8 L-108 -13 L-108 13 L-150 8 Z" fill={`url(#${id}-relief)`} />
@@ -87,13 +87,14 @@ export const Plug = forwardRef(function Plug({ id, filters = true, className }: 
           <line key={x} x1={x} x2={x} y1="-10" y2="10" stroke="#000" strokeOpacity="0.45" strokeWidth="2" strokeLinecap="round" />
         ))}
         {/* brand stripe — lights up once connected */}
+        <rect x="-74" y="-2" width="30" height="4" rx="2" fill="#3a414c" />
         <rect
           x="-74"
           y="-2"
           width="30"
           height="4"
           rx="2"
-          className="fill-[#3a414c] transition-[fill] duration-500 group-[.is-connected]:fill-lime"
+          className="fill-lime opacity-0 transition-opacity duration-500 group-[.is-connected]:opacity-100"
         />
         {/* metal connector */}
         <rect x="-36" y="-13" width="36" height="26" rx="3.5" fill={`url(#${id}-metal)`} />
@@ -105,14 +106,14 @@ export const Plug = forwardRef(function Plug({ id, filters = true, className }: 
   )
 })
 
-type PortProps = { id: string; filters?: boolean; className?: string; label?: string }
+type PortProps = { id: string; filters?: boolean; className?: string; label?: string; 'data-c'?: string }
 
 export const Port = forwardRef(function Port(
-  { id, filters = true, className, label = 'PORT · 01' }: PortProps,
+  { id, filters = true, className, label = 'PORT · 01', 'data-c': dataC }: PortProps,
   ref: Ref<SVGGElement>,
 ) {
   return (
-    <g ref={ref} className={className}>
+    <g ref={ref} className={className} data-c={dataC}>
       {/* halo once lit */}
       <ellipse
         cx="60"
@@ -130,7 +131,15 @@ export const Port = forwardRef(function Port(
         <rect x="150" y="-60" width="16" height="120" rx="8" fill="#0b0d10" fillOpacity="0.55" />
       </g>
       {/* LED light bar */}
-      <rect x="38" y="-38" width="4" height="76" rx="2" className="fill-[#2f353f] transition-[fill] duration-500 group-[.is-connected]:fill-lime" />
+      <rect x="38" y="-38" width="4" height="76" rx="2" fill="#2f353f" />
+      <rect
+        x="38"
+        y="-38"
+        width="4"
+        height="76"
+        rx="2"
+        className="fill-lime opacity-0 transition-opacity duration-500 group-[.is-connected]:opacity-100"
+      />
       <rect
         x="34"
         y="-42"
@@ -142,14 +151,16 @@ export const Port = forwardRef(function Port(
       />
       {/* status dots */}
       {[0, 1, 2].map((i) => (
-        <circle
-          key={i}
-          cx={62 + i * 14}
-          cy="28"
-          r="3.2"
-          className="fill-[#3a414c] transition-[fill] duration-300 group-[.is-connected]:fill-lime"
-          style={{ transitionDelay: `${300 + i * 140}ms` }}
-        />
+        <g key={i}>
+          <circle cx={62 + i * 14} cy="28" r="3.2" fill="#3a414c" />
+          <circle
+            cx={62 + i * 14}
+            cy="28"
+            r="3.2"
+            className="fill-lime opacity-0 transition-opacity duration-300 group-[.is-connected]:opacity-100"
+            style={{ transitionDelay: `${300 + i * 140}ms` }}
+          />
+        </g>
       ))}
       <text x="60" y="-30" fill="#a4abb5" fontSize="10" fontFamily="'Space Grotesk Variable', sans-serif" letterSpacing="2">
         {label}
@@ -173,7 +184,7 @@ export const Port = forwardRef(function Port(
         rx="9"
         fill="none"
         strokeWidth="1.5"
-        className="stroke-transparent transition-[stroke] duration-500 group-[.is-connected]:stroke-lime"
+        className="stroke-lime opacity-0 transition-opacity duration-500 group-[.is-connected]:opacity-100"
       />
     </g>
   )
@@ -192,24 +203,25 @@ export function CableTube({
   id: string
   filters?: boolean
   width?: number
-  shadowRef: Ref<SVGPathElement>
-  outerRef: Ref<SVGPathElement>
-  bodyRef: Ref<SVGPathElement>
-  sheenRef: Ref<SVGPathElement>
+  shadowRef?: Ref<SVGPathElement>
+  outerRef?: Ref<SVGPathElement>
+  bodyRef?: Ref<SVGPathElement>
+  sheenRef?: Ref<SVGPathElement>
 }) {
   return (
     <g fill="none" strokeLinecap="round" strokeLinejoin="round">
       <path
         ref={shadowRef}
+        data-c="shadow"
         stroke="#000"
         strokeOpacity={filters ? 0.55 : 0.3}
         strokeWidth={width * 1.3}
         transform="translate(0 20)"
         filter={filters ? `url(#${id}-shadow)` : undefined}
       />
-      <path ref={outerRef} stroke="#06070a" strokeWidth={width + 2} />
-      <path ref={bodyRef} stroke="#2a3039" strokeWidth={width - 1} />
-      <path ref={sheenRef} stroke="#ffffff" strokeOpacity="0.17" strokeWidth={Math.max(1.5, width * 0.22)} transform="translate(-1 -3)" />
+      <path ref={outerRef} data-c="outer" stroke="#06070a" strokeWidth={width + 2} />
+      <path ref={bodyRef} data-c="body" stroke="#2a3039" strokeWidth={width - 1} />
+      <path ref={sheenRef} data-c="sheen" stroke="#ffffff" strokeOpacity="0.17" strokeWidth={Math.max(1.5, width * 0.22)} transform="translate(-1 -3)" />
     </g>
   )
 }

@@ -2,13 +2,7 @@ import { useEffect, type ReactNode } from 'react'
 import { COMPANY, CONTACT, SOCIALS } from '../data/site'
 import { PRIVACY, PRIVACY_UPDATED, PRIVACY_UPDATED_ISO, type Block } from '../data/privacy'
 
-const PAGES = {
-  '/polityka-prywatnosci': { title: 'Polityka Prywatności Stronivo', doc: 'Polityka prywatności' },
-  '/informacje-prawne': { title: 'Informacje prawne', doc: 'Informacje prawne' },
-} as const
-
-export type LegalPath = keyof typeof PAGES
-export const isLegalPath = (p: string): p is LegalPath => p in PAGES
+import { LEGAL_PAGES as PAGES, type LegalPath } from './legalPaths'
 
 const link = 'text-paper underline decoration-line underline-offset-4 transition-colors hover:text-lime hover:decoration-lime'
 

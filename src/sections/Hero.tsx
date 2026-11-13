@@ -1,22 +1,20 @@
-import { useCallback, useRef, type CSSProperties } from 'react'
+import { useEffect, type CSSProperties } from 'react'
 import { HeroCable } from '../components/cable/HeroCable'
 import { MagneticLink } from '../components/Magnetic'
-import { useReducedMotion } from '../hooks/useMedia'
+import { startHeroIntro } from '../intro/heroIntro'
 
 const delay = (ms: number) => ({ '--d': ms }) as CSSProperties
 
-export function Hero({ onIntroDone }: { onIntroDone: () => void }) {
-  const hero = useRef<HTMLElement>(null)
-  const anchor = useRef<HTMLSpanElement>(null)
-  const reduced = useReducedMotion()
-  const done = useCallback(() => onIntroDone(), [onIntroDone])
+export function Hero() {
+  // In production the engine is already running (inlined in the HTML); this is a no-op
+  // then, and the start path for the dev server or if the inline copy failed.
+  useEffect(() => startHeroIntro(), [])
 
   const tail = 'Twoją firmę do internetu.'.split(' ')
 
   return (
     <section
       id="start"
-      ref={hero}
       aria-labelledby="hero-title"
       className="group relative isolate flex min-h-[100svh] flex-col overflow-hidden"
     >
@@ -26,7 +24,7 @@ export function Hero({ onIntroDone }: { onIntroDone: () => void }) {
         className="absolute inset-0 -z-10 opacity-[0.35] [background-image:linear-gradient(to_right,#252a32_1px,transparent_1px),linear-gradient(to_bottom,#252a32_1px,transparent_1px)] [background-size:96px_96px] [mask-image:radial-gradient(ellipse_70%_60%_at_60%_40%,#000_20%,transparent_75%)]"
       />
 
-      <HeroCable heroRef={hero} anchorRef={anchor} reduced={reduced} onConnected={done} />
+      <HeroCable />
 
       <div className="container-x relative z-10 flex flex-1 flex-col justify-center pb-16 pt-28 md:pb-40 md:pt-40">
         <p className="eyebrow intro-fade mb-0 flex items-center gap-3 md:mb-10" style={delay(0)}>
@@ -41,7 +39,7 @@ export function Hero({ onIntroDone }: { onIntroDone: () => void }) {
 
         <h1 id="hero-title" className="hero-title font-display text-paper">
           <span className="block text-[clamp(3.15rem,14.2vw,5rem)] font-bold leading-[0.92] tracking-[-0.055em] md:text-[clamp(5rem,10.6vw,12.25rem)]">
-            <span ref={anchor} className="split-word !pb-[0.16em] !-mb-[0.16em]">
+            <span data-hero-anchor="" className="split-word !pb-[0.16em] !-mb-[0.16em]">
               <span style={{ '--i': 0 } as CSSProperties}>
                 Podłączamy
               </span>

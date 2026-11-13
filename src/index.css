@@ -1,5 +1,40 @@
 @import 'tailwindcss';
 
+/* Self-hosted variable fonts (OFL, see assets/fonts/LICENSE.txt). Latin + a Latin Extended-A
+   subset (all Polish letters) instead of the full latin-ext files: ~105 kB less to download. */
+@font-face {
+  font-family: 'Space Grotesk Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 700;
+  src: url('./assets/fonts/space-grotesk-latin.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Space Grotesk Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 700;
+  src: url('./assets/fonts/space-grotesk-latin-ext-a.woff2') format('woff2-variations');
+  unicode-range: U+0100-017F;
+}
+@font-face {
+  font-family: 'Inter Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('./assets/fonts/inter-latin.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('./assets/fonts/inter-latin-ext-a.woff2') format('woff2-variations');
+  unicode-range: U+0100-017F;
+}
+
 @theme {
   --color-ink: #10131a;
   --color-ink-2: #161a22;
@@ -159,27 +194,10 @@
   transform: none;
 }
 
-/* Safety net: if JavaScript is slow or fails, reveal the prerendered hero content anyway.
-   When the intro runs normally these values are already reached, so nothing visibly changes. */
-@keyframes intro-fallback {
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-@keyframes intro-fallback-fade {
-  to {
-    opacity: 1;
-  }
-}
-.intro-fade,
-.hero-title .split-word > span {
-  animation: intro-fallback 0.8s var(--ease-out-expo) 3.5s forwards;
-}
-/* The header hosts the fixed mobile menu: an animated transform would make it the menu's
-   containing block (menu shrinks to header height), so it only fades. */
-header.intro-fade {
-  animation-name: intro-fallback-fade;
+/* Hero cable: invisible until the intro engine has positioned it (avoids a frame with
+   the port drawn at the SVG origin before layout). */
+[data-hero-cable]:not([data-ready]) {
+  visibility: hidden;
 }
 
 /* Lime glow used sparingly for "live" connection states */
@@ -296,15 +314,45 @@ header.intro-fade {
   animation: connect-flash 0.9s var(--ease-out-expo) forwards;
 }
 
-/* Data stream travelling along digital traces */
+/* Data stream along the digital trace. Desktop: dash offset along the (stepped) path.
+   Phones: the trace is a straight line, so the same effects run as GPU-composited transforms.
+   Media queries (not a JS flag) so the right animation applies from the very first frame. */
 @keyframes stream {
   to {
     stroke-dashoffset: -48;
   }
 }
+@keyframes stream-x {
+  from {
+    transform: translateX(-12px);
+  }
+  to {
+    transform: none;
+  }
+}
 .stream {
   stroke-dasharray: 2 10;
-  animation: stream 1.2s linear infinite;
+}
+@media (min-width: 768px) {
+  .stream {
+    animation: stream 1.2s linear infinite;
+  }
+}
+@media (max-width: 767.98px) {
+  /* one dash period (2 + 10) at the same speed as the desktop animation (48px / 1.2s) */
+  .stream {
+    animation: stream-x 0.3s linear infinite;
+  }
+  .hero-trace {
+    stroke-dashoffset: 0 !important;
+    transform: scaleX(0);
+    transform-box: fill-box;
+    transform-origin: left center;
+    transition: transform 1.4s var(--ease-out-expo) 0.3s;
+  }
+  .is-connected .hero-trace {
+    transform: none;
+  }
 }
 
 @keyframes scrollcue {

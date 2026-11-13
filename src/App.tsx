@@ -1,6 +1,5 @@
-import { useCallback, useEffect } from 'react'
+import { Suspense, useCallback, useEffect, type ReactNode } from 'react'
 import { Navbar } from './components/Navbar'
-import { Cursor } from './components/Cursor'
 import { Hero } from './sections/Hero'
 import { Work } from './sections/Work'
 import { Services } from './sections/Services'
@@ -10,11 +9,20 @@ import { About } from './sections/About'
 import { Marquee } from './sections/Marquee'
 import { Contact } from './sections/Contact'
 import { Footer } from './sections/Footer'
-import { LegalPage, isLegalPath } from './pages/LegalPage'
+import { isLegalPath } from './pages/legalPaths'
+import { Cursor, LegalPage } from './lazy'
+import { useFinePointer, useReducedMotion } from './hooks/useMedia'
+
+/** Suspense boundary: code-split parts (legal pages, cursor) and per-section hydration units. */
+const Lazy = ({ children }: { children: ReactNode }) => <Suspense fallback={null}>{children}</Suspense>
 
 export default function App({ path }: { path: string }) {
   const legal = isLegalPath(path) ? path : null
   const notFound = !legal && path !== '/'
+
+  // the custom cursor is only for mouse users: phones never download its chunk
+  const fine = useFinePointer()
+  const reduced = useReducedMotion()
 
   const introDone = useCallback(() => document.documentElement.classList.add('intro-done'), [])
 
@@ -30,11 +38,17 @@ export default function App({ path }: { path: string }) {
       >
         Przejdź do treści
       </a>
-      <Cursor />
+      {fine && !reduced && (
+        <Lazy>
+          <Cursor />
+        </Lazy>
+      )}
       <Navbar home={!legal && !notFound} />
       <main id="main" tabIndex={-1} className="outline-none">
         {legal ? (
-          <LegalPage path={legal} />
+          <Lazy>
+            <LegalPage path={legal} />
+          </Lazy>
         ) : notFound ? (
           <section className="container-x flex min-h-[80svh] flex-col justify-center pt-32">
             <p className="eyebrow">Błąd 404</p>
@@ -47,14 +61,30 @@ export default function App({ path }: { path: string }) {
           </section>
         ) : (
           <>
-            <Hero onIntroDone={introDone} />
-            <Work />
-            <Services />
-            <Connect />
-            <Process />
-            <About />
-            <Marquee />
-            <Contact />
+            <Hero />
+            {/* Suspense boundaries (no lazy loading): React hydrates the hero and navigation first,
+                then each section in its own short task instead of one long one. */}
+            <Lazy>
+              <Work />
+            </Lazy>
+            <Lazy>
+              <Services />
+            </Lazy>
+            <Lazy>
+              <Connect />
+            </Lazy>
+            <Lazy>
+              <Process />
+            </Lazy>
+            <Lazy>
+              <About />
+            </Lazy>
+            <Lazy>
+              <Marquee />
+            </Lazy>
+            <Lazy>
+              <Contact />
+            </Lazy>
           </>
         )}
       </main>
