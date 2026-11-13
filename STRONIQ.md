@@ -31,6 +31,26 @@ W konsoli Anthropic ustaw **limit wydatków (spend limit)** dla workspace'u, w k
 ### Formspree
 Zapytania z czatu trafiają do tego samego formularza co formularz kontaktowy (temat: „Zapytanie ze Stroniq (AI) — …”). Wysyłka odbywa się **z serwera**. Po wdrożeniu wyślij jedno testowe zapytanie i sprawdź, czy dotarło. Jeśli Formspree blokuje wysyłkę serwerową (np. przez wymagany reCAPTCHA), użyj Resend (zmienne wyżej). Pamiętaj o limicie zgłoszeń w darmowym planie Formspree (~50/mies., wspólny z formularzem kontaktowym).
 
+## 1a. Tryb awaryjny — kreator zapytania (działa bez AI, 0 zł)
+
+Gdy asystent AI jest niedostępny (brak klucza, przekroczony limit, błąd lub przeciążenie API, brak połączenia), Stroniq **automatycznie przełącza się na kreator**. Kreator:
+- zadaje 6 pytań z gotowymi odpowiedziami (można też wpisać własną): branża → rodzaj strony → funkcje (wielokrotny wybór) → styl → orientacyjny budżet → termin;
+- tworzy podsumowanie i pokazuje tę samą kartę zapytania z formularzem zgody co tryb AI;
+- działa w całości w przeglądarce, bez wywołań API AI. Odpowiedzi trafiają do zespołu dopiero po wysłaniu ze zgodą, przez `/api/lead`, z tematem „Zapytanie z kreatora Stroniq — …” i źródłem „Kreator Stroniq (bez AI)”;
+- jest jasno oznaczony jako „Kreator zapytania — działa bez AI” i nie podaje się za AI.
+
+Pliki: `src/chat/wizard.ts` (pytania, odpowiedzi, budowa podsumowania) oraz `src/chat/ChatWidget.tsx` (przełączanie trybów).
+
+## 1b. Analiza: migracja na Google Gemini API (13.11.2026) — wstrzymana
+
+Sprawdziłem aktualną dokumentację Google (`aistudio.google.com/docs/terms`, `/rate-limits`, `/pricing`, pobrane 13.11.2026):
+- **Darmowy limit nie może obsługiwać użytkowników z Polski.** Warunki: *„You may use only Paid Services when making API Clients available to users in the European Economic Area, Switzerland, or the United Kingdom.”*
+- **W darmowym planie** Google wykorzystuje treść zapytań i odpowiedzi do rozwoju swoich produktów, mogą je czytać ludzie (*„human reviewers may read, annotate, and process your API input and output”*), a warunki mówią: *„Do not submit sensitive, confidential, or personal information to the Unpaid Services.”* Publiczny czat z klientami tego nie gwarantuje.
+- **Darmowe limity** nie są publikowane jako stała tabela: dokumentacja odsyła do panelu AI Studio („Rate limits … can be viewed in Google AI Studio”).
+- **Płatny Gemini nie jest tańszy.** Najtańszy `gemini-3.5-flash-lite` kosztuje $0,30 (wejście) / $2,50 (wyjście) za 1 mln tokenów, a `claude-haiku-5-5` $0,10 / $0,50.
+
+Wniosek: migracja na darmowy Gemini byłaby niezgodna z warunkami Google dla serwisu skierowanego do polskich klientów, a płatny Gemini kosztuje więcej niż obecne rozwiązanie. Backend AI pozostaje na Claude, a koszt 0 zł zapewnia kreator.
+
 ## 2. Architektura
 
 ```

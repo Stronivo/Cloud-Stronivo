@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { CHAT } from './config'
 import { FormattedText } from './format'
+import { WIZARD_INTRO, WIZARD_START, WIZARD_STEPS, wizardInquiry, type WizardState } from './wizard'
 
 /* ------------------------------------------------------------------ types */
 
@@ -16,8 +17,8 @@ type Inquiry = {
 }
 type LeadState = 'form' | 'sending' | 'sent' | 'error'
 type Msg =
-  | { id: string; kind: 'user'; text: string }
-  | { id: string; kind: 'assistant'; text: string; inquiry?: Inquiry; lead?: LeadState; streaming?: boolean }
+  | { id: string; kind: 'user'; text: string; wizard?: boolean }
+  | { id: string; kind: 'assistant'; text: string; inquiry?: Inquiry; lead?: LeadState; streaming?: boolean; wizard?: boolean }
   | { id: string; kind: 'notice'; text: string; tone: 'info' | 'error' | 'ok'; contact?: boolean }
   | { id: string; kind: 'contact' }
 
@@ -46,12 +47,12 @@ const ERRORS: Record<string, string> = {
   network: 'Brak połączenia z serwerem. Sprawdź internet albo skontaktuj się z nami bezpośrednio.',
 }
 
-/** What the model sees: user + assistant turns only (UI notices and the fixed greeting are not sent). */
+/** What the model sees: user + assistant turns only (UI notices, the greeting and wizard steps are never sent). */
 function toApiHistory(msgs: Msg[]) {
   const out: { role: 'user' | 'assistant'; content: string }[] = []
   for (const m of msgs) {
-    if (m.kind === 'user') out.push({ role: 'user', content: m.text })
-    if (m.kind === 'assistant' && !m.streaming) {
+    if (m.kind === 'user' && !m.wizard) out.push({ role: 'user', content: m.text })
+    if (m.kind === 'assistant' && !m.streaming && !m.wizard) {
       const extra = m.inquiry ? `\n\n[Przygotowano podsumowanie zapytania: ${m.inquiry.summary}]` : ''
       const content = `${m.text}${extra}`.trim()
       if (content) out.push({ role: 'assistant', content })
@@ -59,6 +60,21 @@ function toApiHistory(msgs: Msg[]) {
   }
   return out
 }
+
+const WIZARD_KEY = 'stroniq:wizard:v1'
+type WizardSaved = WizardState & { active: boolean }
+function loadWizard(): WizardSaved {
+  try {
+    const raw = sessionStorage.getItem(WIZARD_KEY)
+    if (raw) return { ...WIZARD_START, active: false, ...(JSON.parse(raw) as Partial<WizardSaved>) }
+  } catch {
+    /* ignore */
+  }
+  return { ...WIZARD_START, active: false }
+}
+
+/** AI errors after which the widget falls back to the wizard (it works without any AI API). */
+const FALLBACK_ERRORS = new Set(['not_configured', 'busy', 'upstream', 'rate_limited', 'network'])
 
 function loadSaved(): Msg[] {
   try {
@@ -74,6 +90,7 @@ function loadSaved(): Msg[] {
 
 export default function ChatWidget({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [msgs, setMsgs] = useState<Msg[]>(loadSaved)
+  const [wizard, setWizard] = useState<WizardSaved>(loadWizard)
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
   const [available, setAvailable] = useState<boolean | null>(null)
@@ -109,6 +126,14 @@ export default function ChatWidget({ open, onClose }: { open: boolean; onClose: 
     }
   }, [msgs])
 
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(WIZARD_KEY, JSON.stringify(wizard))
+    } catch {
+      /* ignore */
+    }
+  }, [wizard])
+
   // open / close animation, focus management, Escape, scroll lock on phones
   useEffect(() => {
     if (!open) {
@@ -143,6 +168,58 @@ export default function ChatWidget({ open, onClose }: { open: boolean; onClose: 
   }, [])
 
   const notice = (text: string, tone: 'info' | 'error' | 'ok' = 'error', contact = true): Msg => ({ id: uid(), kind: 'notice', text, tone, contact })
+
+  /* ---------------- wizard (fallback without AI) ---------------- */
+  const wizardMsg = (text: string): Msg => ({ id: uid(), kind: 'assistant', text, wizard: true })
+
+  const startWizard = useCallback((reason?: string) => {
+    setWizard({ ...WIZARD_START, active: true })
+    setMsgs((l) => [
+      ...l,
+      ...(reason ? [{ id: uid(), kind: 'notice' as const, text: reason, tone: 'info' as const }] : []),
+      wizardMsg(WIZARD_INTRO),
+      wizardMsg(WIZARD_STEPS[0].question),
+    ])
+  }, [])
+
+  // AI not configured → switch to the wizard automatically
+  useEffect(() => {
+    if (available === false && !wizard.active) startWizard()
+  }, [available, wizard.active, startWizard])
+
+  const wizardAnswer = (label: string, value?: string) => {
+    const step = WIZARD_STEPS[wizard.step]
+    if (!step || !wizard.active) return
+    let answer: string | string[] = value ?? label
+    let shown = label
+    if (step.multi) {
+      const list = [...wizard.pending, ...(label.trim() ? [label.trim()] : [])]
+      answer = list
+      shown = list.length ? list.join(', ') : 'Bez dodatkowych funkcji'
+    } else if (step.key === 'siteType' && !value) {
+      answer = 'inne' // typed description of the project
+    }
+    const answers = { ...wizard.answers, [step.key]: answer }
+    if (step.key === 'siteType' && !value) answers.features = [`Opis klienta: ${label}`]
+    const next = wizard.step + 1
+    setWizard({ active: true, step: next, answers, pending: [] })
+    const out: Msg[] = [{ id: uid(), kind: 'user', text: shown, wizard: true }]
+    if (next < WIZARD_STEPS.length) out.push(wizardMsg(WIZARD_STEPS[next].question))
+    else
+      out.push({
+        id: uid(),
+        kind: 'assistant',
+        wizard: true,
+        text: 'Gotowe! Sprawdź podsumowanie. Jeśli wszystko się zgadza, podaj dane kontaktowe i wyślij zapytanie do zespołu Stronivo.',
+        inquiry: wizardInquiry(answers),
+        lead: 'form',
+      })
+    setMsgs((l) => [...l, ...out])
+    setInput('')
+  }
+
+  const togglePending = (label: string) =>
+    setWizard((w) => ({ ...w, pending: w.pending.includes(label) ? w.pending.filter((x) => x !== label) : [...w.pending, label] }))
 
   const send = useCallback(
     async (text: string) => {
@@ -216,22 +293,33 @@ export default function ChatWidget({ open, onClose }: { open: boolean; onClose: 
         const hasContent = bot && bot.kind === 'assistant' && (bot.text.trim() || bot.inquiry)
         let next = list.map((m) => (m.id === botId && m.kind === 'assistant' ? { ...m, streaming: false } : m))
         if (!hasContent) next = next.filter((m) => m.id !== botId)
-        if (errorCode) next = [...next, notice(ERRORS[errorCode] ?? ERRORS.upstream)]
+        if (errorCode && !FALLBACK_ERRORS.has(errorCode)) next = [...next, notice(ERRORS[errorCode] ?? ERRORS.upstream)]
         return next
       })
-      if (!errorCode) setAnnounce('Nowa odpowiedź asystenta.')
+      if (errorCode && FALLBACK_ERRORS.has(errorCode)) {
+        startWizard(`${ERRORS[errorCode] ?? ERRORS.upstream} Przełączam na kreator zapytania, który działa bez AI.`)
+      } else if (!errorCode) setAnnounce('Nowa odpowiedź asystenta.')
     },
-    [busy, limitReached, available, msgs, patchAssistant],
+    [busy, limitReached, available, msgs, patchAssistant, startWizard],
   )
 
+  const wizardDone = wizard.active && wizard.step >= WIZARD_STEPS.length
+  const submitText = (text: string) => {
+    if (wizard.active) {
+      const t = text.trim().slice(0, 200)
+      if (t && !wizardDone) wizardAnswer(t)
+      return
+    }
+    send(text)
+  }
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
-    send(input)
+    submitText(input)
   }
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault()
-      send(input)
+      submitText(input)
     }
   }
 
@@ -245,16 +333,22 @@ export default function ChatWidget({ open, onClose }: { open: boolean; onClose: 
     setBusy(false)
     setMsgs([])
     setInput('')
+    setWizard({ ...WIZARD_START, active: false }) // AI unavailable → the effect restarts the wizard
     inputRef.current?.focus()
   }
 
-  const submitLead = async (msgId: string, inquiry: Inquiry, data: { name: string; email: string; phone: string; website: string }) => {
+  const submitLead = async (
+    msgId: string,
+    inquiry: Inquiry,
+    data: { name: string; email: string; phone: string; website: string },
+    source: 'ai' | 'kreator',
+  ) => {
     patchAssistant(msgId, (m) => ({ ...m, lead: 'sending' }))
     try {
       const res = await fetch(CHAT.leadEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, consent: true, inquiry }),
+        body: JSON.stringify({ ...data, consent: true, inquiry, source }),
       })
       if (res.ok) {
         patchAssistant(msgId, (m) => ({ ...m, lead: 'sent' }))
@@ -277,8 +371,9 @@ export default function ChatWidget({ open, onClose }: { open: boolean; onClose: 
     }
   }
 
-  const showGreeting = available !== false
-  const showQuick = msgs.every((m) => m.kind !== 'user') && !busy
+  const showGreeting = available !== false && !wizard.active
+  const showQuick = msgs.every((m) => m.kind !== 'user') && !busy && !wizard.active
+  const step = wizard.active ? WIZARD_STEPS[wizard.step] : undefined
   const waiting = busy && msgs.some((m) => m.kind === 'assistant' && m.streaming && !m.text)
 
   return (
@@ -298,14 +393,14 @@ export default function ChatWidget({ open, onClose }: { open: boolean; onClose: 
           <img src="/stroniq/stroniq-128.webp" alt="" width={40} height={40} className="size-10 rounded-full bg-black object-cover" />
           <span
             aria-hidden
-            className={`absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-ink ${available === false ? 'bg-mist' : 'bg-lime'}`}
+            className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-ink bg-lime"
           />
         </span>
         <div className="min-w-0 flex-1">
           <h2 id={titleId} className="font-display text-base font-semibold leading-tight">
             {CHAT.name}
           </h2>
-          <p className="truncate text-xs text-mist">{available === false ? 'Chwilowo niedostępny' : CHAT.role}</p>
+          <p className="truncate text-xs text-mist">{wizard.active ? 'Kreator zapytania' : CHAT.role}</p>
         </div>
         {msgs.length > 0 && (
           <button
@@ -330,8 +425,17 @@ export default function ChatWidget({ open, onClose }: { open: boolean; onClose: 
 
       {/* AI disclosure + privacy */}
       <p className="border-b border-line/60 bg-ink-2 px-4 py-2 text-[0.7rem] leading-snug text-mist">
-        Rozmawiasz z <strong className="font-medium text-paper">asystentem AI</strong> — odpowiedzi mogą zawierać błędy, a wiążące
-        informacje przekaże zespół Stronivo. Nie podawaj w czacie danych wrażliwych.{' '}
+        {wizard.active ? (
+          <>
+            <strong className="font-medium text-paper">Kreator zapytania</strong> — działa bez AI. Odpowiedzi zostają w Twojej
+            przeglądarce, a do zespołu trafiają dopiero po wysłaniu ze zgodą.{' '}
+          </>
+        ) : (
+          <>
+            Rozmawiasz z <strong className="font-medium text-paper">asystentem AI</strong> — odpowiedzi mogą zawierać błędy, a wiążące
+            informacje przekaże zespół Stronivo. Nie podawaj w czacie danych wrażliwych.{' '}
+          </>
+        )}
         <a href="/polityka-prywatnosci" className="underline underline-offset-2 hover:text-paper">
           Prywatność
         </a>
@@ -343,11 +447,6 @@ export default function ChatWidget({ open, onClose }: { open: boolean; onClose: 
           <Bubble kind="assistant">
             <FormattedText text={CHAT.greeting} />
           </Bubble>
-        )}
-        {available === false && msgs.length === 0 && (
-          <Notice tone="info" contact>
-            Asystent AI jest chwilowo niedostępny. Możesz napisać do nas bezpośrednio — odpowiemy tak szybko, jak to możliwe.
-          </Notice>
         )}
         {showQuick && available !== false && (
           <div className="flex flex-wrap gap-2 pt-1" role="group" aria-label="Szybkie opcje">
@@ -382,10 +481,42 @@ export default function ChatWidget({ open, onClose }: { open: boolean; onClose: 
                   <FormattedText text={m.text} />
                 </Bubble>
               )}
-              {m.inquiry && <InquiryCard inquiry={m.inquiry} state={m.lead ?? 'form'} onSubmit={(d) => submitLead(m.id, m.inquiry!, d)} />}
+              {m.inquiry && <InquiryCard inquiry={m.inquiry} state={m.lead ?? 'form'} onSubmit={(d) => submitLead(m.id, m.inquiry!, d, m.wizard ? 'kreator' : 'ai')} />}
             </div>
           )
         })}
+
+        {step && (
+          <div className="flex flex-wrap gap-2 pt-1" role="group" aria-label="Odpowiedzi do wyboru">
+            {step.options.map((o) => {
+              const selected = step.multi && wizard.pending.includes(o.label)
+              return (
+                <button
+                  key={o.label}
+                  type="button"
+                  title={o.hint}
+                  aria-pressed={step.multi ? selected : undefined}
+                  onClick={() => (step.multi ? togglePending(o.label) : wizardAnswer(o.label, o.value))}
+                  className={`rounded-full border px-3.5 py-2 text-left text-sm transition-colors hover:border-lime hover:bg-lime hover:text-ink ${
+                    selected ? 'border-lime bg-lime text-ink' : 'border-lime/40 text-paper'
+                  }`}
+                >
+                  {o.label}
+                  {o.hint && <span className="sr-only"> — {o.hint}</span>}
+                </button>
+              )
+            })}
+            {step.multi && (
+              <button
+                type="button"
+                onClick={() => wizardAnswer('')}
+                className="rounded-full bg-lime px-4 py-2 text-sm font-medium text-ink transition-opacity hover:opacity-90"
+              >
+                Dalej →
+              </button>
+            )}
+          </div>
+        )}
 
         {waiting && (
           <div className="flex items-center gap-2" aria-label="Asystent pisze">
@@ -396,7 +527,7 @@ export default function ChatWidget({ open, onClose }: { open: boolean; onClose: 
             </span>
           </div>
         )}
-        {limitReached && (
+        {limitReached && !wizard.active && (
           <Notice tone="info" contact>
             To już długa rozmowa — najlepiej będzie, jeśli dalej zajmie się nią zespół Stronivo.
           </Notice>
@@ -420,13 +551,23 @@ export default function ChatWidget({ open, onClose }: { open: boolean; onClose: 
             onChange={(e) => setInput(e.target.value.slice(0, CHAT.maxUserChars))}
             onKeyDown={onKeyDown}
             maxLength={CHAT.maxUserChars}
-            disabled={available === false || limitReached}
-            placeholder={available === false ? 'Asystent niedostępny' : 'Napisz wiadomość…'}
+            disabled={wizard.active ? wizardDone || !step?.freeText : available === false || limitReached}
+            placeholder={
+              wizard.active
+                ? wizardDone
+                  ? 'Wypełnij formularz powyżej'
+                  : step?.freeText
+                    ? 'Lub wpisz własną odpowiedź…'
+                    : 'Wybierz jedną z opcji powyżej'
+                : available === false
+                  ? 'Asystent niedostępny'
+                  : 'Napisz wiadomość…'
+            }
             className="max-h-32 min-h-10 flex-1 resize-none bg-transparent px-2.5 py-2 text-[0.95rem] text-paper outline-none placeholder:text-mist/70 disabled:cursor-not-allowed"
           />
           <button
             type="submit"
-            disabled={!input.trim() || busy || available === false || limitReached}
+            disabled={!input.trim() || (wizard.active ? wizardDone || !step?.freeText : busy || available === false || limitReached)}
             aria-label="Wyślij wiadomość"
             className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-lime text-ink transition-opacity disabled:opacity-35"
           >

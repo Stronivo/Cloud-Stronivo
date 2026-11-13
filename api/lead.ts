@@ -1,7 +1,7 @@
 /**
  * Vercel Function: POST /api/lead — sends an inquiry prepared with Stroniq to kontakt@stronivo.com.
  *
- * Body: { name, email, phone?, consent: true, inquiry: {...}, website: "" (honeypot) }
+ * Body: { name, email, phone?, consent: true, inquiry: {...}, source: "ai" | "kreator", website: "" (honeypot) }
  * Only the needs summary and the contact details the visitor typed into the consent form are
  * sent — never the chat transcript.
  *
@@ -27,9 +27,9 @@ const SITE_LABEL: Record<string, string> = {
   inne: 'Inne',
 }
 
-function render(inq: Inquiry, name: string, email: string, phone: string) {
+function render(inq: Inquiry, name: string, email: string, phone: string, wizard: boolean) {
   return [
-    'Zapytanie przygotowane z asystentem AI Stroniq na stronivo.com',
+    wizard ? 'Zapytanie przygotowane w kreatorze Stroniq (bez AI) na stronivo.com' : 'Zapytanie przygotowane z asystentem AI Stroniq na stronivo.com',
     '',
     `Imię: ${name}`,
     `E-mail: ${email}`,
@@ -94,8 +94,9 @@ export async function POST(req: Request): Promise<Response> {
   if (!inquiry) fields.push('inquiry')
   if (fields.length || !inquiry) return json({ error: 'validation', fields }, 422)
 
-  const subject = `Zapytanie ze Stroniq (AI) — ${name}`
-  const text = render(inquiry, name, email, phone)
+  const wizard = body.source === 'kreator'
+  const subject = wizard ? `Zapytanie z kreatora Stroniq — ${name}` : `Zapytanie ze Stroniq (AI) — ${name}`
+  const text = render(inquiry, name, email, phone, wizard)
   try {
     const viaResend = await sendViaResend(subject, text, email)
     const ok =
@@ -112,7 +113,7 @@ export async function POST(req: Request): Promise<Response> {
         'Budżet': inquiry.budget || '—',
         Termin: inquiry.timeline || '—',
         Podsumowanie: inquiry.summary,
-        'Źródło': 'Asystent AI Stroniq',
+        'Źródło': wizard ? 'Kreator Stroniq (bez AI)' : 'Asystent AI Stroniq',
         Zgoda: 'TAK — przekazanie danych w celu przygotowania wyceny',
       }))
     if (!ok) {
