@@ -27,7 +27,7 @@ export function Contact() {
               <span style={{ '--i': 1 } as React.CSSProperties}>podłączyć</span>
             </span>
             <Socket on={headIn} />
-          </span>
+          </span>{' '}
           <span className="block">
             <span className="split-word">
               <span style={{ '--i': 2 } as React.CSSProperties}>swój</span>

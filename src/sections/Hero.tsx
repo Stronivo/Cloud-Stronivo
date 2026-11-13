@@ -33,7 +33,7 @@ export function Hero({ onIntroDone }: { onIntroDone: () => void }) {
           <span className="relative inline-flex size-2">
             <span className="absolute inset-0 rounded-full bg-lime blink" />
           </span>
-          Studio projektowania stron internetowych
+          Tworzenie stron internetowych · Żory i Śląsk
         </p>
 
         <h1 id="hero-title" className="hero-title font-display text-paper">
@@ -44,6 +44,7 @@ export function Hero({ onIntroDone }: { onIntroDone: () => void }) {
               </span>
             </span>
           </span>
+          {' '}
           <span className="mt-3 block text-[clamp(1.6rem,7vw,2.4rem)] font-medium leading-[1.02] tracking-[-0.035em] md:mt-5 md:text-[clamp(2.4rem,4.4vw,4.6rem)]">
             {tail.map((w, i) => (
               <span key={w}>

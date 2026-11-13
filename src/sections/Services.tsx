@@ -22,10 +22,21 @@ export function Services() {
             text={['Wszystko, czego potrzebuje', 'Twoja firma w sieci.']}
             className="text-[clamp(2.5rem,6.6vw,6.25rem)] font-semibold leading-[0.95] tracking-[-0.045em]"
           />
+          <Reveal className="mt-8 max-w-2xl md:mt-10" delay={150}>
+            <p className="text-lg leading-relaxed text-mist">
+              Tworzymy strony internetowe dla firm, które chcą dobrze wyglądać w sieci i być łatwe do znalezienia: od
+              wizytówek małych firm usługowych, przez{' '}
+              <a href="#realizacje" className="text-paper underline decoration-line underline-offset-4 transition-colors hover:text-lime hover:decoration-lime">
+                strony internetowe dla restauracji
+              </a>{' '}
+              i kawiarni z menu, zdjęciami i danymi kontaktowymi, po landing page nastawione na zapytania od klientów.
+              Każdy projekt dopasowujemy do charakteru biznesu i przygotowujemy z myślą o telefonach oraz wyszukiwarkach.
+            </p>
+          </Reveal>
         </div>
 
         <div className="mt-16 grid gap-12 md:mt-24 lg:grid-cols-12 lg:gap-0">
-          <ol className="relative lg:col-span-7" onMouseLeave={() => undefined}>
+          <ol className="relative lg:col-span-7">
             {SERVICES.map((s, i) => {
               const on = active === i
               return (

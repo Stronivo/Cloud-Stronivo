@@ -87,7 +87,7 @@ export function Footer({ home = true }: { home?: boolean }) {
 
       <div className="container-x flex flex-col gap-3 border-t border-line/60 py-8 text-sm text-mist md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
-          <p>© {YEAR} Stronivo. Wszelkie prawa zastrzeżone.</p>
+          <p suppressHydrationWarning>© {YEAR} Stronivo. Wszelkie prawa zastrzeżone.</p>
           <p className="text-xs">
             Usługi świadczy {COMPANY.shortName}, NIP {COMPANY.nip}, {COMPANY.street}, {COMPANY.city}
           </p>

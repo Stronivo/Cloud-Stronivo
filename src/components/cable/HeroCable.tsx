@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type RefObject } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import { CableDefs, CableTube, Plug, Port, PLUG_INSERT, PLUG_LEN } from './parts'
 import { clamp, easeInOutCubic, easeOutQuint, lerp, lerpPt, P, range, type Pt } from '../../lib/math'
 
@@ -16,6 +16,8 @@ type Layout = {
 }
 
 const TIMING = { delay: 250, approach: 1150, insert: 340 }
+// Phones: same choreography, shorter — the headline appears sooner (better LCP / Speed Index).
+const TIMING_MOBILE = { delay: 80, approach: 720, insert: 260 }
 
 function lerpPose(a: Pose, b: Pose, t: number): Pose {
   return {
@@ -206,9 +208,10 @@ export function HeroCable({ heroRef, anchorRef, reduced, onConnected }: Props) {
     const frame = (now: number) => {
       raf = 0
       if (t0 < 0) t0 = now
-      const t = now - t0 - TIMING.delay
-      const A = TIMING.approach
-      const B = TIMING.insert
+      const T = L.mobile ? TIMING_MOBILE : TIMING
+      const t = now - t0 - T.delay
+      const A = T.approach
+      const B = T.insert
       let pose: Pose
 
       if (t < A) {
@@ -300,7 +303,14 @@ export function HeroCable({ heroRef, anchorRef, reduced, onConnected }: Props) {
     }
   }, [heroRef, anchorRef, reduced])
 
-  const vw = typeof window === 'undefined' ? 1440 : window.innerWidth
+  // Rendered at desktop width on the server, corrected before first paint on the client.
+  const [vw, setVw] = useState(1440)
+  useLayoutEffect(() => {
+    const update = () => setVw(window.innerWidth)
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
   const filters = vw >= 768
   const scale = filters ? clamp(vw / 1440, 0.72, 1.12) : 0.5
 

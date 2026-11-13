@@ -5,6 +5,12 @@ import { Arrow, MagneticLink } from '../components/Magnetic'
 import { useInView } from '../hooks/useInView'
 import { useFinePointer, useReducedMotion } from '../hooks/useMedia'
 
+// Rendered widths: mockup ≈ 8/12 of the container on desktop, full width on phones; the phone is 24% of it.
+const DESKTOP_SIZES = '(min-width: 1440px) 860px, (min-width: 768px) 60vw, 92vw'
+const PHONE_SIZES = '(min-width: 1440px) 210px, (min-width: 768px) 15vw, 22vw'
+const srcset = (base: string, kind: 'desktop' | 'mobile', widths: number[], ext: 'avif' | 'webp') =>
+  widths.map((w) => `${base}-${kind}-${w}.${ext} ${w}w`).join(', ')
+
 export function Work() {
   return (
     <section id="realizacje" aria-labelledby="work-title" className="relative py-28 md:py-44">
@@ -83,7 +89,6 @@ function ProjectRow({ project: p, index }: { project: Project; index: number }) 
           rel="noopener noreferrer"
           data-cursor="view"
           data-cursor-label="Zobacz"
-          aria-label={`${p.name} — otwórz projekt demonstracyjny w nowej karcie`}
           className="group/m block [perspective:1600px]"
           onPointerMove={onMove}
           onPointerLeave={onLeave}
@@ -108,17 +113,19 @@ function ProjectRow({ project: p, index }: { project: Project; index: number }) 
                   </span>
                 </div>
                 <div className="relative aspect-[16/10] overflow-hidden rounded-[10px] bg-ink">
-                  <img
-                    src={p.images.desktop}
-                    srcSet={`${p.images.desktopSmall} 900w, ${p.images.desktop} 1600w`}
-                    sizes="(min-width: 768px) 62vw, 92vw"
-                    width={1600}
-                    height={1000}
-                    loading="lazy"
-                    decoding="async"
-                    alt={`Pierwszy ekran strony ${p.name} na komputerze`}
-                    className="h-full w-full object-cover object-top transition-transform duration-[1200ms] ease-out-expo group-hover/m:scale-[1.035]"
-                  />
+                  <picture>
+                    <source type="image/avif" srcSet={srcset(p.image, 'desktop', [900, 1600], 'avif')} sizes={DESKTOP_SIZES} />
+                    <source type="image/webp" srcSet={srcset(p.image, 'desktop', [900, 1600], 'webp')} sizes={DESKTOP_SIZES} />
+                    <img
+                      src={`${p.image}-desktop-900.webp`}
+                      width={1600}
+                      height={1000}
+                      loading="lazy"
+                      decoding="async"
+                      alt={`Projekt demonstracyjny strony internetowej ${p.subject} — widok na komputerze`}
+                      className="h-full w-full object-cover object-top transition-transform duration-[1200ms] ease-out-expo group-hover/m:scale-[1.035]"
+                    />
+                  </picture>
                 </div>
               </div>
             </div>
@@ -133,16 +140,21 @@ function ProjectRow({ project: p, index }: { project: Project; index: number }) 
               <Reveal delay={450}>
                 <div className="rounded-[1.6rem] border border-[#3a414c] bg-[#0b0d11] p-[5%] shadow-[0_40px_80px_-20px_rgb(0_0_0/0.95)] md:rounded-[2.2rem]">
                   <div className="relative aspect-[9/19.5] overflow-hidden rounded-[1.15rem] bg-ink md:rounded-[1.7rem]">
-                    <img
-                      src={p.images.mobile}
-                      width={600}
-                      height={1298}
-                      loading="lazy"
-                      decoding="async"
-                      alt={`Pierwszy ekran strony ${p.name} na telefonie`}
-                      className="h-full w-full object-cover object-top"
-                    />
+                    <picture>
+                      <source type="image/avif" srcSet={srcset(p.image, 'mobile', [200, 400, 600], 'avif')} sizes={PHONE_SIZES} />
+                      <source type="image/webp" srcSet={srcset(p.image, 'mobile', [200, 400, 600], 'webp')} sizes={PHONE_SIZES} />
+                      <img
+                        src={`${p.image}-mobile-400.webp`}
+                        width={600}
+                        height={1298}
+                        loading="lazy"
+                        decoding="async"
+                        alt={`Projekt demonstracyjny strony internetowej ${p.subject} — widok na telefonie`}
+                        className="h-full w-full object-cover object-top"
+                      />
+                    </picture>
                     <span aria-hidden className="absolute left-1/2 top-[2.2%] h-[3.2%] w-[32%] -translate-x-1/2 rounded-full bg-black" />
+                    <span className="sr-only"> — otwiera się w nowej karcie</span>
                   </div>
                 </div>
               </Reveal>

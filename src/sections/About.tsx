@@ -26,7 +26,7 @@ export function About() {
       const n = words.length
       words.forEach((w, i) => {
         const lit = reduced || p * (n + 6) > i
-        w.style.opacity = lit ? '1' : '0.22'
+        w.style.opacity = lit ? '1' : '0.5' // dimmed words keep WCAG AA contrast
       })
     },
     [reduced],
@@ -55,7 +55,7 @@ export function About() {
           >
             {TEXT.split(' ').map((w, i) => (
               <span key={i}>
-                <span data-w className={`transition-opacity duration-300 ${HIGHLIGHT.has(w) ? 'text-lime' : ''}`} style={{ opacity: 0.22 }}>
+                <span data-w className={`transition-opacity duration-300 ${HIGHLIGHT.has(w) ? 'text-lime' : ''}`} style={{ opacity: 0.5 }}>
                   {w}
                 </span>{' '}
               </span>
@@ -71,6 +71,25 @@ export function About() {
               </Reveal>
             ))}
           </ul>
+
+          <Reveal className="mt-16 md:mt-24">
+            <h3 className="font-display text-[clamp(1.6rem,3vw,2.4rem)] font-semibold leading-[1.1] tracking-[-0.03em]">
+              Projektowanie stron internetowych — <span className="text-lime">Żory i Śląsk</span>
+            </h3>
+            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-mist">
+              Stronivo zajmuje się tworzeniem stron internetowych dla firm z Żor i całego Śląska. Projektujemy dla małych
+              firm usługowych, restauracji, kawiarni i wszystkich, którym zależy na tym, żeby klienci z okolicy łatwo
+              znaleźli ich w internecie.
+            </p>
+            <p className="mt-4 max-w-2xl text-lg leading-relaxed text-mist">
+              Dbamy o to, czego szukają lokalni klienci: przejrzystą ofertę, aktualne dane kontaktowe i stronę, która
+              szybko działa na telefonie.{' '}
+              <a href="#kontakt" className="text-paper underline decoration-line underline-offset-4 transition-colors hover:text-lime hover:decoration-lime">
+                Porozmawiajmy o Twojej stronie
+              </a>
+              .
+            </p>
+          </Reveal>
         </div>
       </div>
     </section>

@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://stronivo.com/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://stronivo.com/polityka-prywatnosci</loc><lastmod>2026-11-12</lastmod><priority>0.3</priority></url>
-  <url><loc>https://stronivo.com/informacje-prawne</loc><priority>0.3</priority></url>
+  <url>
+    <loc>https://www.stronivo.com/</loc>
+    <lastmod>2026-11-13</lastmod>
+  </url>
+  <url>
+    <loc>https://www.stronivo.com/polityka-prywatnosci</loc>
+    <lastmod>2026-11-12</lastmod>
+  </url>
+  <url>
+    <loc>https://www.stronivo.com/informacje-prawne</loc>
+    <lastmod>2026-11-12</lastmod>
+  </url>
 </urlset>

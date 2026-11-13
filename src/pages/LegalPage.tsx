@@ -21,7 +21,7 @@ function linkify(text: string): ReactNode[] {
           {part}
         </a>
       )
-    if (part === CONTACT.siteUrl)
+    if (part === 'https://stronivo.com')
       return (
         <a key={i} href="/" className={link}>
           {part}
@@ -34,9 +34,8 @@ function linkify(text: string): ReactNode[] {
 export function LegalPage({ path }: { path: LegalPath }) {
   const page = PAGES[path]
   useEffect(() => {
-    document.title = `${page.doc} — Stronivo`
     window.scrollTo(0, 0)
-  }, [page.doc])
+  }, [path])
 
   return path === '/polityka-prywatnosci' ? <Privacy title={page.title} /> : <LegalInfo title={page.title} />
 }
@@ -86,7 +85,7 @@ function Privacy({ title }: { title: string }) {
           {PRIVACY.map((s) => (
             <section key={s.no} id={anchor(s.no)} aria-labelledby={`${anchor(s.no)}-h`} className="scroll-mt-28 border-b border-line/60 py-10 first:pt-0">
               <h2 id={`${anchor(s.no)}-h`} className="flex gap-4 text-2xl font-semibold tracking-tight md:text-3xl">
-                <span className="text-lime">{s.no}.</span>
+                <span className="text-lime">{s.no}.</span>{' '}
                 {s.title}
               </h2>
               <div className="mt-6 space-y-5 leading-relaxed text-mist">
@@ -99,7 +98,7 @@ function Privacy({ title }: { title: string }) {
 
           <section id={anchor('§16')} aria-labelledby="p16-h" className="scroll-mt-28 py-10">
             <h2 id="p16-h" className="flex gap-4 text-2xl font-semibold tracking-tight md:text-3xl">
-              <span className="text-lime">§16.</span>
+              <span className="text-lime">§16.</span>{' '}
               Kontakt z administratorem
             </h2>
             <p className="mt-6 leading-relaxed text-mist">
@@ -157,7 +156,7 @@ function CompanyCard() {
     [
       'Strona internetowa',
       <a key="w" href="/" className={link}>
-        {CONTACT.siteUrl}
+        https://stronivo.com
       </a>,
     ],
     [

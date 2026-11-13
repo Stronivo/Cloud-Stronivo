@@ -14,7 +14,7 @@ export const NAV = [
 export const CONTACT = {
   email: 'kontakt@stronivo.com',
   site: 'stronivo.com',
-  siteUrl: 'https://stronivo.com',
+  siteUrl: 'https://www.stronivo.com',
 }
 
 /** The business that provides services under the Stronivo brand (data controller). */
@@ -40,7 +40,10 @@ export type Project = {
   url: string
   domain: string
   accent: string
-  images: { desktop: string; desktopSmall: string; mobile: string }
+  /** describes the page in image alt text, e.g. "restauracji Bella Italia" */
+  subject: string
+  /** image base path; variants: -desktop-{900,1600}, -mobile-{200,400,600} in .avif and .webp */
+  image: string
 }
 
 /**
@@ -57,11 +60,8 @@ export const PROJECTS: Project[] = [
     url: 'https://easybusy.lovable.app',
     domain: 'easybusy.lovable.app',
     accent: '#D9A23A',
-    images: {
-      desktop: '/work/easybusy-desktop-1600.webp',
-      desktopSmall: '/work/easybusy-desktop-900.webp',
-      mobile: '/work/easybusy-mobile-600.webp',
-    },
+    subject: 'firmy budowlanej Easy Busy',
+    image: '/work/easybusy',
   },
   {
     slug: 'bella-italia',
@@ -72,11 +72,8 @@ export const PROJECTS: Project[] = [
     url: 'https://bellaitaliaweb.lovable.app',
     domain: 'bellaitaliaweb.lovable.app',
     accent: '#B4532F',
-    images: {
-      desktop: '/work/bellaitalia-desktop-1600.webp',
-      desktopSmall: '/work/bellaitalia-desktop-900.webp',
-      mobile: '/work/bellaitalia-mobile-600.webp',
-    },
+    subject: 'restauracji Bella Italia',
+    image: '/work/bellaitalia',
   },
 ]
 

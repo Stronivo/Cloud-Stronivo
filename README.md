@@ -13,6 +13,12 @@ npm run build     # produkcja → dist/
 npm run preview
 ```
 
+## SEO i prerendering
+
+`npm run build` buduje aplikację, a następnie `scripts/prerender.mjs` zapisuje gotowy HTML każdej podstrony (`index.html`, `polityka-prywatnosci.html`, `informacje-prawne.html`, `404.html`). Metadane, canonical i dane strukturalne są w `src/seo.ts`. Domena kanoniczna to **https://www.stronivo.com** (wersja bez www przekierowuje). Raport zmian: `SEO-RAPORT.md`.
+
+Obrazy portfolio: `public/work/<nazwa>-desktop-{900,1600}` i `-mobile-{200,400,600}` w formatach `.avif` i `.webp`. Są cache'owane przez rok, więc nowy obraz musi mieć nową nazwę.
+
 ## Struktura
 
 ```

@@ -12,8 +12,7 @@ import { Contact } from './sections/Contact'
 import { Footer } from './sections/Footer'
 import { LegalPage, isLegalPath } from './pages/LegalPage'
 
-export default function App() {
-  const path = window.location.pathname.replace(/\/+$/, '') || '/'
+export default function App({ path }: { path: string }) {
   const legal = isLegalPath(path) ? path : null
   const notFound = !legal && path !== '/'
 

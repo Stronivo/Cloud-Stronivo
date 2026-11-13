@@ -6,9 +6,11 @@ export function Marquee() {
     <div className="flex shrink-0 items-center">
       {ITEMS.map((t) => (
         <span key={t} className="flex items-center">
-          <span className="px-6 font-display text-[clamp(2.6rem,7vw,6.5rem)] font-semibold tracking-[-0.04em] text-transparent [-webkit-text-stroke:1.5px_#3a414c] md:px-10">
-            {t}
-          </span>
+          {/* text lives in a pseudo-element: purely decorative outline lettering */}
+          <span
+            data-text={t}
+            className="px-6 font-display text-[clamp(2.6rem,7vw,6.5rem)] font-semibold tracking-[-0.04em] text-transparent [-webkit-text-stroke:1.5px_#3a414c] before:content-[attr(data-text)] md:px-10"
+          />
           <svg viewBox="0 0 40 24" className="h-6 w-10 shrink-0 md:h-9 md:w-14">
             <path d="M0 12 H22" stroke="#c6ff4d" strokeWidth="3" strokeLinecap="round" />
             <rect x="20" y="5" width="12" height="14" rx="3" fill="#c6ff4d" />
