@@ -1,0 +1,43 @@
+/** Demonstration vocabulary for the interactive flashcards (not taken from paid packages). */
+export const DEMO_WORDS = [
+  { en: 'pocket', pl: 'kieszeń', ipa: '/ˈpɒkɪt/', example: 'I always keep a notebook in my pocket.', examplePl: 'Zawsze noszę notes w kieszeni.' },
+  { en: 'freedom', pl: 'wolność', ipa: '/ˈfriːdəm/', example: 'Learning online gives you more freedom.', examplePl: 'Nauka online daje więcej wolności.' },
+  { en: 'to improve', pl: 'poprawić, ulepszyć', ipa: '/tə ɪmˈpruːv/', example: 'I want to improve my speaking.', examplePl: 'Chcę poprawić swoje mówienie.' },
+  { en: 'goal', pl: 'cel', ipa: '/ɡəʊl/', example: 'My goal is to pass the exam.', examplePl: 'Moim celem jest zdanie egzaminu.' },
+  { en: 'confident', pl: 'pewny siebie', ipa: '/ˈkɒnfɪdənt/', example: 'She feels confident at work meetings.', examplePl: 'Czuje się pewnie na spotkaniach w pracy.' },
+  { en: 'to look forward to', pl: 'nie móc się doczekać', ipa: '/lʊk ˈfɔːwəd tuː/', example: 'I look forward to our trip.', examplePl: 'Nie mogę się doczekać naszej podróży.' },
+  { en: 'habit', pl: 'nawyk', ipa: '/ˈhæbɪt/', example: 'Ten minutes a day is a good habit.', examplePl: 'Dziesięć minut dziennie to dobry nawyk.' },
+  { en: 'curious', pl: 'ciekawy, ciekawski', ipa: '/ˈkjʊəriəs/', example: 'Stay curious about new words.', examplePl: 'Bądź ciekawy nowych słów.' },
+]
+
+/** Pocket dictionary: [polski, english]. Small, curated, everyday vocabulary. */
+export const POCKET_DICTIONARY: [string, string][] = [
+  ['kieszeń', 'pocket'], ['wolność', 'freedom'], ['uczyć się', 'to learn'], ['nauczyć', 'to teach'], ['nauka', 'learning'],
+  ['słowo', 'word'], ['słownictwo', 'vocabulary'], ['zdanie', 'sentence'], ['gramatyka', 'grammar'], ['wymowa', 'pronunciation'],
+  ['egzamin', 'exam'], ['zadanie', 'task'], ['ćwiczenie', 'exercise'], ['powtórka', 'revision'], ['notatka', 'note'],
+  ['zeszyt', 'notebook'], ['książka', 'book'], ['strona', 'page'], ['fiszka', 'flashcard'], ['tłumaczenie', 'translation'],
+  ['cel', 'goal'], ['nawyk', 'habit'], ['postęp', 'progress'], ['tempo', 'pace'], ['presja', 'pressure'],
+  ['bez', 'without'], ['zawsze', 'always'], ['czasami', 'sometimes'], ['nigdy', 'never'], ['często', 'often'],
+  ['dzisiaj', 'today'], ['jutro', 'tomorrow'], ['wczoraj', 'yesterday'], ['tydzień', 'week'], ['miesiąc', 'month'],
+  ['rok', 'year'], ['czas', 'time'], ['godzina', 'hour'], ['minuta', 'minute'], ['dzień', 'day'],
+  ['praca', 'work'], ['spotkanie', 'meeting'], ['szef', 'boss'], ['współpracownik', 'colleague'], ['umowa', 'contract'],
+  ['wynagrodzenie', 'salary'], ['rozmowa kwalifikacyjna', 'job interview'], ['termin', 'deadline'], ['zadzwonić', 'to call'], ['wysłać', 'to send'],
+  ['dom', 'home'], ['rodzina', 'family'], ['przyjaciel', 'friend'], ['sąsiad', 'neighbour'], ['miasto', 'city'],
+  ['sklep', 'shop'], ['zakupy', 'shopping'], ['cena', 'price'], ['rachunek', 'bill'], ['reszta', 'change'],
+  ['jedzenie', 'food'], ['śniadanie', 'breakfast'], ['obiad', 'dinner'], ['kolacja', 'supper'], ['woda', 'water'],
+  ['kawa', 'coffee'], ['herbata', 'tea'], ['restauracja', 'restaurant'], ['kelner', 'waiter'], ['zamówić', 'to order'],
+  ['podróż', 'journey'], ['wakacje', 'holiday'], ['lotnisko', 'airport'], ['bilet', 'ticket'], ['pociąg', 'train'],
+  ['samochód', 'car'], ['ulica', 'street'], ['skręcić w lewo', 'to turn left'], ['skręcić w prawo', 'to turn right'], ['prosto', 'straight on'],
+  ['pogoda', 'weather'], ['deszcz', 'rain'], ['słońce', 'sun'], ['zimno', 'cold'], ['ciepło', 'warm'],
+  ['zdrowie', 'health'], ['lekarz', 'doctor'], ['ból głowy', 'headache'], ['apteka', 'pharmacy'], ['zmęczony', 'tired'],
+  ['szczęśliwy', 'happy'], ['smutny', 'sad'], ['zdenerwowany', 'nervous'], ['pewny siebie', 'confident'], ['ciekawy', 'curious'],
+  ['łatwy', 'easy'], ['trudny', 'difficult'], ['ważny', 'important'], ['przydatny', 'useful'], ['praktyczny', 'practical'],
+  ['szybki', 'fast'], ['wolny', 'slow'], ['nowy', 'new'], ['stary', 'old'], ['piękny', 'beautiful'],
+  ['mówić', 'to speak'], ['słuchać', 'to listen'], ['czytać', 'to read'], ['pisać', 'to write'], ['rozumieć', 'to understand'],
+  ['pamiętać', 'to remember'], ['zapomnieć', 'to forget'], ['zapytać', 'to ask'], ['odpowiedzieć', 'to answer'], ['wyjaśnić', 'to explain'],
+  ['pomóc', 'to help'], ['spróbować', 'to try'], ['poprawić', 'to improve'], ['zacząć', 'to start'], ['skończyć', 'to finish'],
+  ['wybrać', 'to choose'], ['pobrać', 'to download'], ['kupić', 'to buy'], ['zapłacić', 'to pay'], ['wydrukować', 'to print'],
+  ['dziękuję', 'thank you'], ['proszę', 'please'], ['przepraszam', 'sorry'], ['dzień dobry', 'good morning'], ['do widzenia', 'goodbye'],
+  ['tak', 'yes'], ['nie', 'no'], ['może', 'maybe'], ['oczywiście', 'of course'], ['nie ma sprawy', 'no problem'],
+  ['nie mogę się doczekać', 'I look forward to it'], ['jak się masz?', 'how are you?'], ['miło cię poznać', 'nice to meet you'], ['nie rozumiem', "I don't understand"], ['czy możesz powtórzyć?', 'could you repeat that?'],
+]
