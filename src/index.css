@@ -167,9 +167,19 @@
     transform: none;
   }
 }
+@keyframes intro-fallback-fade {
+  to {
+    opacity: 1;
+  }
+}
 .intro-fade,
 .hero-title .split-word > span {
   animation: intro-fallback 0.8s var(--ease-out-expo) 3.5s forwards;
+}
+/* The header hosts the fixed mobile menu: an animated transform would make it the menu's
+   containing block (menu shrinks to header height), so it only fades. */
+header.intro-fade {
+  animation-name: intro-fallback-fade;
 }
 
 /* Lime glow used sparingly for "live" connection states */

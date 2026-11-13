@@ -47,11 +47,13 @@ function computeLayout(hero: HTMLElement, anchor: HTMLElement | null): Layout {
 
   if (mobile) {
     const s = 0.5
-    const port = { x: W - 100, y: H - 118 }
+    // Raised so the port clears the browser's bottom toolbar on phones.
+    const lift = 56
+    const port = { x: W - 100, y: H - 118 - lift }
     const conn: Pose = {
-      c1: { x: W * 0.2, y: H - 70 },
-      c2: { x: W * 0.28, y: H + 30 },
-      mid: { x: W * 0.46, y: H - 52 },
+      c1: { x: W * 0.2, y: H - 70 - lift },
+      c2: { x: W * 0.28, y: H + 10 },
+      mid: { x: W * 0.46, y: H - 52 - lift },
       tip: { x: port.x + PLUG_INSERT * s, y: port.y },
       angle: 0,
     }
@@ -65,10 +67,10 @@ function computeLayout(hero: HTMLElement, anchor: HTMLElement | null): Layout {
       conn,
       appr: { ...conn, tip: { x: port.x - 46, y: port.y } },
       disc: {
-        c1: { x: W * 0.18, y: H - 40 },
-        c2: { x: W * 0.3, y: H + 40 },
-        mid: { x: W * 0.44, y: H - 20 },
-        tip: { x: port.x - 60, y: H - 34 },
+        c1: { x: W * 0.18, y: H - 40 - lift },
+        c2: { x: W * 0.3, y: H + 30 },
+        mid: { x: W * 0.44, y: H - 20 - lift },
+        tip: { x: port.x - 60, y: H - 34 - lift },
         angle: 0.35,
       },
     }

@@ -28,7 +28,7 @@ export function Hero({ onIntroDone }: { onIntroDone: () => void }) {
 
       <HeroCable heroRef={hero} anchorRef={anchor} reduced={reduced} onConnected={done} />
 
-      <div className="container-x relative z-10 flex flex-1 flex-col justify-center pb-56 pt-32 md:pb-40 md:pt-40">
+      <div className="container-x relative z-10 flex flex-1 flex-col justify-center pb-72 pt-28 md:pb-40 md:pt-40">
         <p className="eyebrow intro-fade mb-8 flex items-center gap-3 md:mb-10" style={delay(0)}>
           <span className="relative inline-flex size-2">
             <span className="absolute inset-0 rounded-full bg-lime blink" />
