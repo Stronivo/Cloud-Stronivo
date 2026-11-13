@@ -311,7 +311,7 @@ export function ContactForm() {
         )}
       </div>
 
-      <div className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+      <div data-chat-avoid className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <MagneticButton type="submit" disabled={status === 'sending'} className="disabled:opacity-60">
           {status === 'sending' ? 'Wysyłanie…' : 'Wyślij wiadomość'}
         </MagneticButton>

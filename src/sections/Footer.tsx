@@ -85,7 +85,7 @@ export function Footer({ home = true }: { home?: boolean }) {
         <Logo className="text-[clamp(4.5rem,17vw,17rem)] leading-[0.85] text-paper" />
       </div>
 
-      <div className="container-x flex flex-col gap-3 border-t border-line/60 py-8 text-sm text-mist md:flex-row md:items-center md:justify-between">
+      <div data-chat-avoid className="container-x flex flex-col gap-3 border-t border-line/60 py-8 text-sm text-mist md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
           <p suppressHydrationWarning>© {YEAR} Stronivo. Wszelkie prawa zastrzeżone.</p>
           <p className="text-xs">

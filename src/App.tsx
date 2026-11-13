@@ -11,6 +11,7 @@ import { Contact } from './sections/Contact'
 import { Footer } from './sections/Footer'
 import { isLegalPath } from './pages/legalPaths'
 import { Cursor, LegalPage } from './lazy'
+import { ChatLauncher } from './chat/ChatLauncher'
 import { useFinePointer, useReducedMotion } from './hooks/useMedia'
 
 /** Suspense boundary: code-split parts (legal pages, cursor) and per-section hydration units. */
@@ -89,6 +90,7 @@ export default function App({ path }: { path: string }) {
         )}
       </main>
       <Footer home={!legal && !notFound} />
+      <ChatLauncher />
     </div>
   )
 }

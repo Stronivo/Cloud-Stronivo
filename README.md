@@ -13,6 +13,10 @@ npm run build     # produkcja → dist/
 npm run preview
 ```
 
+## Asystent AI Stroniq
+
+Widget czatu w prawym dolnym rogu (`src/chat/`) z backendem w `api/chat.ts` i `api/lead.ts` (Claude przez `@anthropic-ai/sdk`). **Wymaga `ANTHROPIC_API_KEY` w Vercel.** Bez klucza widget pokazuje, że asystent jest niedostępny, i kieruje do formularza. Konfiguracja, baza wiedzy, koszty, RODO i testy: **`STRONIQ.md`**.
+
 ## SEO i prerendering
 
 Animacja kabla w hero (`src/intro/heroIntro.ts`) jest samodzielną funkcją bez importów: prerender wstawia ją bezpośrednio do HTML strony głównej, więc rusza bez czekania na bundle Reacta. Przy jej edycji nie wolno odwoływać się do niczego spoza funkcji.

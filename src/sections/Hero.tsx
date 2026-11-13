@@ -84,7 +84,7 @@ export function Hero() {
       </div>
 
       <div className="intro-fade container-x absolute inset-x-0 bottom-6 z-10 hidden flex-col items-end gap-4 md:flex" style={delay(800)}>
-        <a href="#realizacje" className="group/s flex items-center gap-4 text-sm text-mist transition-colors hover:text-paper">
+        <a data-chat-avoid href="#realizacje" className="group/s flex items-center gap-4 text-sm text-mist transition-colors hover:text-paper">
           <span aria-hidden className="relative h-12 w-px overflow-hidden bg-line">
             <span className="absolute inset-x-0 top-0 h-1/2 bg-lime motion-safe:animate-[scrollcue_2.2s_ease-in-out_infinite]" />
           </span>
