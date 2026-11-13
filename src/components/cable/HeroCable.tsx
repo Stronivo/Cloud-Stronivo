@@ -46,14 +46,16 @@ function computeLayout(hero: HTMLElement, anchor: HTMLElement | null): Layout {
   const mobile = W < 768
 
   if (mobile) {
+    // Phones: the plug connects in a band right above the headline (Hero leaves room
+    // for it), so the whole animation is in view as soon as the page opens.
     const s = 0.5
-    // Raised so the port clears the browser's bottom toolbar on phones.
-    const lift = 56
-    const port = { x: W - 100, y: H - 118 - lift }
+    const top = anchor ? anchor.getBoundingClientRect().top - hr.top : H * 0.3
+    const Y = top - 58
+    const port = { x: W - 100, y: Y }
     const conn: Pose = {
-      c1: { x: W * 0.2, y: H - 70 - lift },
-      c2: { x: W * 0.28, y: H + 10 },
-      mid: { x: W * 0.46, y: H - 52 - lift },
+      c1: { x: W * 0.16, y: Y + 34 },
+      c2: { x: W * 0.26, y: Y + 62 },
+      mid: { x: W * 0.43, y: Y + 26 },
       tip: { x: port.x + PLUG_INSERT * s, y: port.y },
       angle: 0,
     }
@@ -62,15 +64,15 @@ function computeLayout(hero: HTMLElement, anchor: HTMLElement | null): Layout {
       H,
       s,
       mobile,
-      start: { x: -30, y: H + 30 },
+      start: { x: -30, y: Y + 20 },
       port,
       conn,
       appr: { ...conn, tip: { x: port.x - 46, y: port.y } },
       disc: {
-        c1: { x: W * 0.18, y: H - 40 - lift },
-        c2: { x: W * 0.3, y: H + 30 },
-        mid: { x: W * 0.44, y: H - 20 - lift },
-        tip: { x: port.x - 60, y: H - 34 - lift },
+        c1: { x: W * 0.15, y: Y + 44 },
+        c2: { x: W * 0.28, y: Y + 70 },
+        mid: { x: W * 0.42, y: Y + 46 },
+        tip: { x: port.x - 64, y: Y + 40 },
         angle: 0.35,
       },
     }

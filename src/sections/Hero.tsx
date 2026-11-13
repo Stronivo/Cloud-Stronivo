@@ -28,13 +28,16 @@ export function Hero({ onIntroDone }: { onIntroDone: () => void }) {
 
       <HeroCable heroRef={hero} anchorRef={anchor} reduced={reduced} onConnected={done} />
 
-      <div className="container-x relative z-10 flex flex-1 flex-col justify-center pb-72 pt-28 md:pb-40 md:pt-40">
-        <p className="eyebrow intro-fade mb-8 flex items-center gap-3 md:mb-10" style={delay(0)}>
+      <div className="container-x relative z-10 flex flex-1 flex-col justify-center pb-16 pt-28 md:pb-40 md:pt-40">
+        <p className="eyebrow intro-fade mb-0 flex items-center gap-3 md:mb-10" style={delay(0)}>
           <span className="relative inline-flex size-2">
             <span className="absolute inset-0 rounded-full bg-lime blink" />
           </span>
           Tworzenie stron internetowych · Żory i Śląsk
         </p>
+
+        {/* phones: room for the plug-in animation right above the headline */}
+        <div aria-hidden className="h-[7.5rem] md:hidden" />
 
         <h1 id="hero-title" className="hero-title font-display text-paper">
           <span className="block text-[clamp(3.15rem,14.2vw,5rem)] font-bold leading-[0.92] tracking-[-0.055em] md:text-[clamp(5rem,10.6vw,12.25rem)]">
