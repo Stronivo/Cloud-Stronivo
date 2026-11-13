@@ -1,4 +1,4 @@
-/** Privacy policy text supplied by Stronivo (12 November 2026). Edit here to update the page. */
+/** Privacy policy text supplied by Stronivo (12 November 2026; §13 AI assistant added 13 November 2026). Edit here to update the page. */
 
 export type Block =
   | { p: string }
@@ -8,8 +8,8 @@ export type Block =
 
 export type PolicySection = { no: string; title: string; blocks: Block[] }
 
-export const PRIVACY_UPDATED = '12 listopada 2026 r.'
-export const PRIVACY_UPDATED_ISO = '2026-11-12'
+export const PRIVACY_UPDATED = '13 listopada 2026 r.'
+export const PRIVACY_UPDATED_ISO = '2026-11-13'
 
 export const PRIVACY: PolicySection[] = [
   {
@@ -223,6 +223,20 @@ export const PRIVACY: PolicySection[] = [
   },
   {
     no: '§13',
+    title: 'Asystent AI (czat „Stroniq”)',
+    blocks: [
+      {
+        ol: [
+          'Na stronie działa asystent oparty na sztucznej inteligencji, który odpowiada na pytania o ofertę i pomaga przygotować zapytanie ofertowe. Odpowiedzi generuje model językowy dostarczany przez Anthropic PBC (USA); mogą one zawierać błędy, a wiążących informacji udziela zespół Stronivo.',
+          'Treść wiadomości wpisywanych w czacie jest przekazywana do dostawcy modelu wyłącznie w celu wygenerowania odpowiedzi. Administrator nie zapisuje treści rozmów na swoich serwerach; historia rozmowy jest przechowywana tylko w przeglądarce użytkownika do czasu zamknięcia karty. Prosimy nie podawać w czacie danych wrażliwych.',
+          'Jeżeli użytkownik zdecyduje się wysłać zapytanie przygotowane z asystentem, przekazuje podsumowanie swoich potrzeb oraz podane dobrowolnie dane kontaktowe (imię, adres e-mail, opcjonalnie numer telefonu) w celu przygotowania wyceny — podstawą przetwarzania jest art. 6 ust. 1 lit. b RODO (działania przed zawarciem umowy) oraz zgoda wyrażona w formularzu.',
+          'Przekazanie danych poza EOG odbywa się na zasadach opisanych w §8.',
+        ],
+      },
+    ],
+  },
+  {
+    no: '§14',
     title: 'Zautomatyzowane podejmowanie decyzji',
     blocks: [
       {
@@ -231,7 +245,7 @@ export const PRIVACY: PolicySection[] = [
     ],
   },
   {
-    no: '§14',
+    no: '§15',
     title: 'Linki zewnętrzne',
     blocks: [
       {
@@ -244,7 +258,7 @@ export const PRIVACY: PolicySection[] = [
     ],
   },
   {
-    no: '§15',
+    no: '§16',
     title: 'Zmiany Polityki Prywatności',
     blocks: [
       {

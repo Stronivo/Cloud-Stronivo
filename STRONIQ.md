@@ -93,14 +93,8 @@ ChatLauncher (główny bundle, ~1 KB)
 - Zapytanie ofertowe zawiera tylko **podsumowanie potrzeb i dane, które użytkownik sam wpisał**, wysyłane po zaznaczeniu zgody. Trafia do Formspree lub Resend, a dalej na kontakt@stronivo.com.
 - W widgecie jest stały komunikat (asystent AI, możliwe błędy, nie podawaj danych wrażliwych) z linkiem do polityki prywatności.
 
-### ⚠️ Do decyzji: uzupełnienie polityki prywatności
-Obecna polityka prywatności ogólnie obejmuje zewnętrznych dostawców (§6–§8), ale **nie wspomina wprost o asystencie AI**. Proponowany paragraf poniżej **nie został dodany do strony**, bo to Twój dokument prawny. Zweryfikuj go (najlepiej z prawnikiem) i daj znać, a wstawię go do `src/data/privacy.ts`:
-
-> **Asystent AI (czat „Stroniq”)**
-> 1. Na stronie działa asystent oparty na sztucznej inteligencji, który odpowiada na pytania o ofertę i pomaga przygotować zapytanie ofertowe. Odpowiedzi generuje model językowy dostarczany przez Anthropic PBC (USA); mogą one zawierać błędy, a wiążących informacji udziela zespół Stronivo.
-> 2. Treść wiadomości wpisywanych w czacie jest przekazywana do dostawcy modelu wyłącznie w celu wygenerowania odpowiedzi. Administrator nie zapisuje treści rozmów na swoich serwerach; historia rozmowy jest przechowywana tylko w przeglądarce użytkownika do czasu zamknięcia karty. Prosimy nie podawać w czacie danych wrażliwych.
-> 3. Jeżeli użytkownik zdecyduje się wysłać zapytanie przygotowane z asystentem, przekazuje podsumowanie swoich potrzeb oraz podane dobrowolnie dane kontaktowe (imię, adres e-mail, opcjonalnie numer telefonu) w celu przygotowania wyceny — podstawą przetwarzania jest art. 6 ust. 1 lit. b RODO (działania przed zawarciem umowy) oraz zgoda wyrażona w formularzu.
-> 4. Przekazanie danych poza EOG odbywa się na zasadach opisanych w §8.
+### Polityka prywatności
+Asystent AI jest opisany w **§13 „Asystent AI (czat „Stroniq”)”** polityki prywatności (dodane 13 listopada 2026 na prośbę właściciela; treść w `src/data/privacy.ts`). Przy zmianie dostawcy modelu lub sposobu przetwarzania zaktualizuj ten paragraf.
 
 ## 6. Koszty (szacunki, nie gwarancja)
 

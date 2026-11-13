@@ -107,7 +107,7 @@ export const ROUTES: RouteMeta[] = [
     ogType: 'article',
     jsonLd: {
       '@context': 'https://schema.org',
-      ...page('/polityka-prywatnosci', 'Polityka prywatności | Stronivo', { dateModified: '2026-11-12' }),
+      ...page('/polityka-prywatnosci', 'Polityka prywatności | Stronivo', { dateModified: '2026-11-13' }),
     },
   },
   {

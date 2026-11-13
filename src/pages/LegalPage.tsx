@@ -60,7 +60,7 @@ function Privacy({ title }: { title: string }) {
           <div className="lg:sticky lg:top-28">
             <p className="eyebrow">Spis treści</p>
             <ol className="mt-5 grid gap-1 sm:grid-cols-2 lg:grid-cols-1">
-              {[...PRIVACY, { no: '§16', title: 'Kontakt z administratorem' }].map((s) => (
+              {[...PRIVACY, { no: '§17', title: 'Kontakt z administratorem' }].map((s) => (
                 <li key={s.no}>
                   <a
                     href={`#${anchor(s.no)}`}
@@ -90,9 +90,9 @@ function Privacy({ title }: { title: string }) {
             </section>
           ))}
 
-          <section id={anchor('§16')} aria-labelledby="p16-h" className="scroll-mt-28 py-10">
-            <h2 id="p16-h" className="flex gap-4 text-2xl font-semibold tracking-tight md:text-3xl">
-              <span className="text-lime">§16.</span>{' '}
+          <section id={anchor('§17')} aria-labelledby="p17-h" className="scroll-mt-28 py-10">
+            <h2 id="p17-h" className="flex gap-4 text-2xl font-semibold tracking-tight md:text-3xl">
+              <span className="text-lime">§17.</span>{' '}
               Kontakt z administratorem
             </h2>
             <p className="mt-6 leading-relaxed text-mist">
