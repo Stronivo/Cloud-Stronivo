@@ -147,3 +147,34 @@ Nawigacja i stopka linkują do wszystkich sekcji i podstron. W nowych treściach
 - `https://www.stronivo.com/nieistniejaca-strona` powinien zwrócić status **404**.
 - Test wyników z elementami rozszerzonymi (search.google.com/test/rich-results) dla strony głównej: Organization bez błędów.
 - Search Console → Sprawdzanie adresu URL → „Wyświetl przetestowaną stronę”: treść widoczna w HTML.
+
+---
+
+## Aktualizacja 14 listopada 2026 — SEO lokalne (Żory, Rybnik, Jastrzębie-Zdrój, Katowice)
+
+**Zmiany**
+- Strona główna:
+  - title: „Strony internetowe Żory – Projektowanie WWW | Stronivo” (54 zn.);
+  - description (153 zn.): „Strony internetowe Żory i Śląsk – tworzenie stron WWW i projektowanie stron dla firm z Żor, Rybnika, Jastrzębia-Zdroju i Katowic. Poznaj ofertę Stronivo.”;
+  - Open Graph i JSON-LD WebPage zaktualizowane razem z tytułem.
+- JSON-LD Organization: `areaServed` = Żory, Rybnik, Jastrzębie-Zdrój, Katowice, województwo śląskie (obszar działania podany przez właściciela). Opis zaktualizowany, pozostałe dane bez zmian (wyłącznie prawdziwe dane).
+- Treść:
+  - sekcja „O nas”: „Świadczymy usługi na terenie Żor i całego Śląska — tworzymy strony internetowe dla firm z Żor, Rybnika, Jastrzębia-Zdroju, Katowic i okolic.”;
+  - stopka (na każdej podstronie): „Świadczymy usługi na terenie Żor i Śląska.”
+- Baza wiedzy Stroniq: obszar działania zaktualizowany tak samo.
+- sitemap.xml: `lastmod` strony głównej 2026-11-14.
+
+**Weryfikacja (statyczny HTML, bez JS)**
+
+| URL | Status | Title | Description | Canonical | H1 |
+|---|---|---|---|---|---|
+| `/` | 200 | 54 zn. | 153 zn. | ✓ | 1 |
+| `/polityka-prywatnosci` | 200 | 31 zn. | 157 zn. | ✓ | 1 |
+| `/informacje-prawne` | 200 | 28 zn. | 146 zn. | ✓ | 1 |
+| nieistniejący adres | 404 | ✓ | — | brak (noindex) | 1 |
+
+- Wszystkie 3 adresy z sitemap.xml zwracają 200 (lokalnie i na żywo); robots.txt wskazuje sitemap.
+- Hierarchia nagłówków bez pominiętych poziomów. Open Graph zgodny z title i description na każdej podstronie.
+- Rybnik, Jastrzębie-Zdrój i Katowice pojawiają się w widocznym tekście po 1 razie (bez upychania fraz).
+
+**Niewykonane (świadomie):** tytuły dla „O nas”, „Oferta”, „Realizacje” i „Kontakt”. To sekcje strony głównej (`#o-nas`, `#uslugi`, `#realizacje`, `#kontakt`), nie osobne adresy URL: `/o-nas` itd. zwracają 404. Jeden adres ma jeden `<title>`, więc osobne tytuły wymagałyby nowych podstron, czego zadanie zabrania.

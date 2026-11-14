@@ -14,6 +14,7 @@ export function Footer({ home = true }: { home?: boolean }) {
             <p className="max-w-sm font-display text-2xl font-medium leading-tight tracking-tight md:text-3xl">
               Podłączamy Twoją firmę do internetu<span className="text-lime">.</span>
             </p>
+            <p className="mt-3 max-w-sm text-sm text-mist">Świadczymy usługi na terenie Żor i Śląska.</p>
             <a
               href={`${prefix}#kontakt`}
               className="mt-8 inline-flex min-h-12 items-center gap-3 rounded-full bg-lime px-6 font-display font-medium text-ink transition-colors hover:bg-paper"

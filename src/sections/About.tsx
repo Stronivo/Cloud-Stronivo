@@ -77,9 +77,9 @@ export function About() {
               Projektowanie stron internetowych — <span className="text-lime">Żory i Śląsk</span>
             </h3>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-mist">
-              Stronivo zajmuje się tworzeniem stron internetowych dla firm z Żor i całego Śląska. Projektujemy dla małych
-              firm usługowych, restauracji, kawiarni i wszystkich, którym zależy na tym, żeby klienci z okolicy łatwo
-              znaleźli ich w internecie.
+              Świadczymy usługi na terenie Żor i całego Śląska — tworzymy strony internetowe dla firm z Żor, Rybnika,
+              Jastrzębia-Zdroju, Katowic i okolic. Projektujemy dla małych firm usługowych, restauracji, kawiarni i
+              wszystkich, którym zależy na tym, żeby klienci z okolicy łatwo znaleźli ich w internecie.
             </p>
             <p className="mt-4 max-w-2xl text-lg leading-relaxed text-mist">
               Dbamy o to, czego szukają lokalni klienci: przejrzystą ofertę, aktualne dane kontaktowe i stronę, która

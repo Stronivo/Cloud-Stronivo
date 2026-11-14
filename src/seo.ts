@@ -33,12 +33,15 @@ const organization = {
   image: OG_IMAGE,
   slogan: 'Podłączamy Twoją firmę do internetu.',
   description:
-    'Stronivo projektuje i tworzy nowoczesne strony internetowe dla firm, restauracji i kawiarni z Żor i Śląska: strony firmowe, landing page, odświeżanie stron oraz SEO i optymalizację.',
+    'Stronivo projektuje i tworzy nowoczesne strony internetowe dla firm, restauracji i kawiarni. Świadczy usługi na terenie Żor i Śląska, m.in. dla firm z Rybnika, Jastrzębia-Zdroju i Katowic: strony firmowe, landing page, odświeżanie stron oraz SEO i optymalizację.',
   areaServed: [
     { '@type': 'City', name: 'Żory' },
+    { '@type': 'City', name: 'Rybnik' },
+    { '@type': 'City', name: 'Jastrzębie-Zdrój' },
+    { '@type': 'City', name: 'Katowice' },
     { '@type': 'AdministrativeArea', name: 'Województwo śląskie' },
   ],
-  knowsAbout: ['tworzenie stron internetowych', 'projektowanie stron internetowych', 'landing page', 'SEO'],
+  knowsAbout: ['tworzenie stron WWW', 'projektowanie stron internetowych dla firm', 'landing page', 'SEO'],
   sameAs: SOCIALS.map((s) => s.href),
   // Stronivo is a brand; services are provided by this company (see /informacje-prawne).
   parentOrganization: {
@@ -61,7 +64,7 @@ const organization = {
       'Landing page',
       'Odświeżanie stron internetowych',
       'SEO i optymalizacja stron',
-    ].map((name) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name, areaServed: 'Żory, Śląsk' } })),
+    ].map((name) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name, areaServed: 'Żory i województwo śląskie' } })),
   },
 }
 
@@ -88,13 +91,13 @@ export const ROUTES: RouteMeta[] = [
   {
     path: '/',
     file: 'index.html',
-    title: 'Tworzenie Stron Internetowych Żory | Stronivo',
+    title: 'Strony internetowe Żory – Projektowanie WWW | Stronivo',
     description:
-      'Projektujemy nowoczesne strony internetowe dla małych firm, restauracji i kawiarni. Stronivo – strony dopasowane do Twojego biznesu. Poznaj ofertę!',
+      'Strony internetowe Żory i Śląsk – tworzenie stron WWW i projektowanie stron dla firm z Żor, Rybnika, Jastrzębia-Zdroju i Katowic. Poznaj ofertę Stronivo.',
     canonical: `${SITE_URL}/`,
     jsonLd: {
       '@context': 'https://schema.org',
-      '@graph': [organization, website, page('/', 'Tworzenie Stron Internetowych Żory | Stronivo', { about: { '@id': `${SITE_URL}/#organization` } })],
+      '@graph': [organization, website, page('/', 'Strony internetowe Żory – Projektowanie WWW | Stronivo', { about: { '@id': `${SITE_URL}/#organization` } })],
     },
   },
   {

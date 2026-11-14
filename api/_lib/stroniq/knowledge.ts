@@ -14,7 +14,7 @@ export const KNOWLEDGE_BASE = `
 - Stronivo to studio projektujące i tworzące nowoczesne strony internetowe dla firm.
 - Hasło marki: „Podłączamy Twoją firmę do internetu.”
 - Strona: https://www.stronivo.com · e-mail: kontakt@stronivo.com
-- Obszar działania podany na stronie: firmy z Żor i całego Śląska.
+- Obszar działania: usługi na terenie Żor i całego Śląska (m.in. Rybnik, Jastrzębie-Zdrój, Katowice).
 - „Małe studio. Wielkie pomysły.” Wierzymy, że profesjonalna obecność w internecie nie musi być zarezerwowana dla największych firm. Tworzymy nowoczesne, przemyślane strony, które łączą estetykę z funkcjonalnością. Stawiamy na indywidualne podejście, kreatywność i rozwiązania dopasowane do potrzeb każdego biznesu.
 - Usługi pod marką Stronivo świadczy EASY BUSY Sp. z o.o., NIP 8961591928, ul. Hebanowa 43, 55-093 Kiełczów (dane prawne — podawaj tylko, gdy ktoś o nie pyta).
 
