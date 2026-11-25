@@ -21,7 +21,7 @@ export function Hero() {
       {/* technical grid — fades towards the edges */}
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 opacity-[0.35] [background-image:linear-gradient(to_right,#252a32_1px,transparent_1px),linear-gradient(to_bottom,#252a32_1px,transparent_1px)] [background-size:96px_96px] [mask-image:radial-gradient(ellipse_70%_60%_at_60%_40%,#000_20%,transparent_75%)]"
+        className="absolute inset-0 -z-10 opacity-[0.35] [background-image:linear-gradient(to_right,#e6dac5_1px,transparent_1px),linear-gradient(to_bottom,#e6dac5_1px,transparent_1px)] [background-size:96px_96px] [mask-image:radial-gradient(ellipse_70%_60%_at_60%_40%,#000_20%,transparent_75%)]"
       />
 
       <HeroCable />

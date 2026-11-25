@@ -24,7 +24,7 @@ export function HeroCable() {
       <path
         data-c="trace"
         fill="none"
-        stroke="#c6ff4d"
+        stroke="#9e1b32"
         strokeWidth="1.5"
         pathLength={1}
         strokeDasharray="1"
@@ -33,7 +33,7 @@ export function HeroCable() {
       <path
         data-c="stream"
         fill="none"
-        stroke="#f5f7f2"
+        stroke="#9e1b32"
         strokeWidth="1.5"
         className="stream opacity-0 transition-opacity delay-1000 duration-700 group-[.is-connected]:opacity-70"
       />
@@ -41,7 +41,7 @@ export function HeroCable() {
       <path
         data-c="glow"
         fill="none"
-        stroke="#c6ff4d"
+        stroke="#d4a24c"
         strokeOpacity="0.35"
         strokeWidth="12"
         strokeLinecap="round"
@@ -53,7 +53,7 @@ export function HeroCable() {
       <path
         data-c="pulse"
         fill="none"
-        stroke="#e9ffb8"
+        stroke="#f6dfa8"
         strokeWidth="3"
         strokeLinecap="round"
         pathLength={1000}
@@ -66,7 +66,7 @@ export function HeroCable() {
         data-c="flash"
         r="70"
         fill="none"
-        stroke="#c6ff4d"
+        stroke="#9e1b32"
         strokeWidth="2"
         className="connect-flash opacity-0"
         style={{ transformBox: 'fill-box', transformOrigin: 'center' }}

@@ -9,12 +9,12 @@ export function Marquee() {
           {/* text lives in a pseudo-element: purely decorative outline lettering */}
           <span
             data-text={t}
-            className="px-6 font-display text-[clamp(2.6rem,7vw,6.5rem)] font-semibold tracking-[-0.04em] text-transparent [-webkit-text-stroke:1.5px_#3a414c] before:content-[attr(data-text)] md:px-10"
+            className="px-6 font-display text-[clamp(2.6rem,7vw,6.5rem)] font-semibold tracking-[-0.04em] text-transparent [-webkit-text-stroke:1.5px_#cdbda4] before:content-[attr(data-text)] md:px-10"
           />
           <svg viewBox="0 0 40 24" className="h-6 w-10 shrink-0 md:h-9 md:w-14">
-            <path d="M0 12 H22" stroke="#c6ff4d" strokeWidth="3" strokeLinecap="round" />
-            <rect x="20" y="5" width="12" height="14" rx="3" fill="#c6ff4d" />
-            <path d="M32 9 h6 M32 15 h6" stroke="#c6ff4d" strokeWidth="2" strokeLinecap="round" />
+            <path d="M0 12 H22" stroke="#9e1b32" strokeWidth="3" strokeLinecap="round" />
+            <rect x="20" y="5" width="12" height="14" rx="3" fill="#9e1b32" />
+            <path d="M32 9 h6 M32 15 h6" stroke="#9e1b32" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </span>
       ))}

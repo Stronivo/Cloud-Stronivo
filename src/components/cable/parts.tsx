@@ -41,9 +41,9 @@ export function CableDefs({ id, filters = true }: { id: string; filters?: boolea
         <stop offset="1" stopColor="#626973" />
       </linearGradient>
       <radialGradient id={`${id}-halo`}>
-        <stop offset="0" stopColor="#c6ff4d" stopOpacity="0.55" />
-        <stop offset="0.45" stopColor="#c6ff4d" stopOpacity="0.12" />
-        <stop offset="1" stopColor="#c6ff4d" stopOpacity="0" />
+        <stop offset="0" stopColor="#d4a24c" stopOpacity="0.55" />
+        <stop offset="0.45" stopColor="#d4a24c" stopOpacity="0.12" />
+        <stop offset="1" stopColor="#d4a24c" stopOpacity="0" />
       </radialGradient>
       {filters && (
         <>
@@ -138,7 +138,7 @@ export const Port = forwardRef(function Port(
         width="4"
         height="76"
         rx="2"
-        className="fill-lime opacity-0 transition-opacity duration-500 group-[.is-connected]:opacity-100"
+        className="fill-gold opacity-0 transition-opacity duration-500 group-[.is-connected]:opacity-100"
       />
       <rect
         x="34"
@@ -146,7 +146,7 @@ export const Port = forwardRef(function Port(
         width="12"
         height="84"
         rx="6"
-        className="fill-lime opacity-0 transition-opacity duration-700 group-[.is-connected]:opacity-30"
+        className="fill-gold opacity-0 transition-opacity duration-700 group-[.is-connected]:opacity-30"
         filter={filters ? `url(#${id}-glow)` : undefined}
       />
       {/* status dots */}
@@ -157,7 +157,7 @@ export const Port = forwardRef(function Port(
             cx={62 + i * 14}
             cy="28"
             r="3.2"
-            className="fill-lime opacity-0 transition-opacity duration-300 group-[.is-connected]:opacity-100"
+            className="fill-gold opacity-0 transition-opacity duration-300 group-[.is-connected]:opacity-100"
             style={{ transitionDelay: `${300 + i * 140}ms` }}
           />
         </g>

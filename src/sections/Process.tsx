@@ -72,12 +72,12 @@ export function Process() {
           <span
             ref={fill}
             aria-hidden
-            className="absolute bottom-0 left-[11px] top-0 w-[3px] origin-top scale-y-0 rounded-full bg-lime shadow-[0_0_12px_rgb(198_255_77/0.6)] md:left-[15px]"
+            className="absolute bottom-0 left-[11px] top-0 w-[3px] origin-top scale-y-0 rounded-full bg-lime shadow-[0_0_12px_rgb(158_27_50/0.6)] md:left-[15px]"
           />
           <span ref={head} aria-hidden className="absolute -top-3 left-[3px] md:left-[7px]">
             <svg viewBox="0 0 20 30" className="h-[30px] w-5">
               <rect x="3" y="0" width="14" height="18" rx="4" fill="#3a414c" />
-              <rect x="6" y="18" width="8" height="8" rx="1.5" fill="#c6ff4d" />
+              <rect x="6" y="18" width="8" height="8" rx="1.5" fill="#9e1b32" />
             </svg>
           </span>
 
@@ -85,14 +85,14 @@ export function Process() {
             <li key={s.no} data-step className="group/step relative pb-16 pl-12 last:pb-0 md:pb-24 md:pl-20">
               <span
                 aria-hidden
-                className="absolute left-0 top-2 flex size-[25px] items-center justify-center rounded-full border-2 border-line bg-ink transition-[border-color,box-shadow] duration-500 group-[.is-lit]/step:border-lime group-[.is-lit]/step:shadow-[0_0_0_6px_rgb(198_255_77/0.12)] md:size-[33px]"
+                className="absolute left-0 top-2 flex size-[25px] items-center justify-center rounded-full border-2 border-line bg-ink transition-[border-color,box-shadow] duration-500 group-[.is-lit]/step:border-lime group-[.is-lit]/step:shadow-[0_0_0_6px_rgb(158_27_50/0.12)] md:size-[33px]"
               >
                 <span className="size-2 rounded-full bg-line transition-colors duration-500 group-[.is-lit]/step:bg-lime" />
               </span>
               <p className="font-display text-sm tabular-nums text-mist transition-colors duration-500 group-[.is-lit]/step:text-lime">
                 {s.no}.
               </p>
-              <h3 className="mt-2 text-[clamp(1.8rem,3.4vw,3rem)] font-semibold leading-none tracking-[-0.035em] text-paper/40 transition-colors duration-700 group-[.is-lit]/step:text-paper">
+              <h3 className="mt-2 text-[clamp(1.8rem,3.4vw,3rem)] font-semibold leading-none tracking-[-0.035em] text-paper/50 transition-colors duration-700 group-[.is-lit]/step:text-paper">
                 {s.title}
               </h3>
               <p className="mt-4 max-w-md text-lg leading-relaxed text-mist">{s.body}</p>

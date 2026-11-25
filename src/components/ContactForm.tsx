@@ -134,7 +134,7 @@ export function ContactForm() {
 
   const field =
     'peer w-full rounded-xl border bg-ink-2 px-4 pb-3 pt-7 text-paper placeholder-transparent outline-none transition-[border-color,box-shadow] duration-300 ' +
-    'focus:border-lime focus:shadow-[0_0_0_4px_rgb(198_255_77/0.12)] aria-[invalid=true]:border-[#ff8a7a]'
+    'focus:border-lime focus:shadow-[0_0_0_4px_rgb(158_27_50/0.12)] aria-[invalid=true]:border-[#b42318]'
   const label =
     'pointer-events-none absolute left-4 top-2.5 text-xs text-mist transition-all duration-200 ' +
     'peer-placeholder-shown:top-[1.15rem] peer-placeholder-shown:text-base peer-focus:top-2.5 peer-focus:text-xs peer-focus:text-lime'
@@ -293,7 +293,7 @@ export function ContactForm() {
             }}
             aria-invalid={!!err('consent')}
             aria-describedby={err('consent') ? `${fid('consent')}-err` : undefined}
-            className="mt-0.5 size-5 shrink-0 cursor-pointer appearance-none rounded-md border border-line bg-ink-2 bg-center bg-no-repeat transition-colors checked:border-lime checked:bg-lime checked:[background-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2020%2020%22%3E%3Cpath%20d=%22M5%2010.5l3%203%207-7%22%20fill=%22none%22%20stroke=%22%2310131A%22%20stroke-width=%222.4%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E')] aria-[invalid=true]:border-[#ff8a7a]"
+            className="mt-0.5 size-5 shrink-0 cursor-pointer appearance-none rounded-md border border-line bg-ink-2 bg-center bg-no-repeat transition-colors checked:border-lime checked:bg-lime checked:[background-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2020%2020%22%3E%3Cpath%20d=%22M5%2010.5l3%203%207-7%22%20fill=%22none%22%20stroke=%22%23fbf6ec%22%20stroke-width=%222.4%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E')] aria-[invalid=true]:border-[#b42318]"
           />
           <label htmlFor={fid('consent')} className="text-sm leading-relaxed text-mist">
             Zapoznałem(-am) się z{' '}
@@ -305,7 +305,7 @@ export function ContactForm() {
           </label>
         </div>
         {err('consent') && (
-          <p id={`${fid('consent')}-err`} className="mt-2 pl-8 text-sm text-[#ff8a7a]">
+          <p id={`${fid('consent')}-err`} className="mt-2 pl-8 text-sm text-[#b42318]">
             {err('consent')}
           </p>
         )}
@@ -352,7 +352,7 @@ function Field({ id, error, children }: { id: string; error?: string; children: 
     <div className="relative">
       {children}
       {error && (
-        <p id={`${id}-err`} className="mt-2 text-sm text-[#ff8a7a]">
+        <p id={`${id}-err`} className="mt-2 text-sm text-[#b42318]">
           {error}
         </p>
       )}
@@ -362,8 +362,8 @@ function Field({ id, error, children }: { id: string; error?: string; children: 
 
 function Notice({ tone, title, children }: { tone: 'ok' | 'err'; title: string; children: React.ReactNode }) {
   return (
-    <div className={`rounded-2xl border px-5 py-4 ${tone === 'ok' ? 'border-lime/60 bg-lime/5' : 'border-[#ff8a7a]/50 bg-[#ff8a7a]/5'}`}>
-      <p className={`font-medium ${tone === 'ok' ? 'text-lime' : 'text-[#ffb3a8]'}`}>{title}</p>
+    <div className={`rounded-2xl border px-5 py-4 ${tone === 'ok' ? 'border-lime/60 bg-lime/5' : 'border-[#b42318]/50 bg-[#b42318]/5'}`}>
+      <p className={`font-medium ${tone === 'ok' ? 'text-lime' : 'text-[#b42318]'}`}>{title}</p>
       <p className="mt-1 text-sm text-mist">{children}</p>
     </div>
   )

@@ -137,7 +137,7 @@ function Socket({ on }: { on: boolean }) {
           height="5"
           rx="2.5"
           className="transition-[fill] duration-500"
-          style={{ fill: on ? '#c6ff4d' : '#3a414c', transitionDelay: on ? '1300ms' : '0ms' }}
+          style={{ fill: on ? '#d4a24c' : '#3a414c', transitionDelay: on ? '1300ms' : '0ms' }}
         />
       </svg>
     </span>

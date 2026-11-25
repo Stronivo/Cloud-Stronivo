@@ -91,14 +91,14 @@ export function Services() {
                 <span className="absolute -left-2 top-1/2 z-10 h-12 w-4 -translate-y-1/2 rounded-md bg-[#3a414c]">
                   <span className="absolute inset-y-2 left-0 w-1.5 rounded-sm bg-[#050608]" />
                 </span>
-                <div className="overflow-hidden rounded-[22px] border border-line bg-ink-2 p-3 shadow-[0_40px_100px_-40px_rgb(0_0_0/0.9)]">
+                <div className="overflow-hidden rounded-[22px] border border-line bg-ink-2 p-3 shadow-[0_40px_100px_-40px_rgb(36_17_15/0.28)]">
                   <div className="flex items-center justify-between px-2 pb-3 pt-1 text-[0.7rem] text-mist">
                     <span className="font-display tracking-[0.2em]">MONITOR · {SERVICES[active].no}</span>
                     <span className="flex items-center gap-2">
                       <span className="size-1.5 rounded-full bg-lime" /> live
                     </span>
                   </div>
-                  <div className="relative aspect-[4/3.2] overflow-hidden rounded-[14px] bg-ink">
+                  <div className="relative aspect-[4/3.2] overflow-hidden rounded-[14px] bg-[#15110e]">
                     {[WebsiteScene, LandingScene, RefreshScene, SeoScene].map((Scene, i) => (
                       <div
                         key={i}
@@ -147,7 +147,7 @@ function WebsiteScene({ on }: { on: boolean }) {
           width={b.w}
           height={b.h}
           rx="6"
-          fill={b.lime ? '#c6ff4d' : '#252a32'}
+          fill={b.lime ? '#d4a24c' : '#252a32'}
           className={T}
           style={{ opacity: on ? 1 : 0, transform: on ? 'none' : 'translateY(14px)', transitionDelay: `${b.d}ms` }}
         />
@@ -165,7 +165,7 @@ function LandingScene({ on }: { on: boolean }) {
       <rect x="130" y="100" width="140" height="7" rx="3" fill="#2f353f" />
       <rect x="130" y="114" width="110" height="7" rx="3" fill="#2f353f" />
       <g className={T} style={{ transform: on ? 'scale(1)' : 'scale(.9)', transformOrigin: '200px 160px', transformBox: 'view-box' }}>
-        <rect x="130" y="140" width="140" height="40" rx="20" fill="#c6ff4d" />
+        <rect x="130" y="140" width="140" height="40" rx="20" fill="#d4a24c" />
         <rect x="160" y="156" width="80" height="8" rx="4" fill="#10131a" />
       </g>
       <rect x="130" y="200" width="140" height="28" rx="6" fill="#252a32" />
@@ -183,7 +183,7 @@ function LandingScene({ on }: { on: boolean }) {
         cy="166"
         r="16"
         fill="none"
-        stroke="#c6ff4d"
+        stroke="#d4a24c"
         className="transition-opacity delay-700 duration-500"
         style={{ opacity: on ? 0.8 : 0 }}
       />
@@ -219,7 +219,7 @@ function RefreshScene({ on }: { on: boolean }) {
       <g clipPath="url(#refresh-clip)">
         <rect x="0" y="0" width="400" height="320" fill="#10131a" />
         <rect x="24" y="24" width="60" height="10" rx="5" fill="#f5f7f2" />
-        <rect x="306" y="20" width="70" height="18" rx="9" fill="#c6ff4d" />
+        <rect x="306" y="20" width="70" height="18" rx="9" fill="#d4a24c" />
         <rect x="24" y="72" width="250" height="30" rx="6" fill="#f5f7f2" />
         <rect x="24" y="110" width="190" height="30" rx="6" fill="#f5f7f2" />
         <rect x="24" y="156" width="150" height="8" rx="4" fill="#2f353f" />
@@ -227,8 +227,8 @@ function RefreshScene({ on }: { on: boolean }) {
         <rect x="208" y="200" width="168" height="96" rx="12" fill="#252a32" />
       </g>
       <g className="transition-transform delay-200 duration-[1400ms] ease-in-out-quart" style={{ transform: `translateX(${on ? 260 : 0}px)` }}>
-        <rect x="-1" y="0" width="2" height="320" fill="#c6ff4d" />
-        <circle cx="0" cy="160" r="14" fill="#c6ff4d" />
+        <rect x="-1" y="0" width="2" height="320" fill="#d4a24c" />
+        <circle cx="0" cy="160" r="14" fill="#d4a24c" />
         <path d="M-5 155 l-4 5 4 5 M5 155 l4 5 -4 5" stroke="#10131a" strokeWidth="2" fill="none" strokeLinecap="round" />
       </g>
     </svg>
@@ -243,7 +243,7 @@ function SeoScene({ on }: { on: boolean }) {
       <path
         d={arc}
         fill="none"
-        stroke="#c6ff4d"
+        stroke="#d4a24c"
         strokeWidth="18"
         strokeLinecap="round"
         pathLength={1}
@@ -259,7 +259,7 @@ function SeoScene({ on }: { on: boolean }) {
       </text>
       <g className={T} style={{ opacity: on ? 1 : 0, transform: on ? 'none' : 'translateY(10px)', transitionDelay: '500ms' }}>
         <rect x="40" y="250" width="320" height="56" rx="10" fill="#161a22" stroke="#2f353f" />
-        <text x="56" y="272" fill="#c6ff4d" fontSize="13" fontFamily="'Inter Variable', sans-serif">Twoja firma — strona główna</text>
+        <text x="56" y="272" fill="#d4a24c" fontSize="13" fontFamily="'Inter Variable', sans-serif">Twoja firma — strona główna</text>
         <text x="56" y="292" fill="#a4abb5" fontSize="10" fontFamily="'Inter Variable', sans-serif">twojafirma.pl › oferta</text>
       </g>
     </svg>

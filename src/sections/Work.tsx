@@ -100,7 +100,7 @@ function ProjectRow({ project: p, index }: { project: Project; index: number }) 
             {/* Desktop display */}
             <div ref={imgRef}>
             <div className={`img-reveal ${imgIn ? 'is-in' : ''} relative`}>
-              <div className="img-reveal-inner overflow-hidden rounded-[18px] border border-line bg-surface p-[1.2%] shadow-[0_50px_120px_-40px_rgb(0_0_0/0.9)]">
+              <div className="img-reveal-inner overflow-hidden rounded-[18px] border border-line bg-surface p-[1.2%] shadow-[0_50px_120px_-40px_rgb(36_17_15/0.28)]">
                 <div className="flex items-center gap-2 px-2 pb-2.5 pt-1 md:px-3 md:pb-3">
                   <span className="flex gap-1.5" aria-hidden>
                     <i className="size-2 rounded-full bg-[#3a414c] md:size-2.5" />
@@ -138,7 +138,7 @@ function ProjectRow({ project: p, index }: { project: Project; index: number }) 
               }`}
             >
               <Reveal delay={450}>
-                <div className="rounded-[1.6rem] border border-[#3a414c] bg-[#0b0d11] p-[5%] shadow-[0_40px_80px_-20px_rgb(0_0_0/0.95)] md:rounded-[2.2rem]">
+                <div className="rounded-[1.6rem] border border-[#3a414c] bg-[#0b0d11] p-[5%] shadow-[0_40px_80px_-20px_rgb(36_17_15/0.28)] md:rounded-[2.2rem]">
                   <div className="relative aspect-[9/19.5] overflow-hidden rounded-[1.15rem] bg-ink md:rounded-[1.7rem]">
                     <picture>
                       <source type="image/avif" srcSet={srcset(p.image, 'mobile', [200, 400, 600], 'avif')} sizes={PHONE_SIZES} />

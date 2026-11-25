@@ -84,10 +84,10 @@ export function Connect() {
             {/* Your business */}
             <Node label="Twój biznes" sub="realny świat" align="end" jack>
               <svg viewBox="0 0 64 64" className="size-full" aria-hidden>
-                <path d="M10 26 L14 12 H50 L54 26" fill="none" stroke="#f5f7f2" strokeWidth="2.5" strokeLinejoin="round" />
-                <path d="M10 26 q5.5 7 11 0 q5.5 7 11 0 q5.5 7 11 0 q5.5 7 11 0" fill="none" stroke="#f5f7f2" strokeWidth="2.5" />
-                <path d="M14 31 V52 H50 V31" fill="none" stroke="#f5f7f2" strokeWidth="2.5" strokeLinejoin="round" />
-                <rect x="27" y="38" width="10" height="14" fill="none" stroke="#c6ff4d" strokeWidth="2.5" />
+                <path d="M10 26 L14 12 H50 L54 26" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
+                <path d="M10 26 q5.5 7 11 0 q5.5 7 11 0 q5.5 7 11 0 q5.5 7 11 0" fill="none" stroke="currentColor" strokeWidth="2.5" />
+                <path d="M14 31 V52 H50 V31" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
+                <rect x="27" y="38" width="10" height="14" fill="none" stroke="#9e1b32" strokeWidth="2.5" />
               </svg>
             </Node>
 
@@ -113,9 +113,9 @@ export function Connect() {
             {/* Online world */}
             <Node label="Świat online" sub="Twoi klienci" align="start" lit>
               <svg viewBox="0 0 64 64" className="size-full" aria-hidden>
-                <circle cx="32" cy="32" r="21" fill="none" stroke="#f5f7f2" strokeWidth="2.5" />
-                <ellipse cx="32" cy="32" rx="9" ry="21" fill="none" stroke="#f5f7f2" strokeWidth="2.5" />
-                <path d="M11 32 H53 M15 21 H49 M15 43 H49" fill="none" stroke="#f5f7f2" strokeWidth="2" />
+                <circle cx="32" cy="32" r="21" fill="none" stroke="currentColor" strokeWidth="2.5" />
+                <ellipse cx="32" cy="32" rx="9" ry="21" fill="none" stroke="currentColor" strokeWidth="2.5" />
+                <path d="M11 32 H53 M15 21 H49 M15 43 H49" fill="none" stroke="currentColor" strokeWidth="2" />
                 <circle cx="32" cy="32" r="27" fill="none" strokeWidth="1.5" className="stroke-transparent transition-[stroke] duration-700 group-[.is-connected]:stroke-lime" />
               </svg>
             </Node>
@@ -160,7 +160,7 @@ function Node({
     <div className="flex flex-col items-center text-center">
       <div
         className={`relative flex size-16 items-center justify-center rounded-2xl border border-line bg-surface/60 p-3 transition-[border-color,box-shadow] duration-700 sm:size-24 sm:p-5 md:size-32 md:rounded-[28px] md:p-7 ${
-          lit ? 'group-[.is-connected]:border-lime/70 group-[.is-connected]:shadow-[0_0_60px_-10px_rgb(198_255_77/0.45)]' : ''
+          lit ? 'group-[.is-connected]:border-lime/70 group-[.is-connected]:shadow-[0_0_60px_-10px_rgb(158_27_50/0.45)]' : ''
         }`}
       >
         {children}

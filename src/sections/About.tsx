@@ -26,7 +26,8 @@ export function About() {
       const n = words.length
       words.forEach((w, i) => {
         const lit = reduced || p * (n + 6) > i
-        w.style.opacity = lit ? '1' : '0.5' // dimmed words keep WCAG AA contrast
+        // dimmed words keep WCAG AA contrast on the light background (accent words need a higher floor)
+        w.style.opacity = lit ? '1' : 'accent' in w.dataset ? '0.8' : '0.6'
       })
     },
     [reduced],
@@ -55,7 +56,12 @@ export function About() {
           >
             {TEXT.split(' ').map((w, i) => (
               <span key={i}>
-                <span data-w className={`transition-opacity duration-300 ${HIGHLIGHT.has(w) ? 'text-lime' : ''}`} style={{ opacity: 0.5 }}>
+                <span
+                  data-w
+                  data-accent={HIGHLIGHT.has(w) ? '' : undefined}
+                  className={`transition-opacity duration-300 ${HIGHLIGHT.has(w) ? 'text-lime' : ''}`}
+                  style={{ opacity: HIGHLIGHT.has(w) ? 0.8 : 0.6 }}
+                >
                   {w}
                 </span>{' '}
               </span>

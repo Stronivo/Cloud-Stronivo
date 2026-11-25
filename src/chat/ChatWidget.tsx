@@ -383,7 +383,7 @@ export default function ChatWidget({ open, onClose }: { open: boolean; onClose: 
       role="dialog"
       aria-labelledby={titleId}
       aria-hidden={!open}
-      className={`stroniq-panel fixed z-50 flex flex-col overflow-hidden border-line bg-ink text-paper shadow-[0_30px_80px_-20px_rgb(0_0_0/0.9)] max-sm:inset-0 max-sm:h-[100dvh] sm:bottom-24 sm:right-6 sm:h-[min(640px,calc(100vh-8rem))] sm:w-[400px] sm:rounded-[24px] sm:border ${
+      className={`stroniq-panel fixed z-50 flex flex-col overflow-hidden border-line bg-ink text-paper shadow-[0_30px_80px_-20px_rgb(36_17_15/0.28)] max-sm:inset-0 max-sm:h-[100dvh] sm:bottom-24 sm:right-6 sm:h-[min(640px,calc(100vh-8rem))] sm:w-[400px] sm:rounded-[24px] sm:border ${
         visible && open ? 'is-open' : ''
       }`}
     >
@@ -393,7 +393,7 @@ export default function ChatWidget({ open, onClose }: { open: boolean; onClose: 
           <img src="/stroniq/stroniq-128.webp" alt="" width={40} height={40} className="size-10 rounded-full bg-black object-cover" />
           <span
             aria-hidden
-            className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-ink bg-lime"
+            className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-ink bg-gold"
           />
         </span>
         <div className="min-w-0 flex-1">
@@ -606,7 +606,7 @@ function Bubble({ kind, children }: { kind: 'user' | 'assistant'; children: Reac
 }
 
 function Notice({ tone, contact, children }: { tone: 'info' | 'error' | 'ok'; contact?: boolean; children: React.ReactNode }) {
-  const color = tone === 'ok' ? 'border-lime/50 text-paper' : tone === 'error' ? 'border-[#ff8a7a]/50 text-paper' : 'border-line text-paper'
+  const color = tone === 'ok' ? 'border-lime/50 text-paper' : tone === 'error' ? 'border-[#b42318]/50 text-paper' : 'border-line text-paper'
   return (
     <div role={tone === 'error' ? 'alert' : 'status'} className={`rounded-2xl border border-dashed px-4 py-3 text-sm ${color}`}>
       <p>{children}</p>
@@ -749,7 +749,7 @@ function InquiryCard({
               type="checkbox"
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}
-              className="mt-0.5 size-4 shrink-0 accent-[#c6ff4d]"
+              className="mt-0.5 size-4 shrink-0 accent-[#9e1b32]"
             />
             <span>
               Zgadzam się na przekazanie tego podsumowania oraz moich danych kontaktowych zespołowi Stronivo (kontakt@stronivo.com) w celu
@@ -761,7 +761,7 @@ function InquiryCard({
             </span>
           </label>
           {error && (
-            <p id={`${id}-err`} role="alert" className="text-xs text-[#ff8a7a]">
+            <p id={`${id}-err`} role="alert" className="text-xs text-[#b42318]">
               {error}
             </p>
           )}

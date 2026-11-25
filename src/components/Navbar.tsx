@@ -138,7 +138,7 @@ export function Navbar({ home = true }: { home?: boolean }) {
           <path
             d="M420 120 C 260 140, 300 330, 180 360 S 40 520, 120 640 S 300 760, 260 820"
             fill="none"
-            stroke="#c6ff4d"
+            stroke="#9e1b32"
             strokeOpacity="0.5"
             strokeWidth="1.5"
             pathLength={1}

@@ -9,7 +9,7 @@ const base =
   'min-h-12 px-7 text-[0.95rem] sm:min-h-14 sm:px-8 sm:text-base'
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-lime text-ink hover:bg-paper hover:shadow-[0_0_0_6px_rgb(198_255_77/0.14)]',
+  primary: 'bg-lime text-ink hover:bg-paper hover:shadow-[0_0_0_6px_rgb(158_27_50/0.14)]',
   ghost: 'border border-line text-paper hover:border-paper/60 hover:bg-paper/5',
   dark: 'bg-ink text-paper hover:bg-surface',
 }

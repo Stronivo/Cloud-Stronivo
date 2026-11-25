@@ -84,7 +84,7 @@ export function ChatLauncher() {
           {open ? 'Zamknij czat' : `Zapytaj ${CHAT.name}`}
         </span>
         <span className="relative">
-        <span className="relative flex size-14 items-center justify-center overflow-hidden rounded-full border border-lime/40 bg-black shadow-[0_10px_30px_-10px_rgb(0_0_0/0.8),0_0_0_4px_rgb(198_255_77/0.08)] transition-transform duration-300 ease-out-expo group-hover/l:scale-105 group-active/l:scale-95">
+        <span className="relative flex size-14 items-center justify-center overflow-hidden rounded-full border border-lime/40 bg-black shadow-[0_10px_30px_-10px_rgb(36_17_15/0.28),0_0_0_4px_rgb(158_27_50/0.08)] transition-transform duration-300 ease-out-expo group-hover/l:scale-105 group-active/l:scale-95">
           {open ? (
             <svg aria-hidden viewBox="0 0 24 24" className="size-6 text-paper">
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -93,7 +93,7 @@ export function ChatLauncher() {
             <img src="/stroniq/stroniq-128.webp" alt="" width={56} height={56} decoding="async" className="size-full object-cover" />
           )}
         </span>
-        {!open && <span aria-hidden className="absolute right-0 top-0 size-3.5 rounded-full border-2 border-ink bg-lime" />}
+        {!open && <span aria-hidden className="absolute right-0 top-0 size-3.5 rounded-full border-2 border-ink bg-gold" />}
         </span>
       </button>
       {mounted && (

@@ -36,14 +36,18 @@
 }
 
 @theme {
-  --color-ink: #10131a;
-  --color-ink-2: #161a22;
-  --color-surface: #252a32;
-  --color-line: #2f353f;
-  --color-lime: #c6ff4d;
-  --color-lime-dim: #9bcc33;
-  --color-paper: #f5f7f2;
-  --color-mist: #a4abb5;
+  /* GiftHub palette: warm paper, dark ink, ribbon red + gold.
+     Token names are historical: "ink" = page background, "paper" = main text, "lime" = accent. */
+  --color-ink: #fbf6ec;
+  --color-ink-2: #f3ead8;
+  --color-surface: #efe4cf;
+  --color-line: #e0d3bd;
+  --color-lime: #9e1b32;
+  --color-lime-dim: #7d1426;
+  --color-gold: #d4a24c;
+  --color-paper: #24110f;
+  --color-mist: #5e5049;
+  --color-danger: #b42318;
 
   --font-display: 'Space Grotesk Variable', 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
@@ -202,7 +206,7 @@
 
 /* Lime glow used sparingly for "live" connection states */
 .glow-lime {
-  filter: drop-shadow(0 0 6px rgb(198 255 77 / 0.65)) drop-shadow(0 0 22px rgb(198 255 77 / 0.35));
+  filter: drop-shadow(0 0 6px rgb(158 27 50 / 0.35)) drop-shadow(0 0 18px rgb(212 162 76 / 0.35));
 }
 
 /* ---------- Custom cursor ---------- */
@@ -279,14 +283,14 @@
 .cursor-ring[data-mode='link'] .cursor-ring-inner {
   width: 58px;
   height: 58px;
-  border-color: rgb(198 255 77 / 0.9);
+  border-color: rgb(158 27 50 / 0.9);
 }
 .cursor-ring[data-mode='text'] .cursor-ring-inner {
   width: 4px;
   height: 28px;
   border-radius: 2px;
   border-color: transparent;
-  background: rgb(198 255 77 / 0.9);
+  background: rgb(158 27 50 / 0.9);
 }
 .cursor-ring[data-mode='view'] .cursor-ring-inner {
   width: 104px;
