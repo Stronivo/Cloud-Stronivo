@@ -66,8 +66,61 @@ h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
 .menu-foot { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: flex-end; justify-content: space-between; }
 .carname { display: grid; gap: 2px; }
 .carname b { font-family: var(--display); font-size: 30px; font-style: italic; letter-spacing: .02em; }
-.keys { color: var(--muted); font-size: 14px; max-width: 520px; line-height: 1.45; }
+.keys { color: var(--muted); font-size: 14px; max-width: 560px; line-height: 1.45; display: grid; gap: 8px; justify-items: start; }
+.keys p { margin: 0; }
+.ghost.small { padding: 7px 12px; font-size: 12px; border-radius: 9px; }
+body.touch .keys { display: none; }
 kbd { font-family: var(--display); font-size: 12px; padding: 1px 6px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; color: var(--chrome); }
+
+/* ---------- auth ---------- */
+#auth { display: grid; place-items: center; background: radial-gradient(ellipse at 70% 20%, rgba(255,90,40,.18), transparent 55%), radial-gradient(ellipse at 10% 90%, rgba(255,31,90,.16), transparent 50%), rgba(5,6,10,.88); }
+.authwrap { width: min(440px, 100%); display: grid; gap: 14px; justify-items: center; }
+.authlogo { width: min(380px, 90%); filter: drop-shadow(0 8px 30px rgba(255,60,40,.35)); }
+.authcard { width: 100%; box-sizing: border-box; display: grid; gap: 12px; padding: 20px; border-radius: 20px; background: var(--panel-solid); border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: rgba(255,255,255,.05); }
+.tab { padding: 9px; border-radius: 9px; font-family: var(--display); font-weight: 700; letter-spacing: .06em; color: var(--muted); }
+.tab.on { background: var(--grad); color: #fff; }
+.google { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 12px; background: #fff; color: #1f1f1f; font-weight: 700; font-size: 16px; }
+.google[disabled], #auth-submit[disabled] { opacity: .45; cursor: not-allowed; }
+.or { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+.or::before, .or::after { content: ""; height: 1px; background: var(--line); }
+#auth-form { display: grid; gap: 10px; }
+.fld { display: grid; gap: 5px; font-size: 13px; color: var(--muted); }
+.fld input { width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 11px; border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--chrome); font: inherit; font-size: 16px; -webkit-user-select: text; user-select: text; }
+.fld input:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,122,26,.2); }
+.pw { position: relative; }
+.pw input { padding-right: 70px; }
+.pw button { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 12px; font-weight: 700; color: var(--muted); padding: 6px; }
+.pwmeter { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); }
+.pwmeter i { height: 5px; border-radius: 3px; background: rgba(255,255,255,.1); position: relative; overflow: hidden; }
+.pwmeter i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--w, 0%); background: var(--c, var(--hot)); transition: width .2s; }
+.linkbtn { justify-self: center; font-size: 13px; color: var(--muted); text-decoration: underline; }
+.autherr { margin: 0; min-height: 1em; color: #ff8aa0; font-size: 14px; text-align: center; }
+.autherr.ok { color: var(--good); }
+.authnote { padding: 10px 12px; border-radius: 10px; background: rgba(255,194,26,.1); border: 1px solid rgba(255,194,26,.35); font-size: 13px; line-height: 1.4; color: #ffe3a0; }
+.acct { display: inline-flex; align-items: center; gap: 8px; }
+.acct .chip { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- party ---------- */
+.partygrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.ppanel { display: grid; gap: 12px; align-content: start; padding: 18px; border-radius: 16px; background: var(--panel-solid); border: 1px solid var(--line); }
+.ppanel h3 { font-size: 22px; font-style: italic; }
+.ppanel p { margin: 0; color: var(--muted); line-height: 1.45; }
+.codein { display: flex; gap: 8px; }
+.codein input { flex: 1; min-width: 0; padding: 12px; border-radius: 11px; border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--chrome); font-family: var(--display); font-size: 26px; letter-spacing: .35em; text-transform: uppercase; text-align: center; -webkit-user-select: text; user-select: text; }
+.bigcode { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 18px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px dashed rgba(255,194,26,.5); }
+.bigcode b { font-family: var(--display); font-size: clamp(30px, 8vw, 44px); letter-spacing: .3em; color: var(--gold); -webkit-user-select: all; user-select: all; }
+.members { display: grid; gap: 6px; }
+.member { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 12px; border-radius: 12px; background: rgba(255,255,255,.04); }
+.member .dot { width: 26px; height: 26px; border-radius: 50%; box-shadow: inset 0 -4px 8px rgba(0,0,0,.4); }
+.member span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.member em { font-style: normal; font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 999px; background: rgba(255,255,255,.08); color: var(--muted); }
+.member em.rdy { background: rgba(62,224,138,.15); color: var(--good); }
+.member em.host { background: rgba(255,194,26,.15); color: var(--gold); }
+.citypick { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px; }
+.citypick button { padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.04); font-weight: 700; }
+.citypick button.on { border-color: var(--orange); background: rgba(255,122,26,.15); }
+@media (max-width: 760px) { .partygrid { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- city select ---------- */
 #cities { background: rgba(7,8,13,.7); backdrop-filter: blur(4px); }
@@ -90,7 +143,9 @@ kbd { font-family: var(--display); font-size: 12px; padding: 1px 6px; border: 1p
 
 /* ---------- garage ---------- */
 #garage { display: flex; flex-direction: column; gap: 14px; justify-content: space-between; background: linear-gradient(0deg, rgba(7,8,13,.92) 0%, rgba(7,8,13,.2) 45%, rgba(7,8,13,0) 60%); }
-.garage-low { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 14px; align-items: end; }
+.garage-low { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr) minmax(0, 420px); gap: 14px; align-items: end; }
+.garage-low #carpanel { grid-column: 1; }
+.garage-low #uppanel { grid-column: 3; }
 .carlist { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
 .carchip { flex: 0 0 auto; display: grid; gap: 2px; padding: 10px 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); text-align: left; min-width: 118px; }
 .carchip b { font-family: var(--display); font-size: 16px; font-style: italic; }
@@ -117,6 +172,18 @@ kbd { font-family: var(--display); font-size: 12px; padding: 1px 6px; border: 1p
 .buy { padding: 10px 14px; border-radius: 10px; background: var(--grad); color: #fff; font-family: var(--display); font-weight: 700; white-space: nowrap; }
 .buy[disabled] { background: rgba(255,255,255,.1); color: var(--muted); cursor: not-allowed; }
 .wide { width: 100%; padding: 14px; font-size: 18px; letter-spacing: .08em; text-transform: uppercase; }
+
+.cosm { display: grid; gap: 10px; padding-top: 4px; border-top: 1px solid var(--line); }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.sw { width: 30px; height: 30px; border-radius: 50%; border: 2px solid rgba(255,255,255,.18); box-shadow: inset 0 -6px 10px rgba(0,0,0,.35), inset 0 4px 8px rgba(255,255,255,.35); }
+.sw.on { outline: 2px solid var(--gold); outline-offset: 2px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.clabel { font-size: 13px; color: var(--muted); min-width: 44px; }
+.cchip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,.04); font-size: 13px; font-weight: 600; }
+.cchip i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.cchip.on { border-color: var(--orange); background: rgba(255,122,26,.15); }
+#uppanel { max-height: calc(100vh - 120px); overflow-y: auto; }
+@media (max-width: 760px) { #uppanel { max-height: none; } }
 
 /* ---------- shop ---------- */
 #shop { background: rgba(7,8,13,.72); backdrop-filter: blur(4px); }
@@ -212,6 +279,7 @@ body.touch #hpos { font-size: 40px; }
 
 @media (max-width: 760px) {
   .garage-low { grid-template-columns: minmax(0, 1fr); }
+  .garage-low #carpanel, .garage-low #uppanel { grid-column: 1; }
   .bigbtn { font-size: 20px; padding: 14px 18px; }
   .stat { grid-template-columns: 92px 1fr 62px; }
   #menu { background: linear-gradient(0deg, rgba(7,8,13,.9) 0%, rgba(7,8,13,.5) 45%, rgba(7,8,13,.35) 100%); }
@@ -226,19 +294,50 @@ body.touch #hpos { font-size: 40px; }
 <div id="ui">
   <div id="loading"><img src="logo.webp" alt="Asphalt Horizon"><p id="loadtext">Ładowanie silnika…</p></div>
 
+  <section id="auth" class="screen" hidden>
+    <div class="authwrap">
+      <img class="authlogo" src="logo.webp" alt="Asphalt Horizon">
+      <div class="authcard">
+        <div class="tabs" role="tablist"><button class="tab on" id="tab-login" role="tab">Logowanie</button><button class="tab" id="tab-register" role="tab">Nowe konto</button></div>
+        <div class="authnote" id="auth-note" hidden></div>
+        <button class="google" id="auth-google" type="button"><svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Kontynuuj z Google</button>
+        <div class="or"><span>albo e-mail i hasło</span></div>
+        <form id="auth-form" novalidate>
+          <label class="fld" id="fld-nick" hidden><span>Nick w grze</span><input id="auth-nick" type="text" autocomplete="nickname" minlength="3" maxlength="20" placeholder="np. NocnyKierowca"></label>
+          <label class="fld"><span>E-mail</span><input id="auth-email" type="email" autocomplete="email" required placeholder="ty@przyklad.pl"></label>
+          <label class="fld"><span>Hasło</span><div class="pw"><input id="auth-pass" type="password" autocomplete="current-password" minlength="8" required placeholder="min. 8 znaków"><button type="button" id="auth-eye" aria-label="Pokaż hasło">Pokaż</button></div></label>
+          <div class="pwmeter" id="pwmeter" hidden><i></i><span></span></div>
+          <button class="solid" type="submit" id="auth-submit">Zaloguj się</button>
+          <button class="linkbtn" type="button" id="auth-forgot">Nie pamiętam hasła</button>
+        </form>
+        <p class="autherr" id="auth-err" role="alert"></p>
+        <button class="ghost" id="auth-guest" type="button">Graj jako gość (offline)</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="party" class="screen" hidden>
+    <div class="page">
+      <div class="topbar"><button class="back" data-back>‹ Menu</button><div data-topbar></div></div>
+      <div class="page-head"><div><span class="eyebrow">Wyścig ze znajomymi</span><h2>Party</h2></div></div>
+      <div id="partybody"></div>
+    </div>
+  </section>
+
   <section id="menu" class="screen" hidden>
     <div class="topbar" data-topbar></div>
     <div class="menu-body">
       <img class="logo" src="logo.webp" alt="Asphalt Horizon">
       <div class="menu-btns">
         <button class="bigbtn primary" id="btn-race">Wyścig <small>5 miast · 6 aut na starcie</small></button>
-        <button class="bigbtn" id="btn-garage">Garaż <small>Auta i ulepszenia</small></button>
+        <button class="bigbtn" id="btn-party">Ze znajomymi <small>Party online z kodem</small></button>
+        <button class="bigbtn" id="btn-garage">Garaż <small>Auta, lakier i ulepszenia</small></button>
         <button class="bigbtn" id="btn-shop">Sklep boostów <small>Zamrożenie · Lot · Nitro Max</small></button>
       </div>
     </div>
     <div class="menu-foot">
       <div class="carname"><span class="eyebrow">Twoje auto</span><b id="menu-car">Vento GT</b></div>
-      <p class="keys"><kbd>←</kbd> <kbd>→</kbd> skręt · <kbd>↓</kbd> hamulec / drift · <kbd>Spacja</kbd> nitro · <kbd>Q</kbd> zamrożenie · <kbd>E</kbd> lot · <kbd>R</kbd> nitro max · <kbd>Esc</kbd> pauza</p>
+      <div class="keys"><p><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd> skręt · <kbd>W</kbd> gaz · <kbd>S</kbd> / <kbd>↓</kbd> hamulec i drift · <kbd>Spacja</kbd> nitro · <kbd>Q</kbd> zamrożenie · <kbd>E</kbd> lot · <kbd>R</kbd> nitro max · <kbd>Esc</kbd> pauza</p><button class="ghost small" data-gas>Gaz: automatyczny</button></div>
     </div>
   </section>
 
@@ -291,6 +390,7 @@ body.touch #hpos { font-size: 40px; }
         <button class="ghost" id="p-restart">Od nowa</button>
         <button class="ghost" id="p-quit">Wyjdź do menu</button>
         <button class="ghost" id="p-mute">Dźwięk: wł.</button>
+        <button class="ghost" data-gas>Gaz: automatyczny</button>
       </div>
     </div>
   </section>
@@ -303,7 +403,11 @@ body.touch #hpos { font-size: 40px; }
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
 <script src="data.js"></script>
 <script src="models.js"></script>
+<script src="cars.js"></script>
 <script src="world.js"></script>
+<script src="net.js"></script>
 <script src="game.js"></script>

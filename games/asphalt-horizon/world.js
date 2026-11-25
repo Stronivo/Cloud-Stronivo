@@ -99,7 +99,7 @@ function ribbon(tr, fn, opts = {}) {
   for (let i = 0; i < N; i++) for (let j = 0; j < m - 1; j++) {
     if (opts.skip && opts.skip(i, j)) continue;
     const a = i * m + j, b = (i + 1) * m + j;
-    idx.push(a, b, a + 1, a + 1, b, b + 1);
+    if (opts.flip) idx.push(a, a + 1, b, a + 1, b + 1, b); else idx.push(a, b, a + 1, a + 1, b, b + 1);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -129,7 +129,7 @@ function skewBox(b0, b1, y0, y1, c0 = [0, 0], c1 = [0, 0]) {
   return g;
 }
 
-function std(color, o = {}) { return new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.8, metalness: 0.05 }, o)); }
+function std(color, o = {}) { return new THREE.MeshStandardMaterial(Object.assign({ color: new THREE.Color(color).convertSRGBToLinear(), roughness: 0.8, metalness: 0.05 }, o)); }
 function mesh(geo, mat, x = 0, y = 0, z = 0, shadow = true) { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); if (shadow) { m.castShadow = true; m.receiveShadow = true; } return m; }
 
 // ---------- building material with world-scaled windows ----------
@@ -439,7 +439,7 @@ AH.buildCity = (city, scene) => {
     const u = dx * c + dz * s, v = -dx * s + dz * c;
     return Math.abs(u) < w.len / 2 + pad && Math.abs(v) < w.wid / 2 + pad;
   });
-  const waterMat = new THREE.MeshStandardMaterial({ color: night > 0.5 ? 0x0b1a30 : 0x1d5a86, metalness: 0.6, roughness: 0.12 });
+  const waterMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(night > 0.5 ? 0x0b1a30 : 0x1d5a86).convertSRGBToLinear(), metalness: 0.6, roughness: 0.12 });
   for (const w of waters) {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w.len, w.wid), waterMat);
     m.rotation.x = -Math.PI / 2; m.rotation.z = -w.ang; m.position.set(w.cx, 0.08, w.cz); m.receiveShadow = true; root.add(m);
@@ -470,7 +470,7 @@ AH.buildCity = (city, scene) => {
 
   // ---- road surface
   const roadTex = AH.tex.road(); roadTex.repeat.set(1, 1);
-  const roadGeo = ribbon(tr, () => [[-W, 0.05, 0], [W, 0.05, 1]], { vScale: 20 });
+  const roadGeo = ribbon(tr, () => [[-W, 0.05, 0], [W, 0.05, 1]], { vScale: 20, flip: true });
   const road = new THREE.Mesh(roadGeo, new THREE.MeshStandardMaterial({ map: roadTex, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.25 }));
   road.receiveShadow = true; root.add(road);
   // sidewalks + curbs + skirts (vertex coloured: bridge parts painted orange-red)
@@ -478,7 +478,7 @@ AH.buildCity = (city, scene) => {
   const swGeo = ribbon(tr, (i) => {
     const b = isBridge(i), cc = b ? bridgeC : gray, sk = b ? bridgeC : skirtC;
     return [[-W - SW, -3, 0, sk], [-W - SW, 0.2, 0, cc], [-W - 0.4, 0.2, 0.4, cc], [-W - 0.4, 0.04, 0.45, cc], [W + 0.4, 0.04, 0.55, cc], [W + 0.4, 0.2, 0.6, cc], [W + SW, 0.2, 1, cc], [W + SW, -3, 1, sk]];
-  }, { colors: true, vScale: 6, skip: (i, j) => j === 3 });
+  }, { colors: true, vScale: 6, skip: (i, j) => j === 3, flip: true });
   const swTex = AH.tex.sidewalk(); swTex.repeat.set(6, 1);
   const sw = new THREE.Mesh(swGeo, new THREE.MeshStandardMaterial({ map: swTex, vertexColors: true, roughness: 0.9, side: THREE.DoubleSide, envMapIntensity: 0.3 }));
   sw.receiveShadow = true; root.add(sw);
@@ -512,7 +512,7 @@ AH.buildCity = (city, scene) => {
       zeb.push(c);
     }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
-    const m = new THREE.Mesh(g, std(0x3a3c42, { roughness: 0.9 })); m.receiveShadow = true; root.add(m);
+    const m = new THREE.Mesh(g, std(0x3a3c42, { roughness: 0.9, side: THREE.DoubleSide })); m.receiveShadow = true; root.add(m);
     // zebra crossings on the main road
     const zm = new THREE.MeshBasicMaterial({ map: AH.tex.zebra(), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
     for (const c of zeb) {
@@ -761,7 +761,7 @@ AH.buildCity = (city, scene) => {
     const d = new THREE.Object3D(), col = new THREE.Color();
     boxes.forEach((b, k) => {
       d.position.set(b.x, b.y + b.y0, b.z); d.rotation.set(0, b.ry, 0); d.scale.set(b.w, b.h, b.d); d.updateMatrix();
-      im.setMatrixAt(k, d.matrix); im.setColorAt(k, col.set(b.c));
+      im.setMatrixAt(k, d.matrix); im.setColorAt(k, col.set(b.c).convertSRGBToLinear());
     });
     im.castShadow = true; im.receiveShadow = true;
     root.add(im);
@@ -769,7 +769,7 @@ AH.buildCity = (city, scene) => {
       const sh = new THREE.Shape(); sh.moveTo(-0.5, 0); sh.lineTo(0.5, 0); sh.lineTo(0, 1); sh.closePath();
       const rg = new THREE.ExtrudeGeometry(sh, { depth: 1, bevelEnabled: false }); rg.translate(0, 0, -0.5);
       const rm = new THREE.InstancedMesh(rg, std(0xffffff, { roughness: 0.7 }), roofs.length);
-      roofs.forEach((r, k) => { d.position.set(r.x, r.y, r.z); d.rotation.set(0, r.ry, 0); d.scale.set(r.w, r.h, r.d); d.updateMatrix(); rm.setMatrixAt(k, d.matrix); rm.setColorAt(k, col.set(r.c)); });
+      roofs.forEach((r, k) => { d.position.set(r.x, r.y, r.z); d.rotation.set(0, r.ry, 0); d.scale.set(r.w, r.h, r.d); d.updateMatrix(); rm.setMatrixAt(k, d.matrix); rm.setColorAt(k, col.set(r.c).convertSRGBToLinear()); });
       rm.castShadow = true; root.add(rm);
     }
   }

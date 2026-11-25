@@ -125,15 +125,16 @@ AH.NAMES = ['Vortex', 'Nocna Mara', 'Kobra', 'Blaze', 'Glacier', 'Rekin', 'Neon'
 // ---- save / progression
 AH.SAVE_KEY = 'asphaltHorizon.v1';
 AH.defaultSave = () => ({ pts: 1000, xp: 0, owned: { vento: true }, sel: 'vento', ups: {}, boosts: { freeze: 2, fly: 2, nitro: 2 }, best: {}, races: 0, wins: 0, muted: false });
+AH.saveKey = () => AH.SAVE_KEY + (AH.Net && AH.Net.user ? '.' + AH.Net.user.id : '');
 AH.load = () => {
   try {
-    const raw = localStorage.getItem(AH.SAVE_KEY);
+    const raw = localStorage.getItem(AH.saveKey());
     if (raw) return Object.assign(AH.defaultSave(), JSON.parse(raw));
   } catch (e) { /* storage blocked */ }
   return AH.defaultSave();
 };
 AH.save = AH.load();
-AH.persist = () => { try { localStorage.setItem(AH.SAVE_KEY, JSON.stringify(AH.save)); } catch (e) { /* ignore */ } };
+AH.persist = () => { try { localStorage.setItem(AH.saveKey(), JSON.stringify(AH.save)); } catch (e) { /* ignore */ } };
 
 AH.xpFor = (L) => 75 * (L - 1) * L;   // cumulative XP needed to reach level L
 AH.level = (xp = AH.save.xp) => { let L = 1; while (xp >= AH.xpFor(L + 1)) L++; return L; };
@@ -154,6 +155,10 @@ AH.stats = (car, u = AH.ups(car.id)) => ({
   freezeRange: 220 + 40 * u.boost,
   coinMult: 1 + 0.1 * u.boost,
 });
+AH.PAINTS = [0xe3203a, 0xff6a00, 0xffc400, 0x16c96a, 0x00b8c2, 0x1f6bff, 0x8a2bff, 0xff2fa0, 0xf2f2f2, 0x9aa3ae, 0x2b2d33, 0x0b0b0f];
+AH.NEONS = [null, 0xff1f5a, 0x5fe1ff, 0x8a2bff, 0x3ee08a, 0xff7a1a];
+AH.cosm = (id) => { const car = AH.carById(id), c = (AH.save.cosm || {})[id] || {}; return { color: c.color !== undefined ? c.color : car.color, finish: c.finish || null, rim: c.rim || null, neon: c.neon !== undefined ? c.neon : undefined }; };
+AH.setCosm = (id, patch) => { AH.save.cosm = AH.save.cosm || {}; AH.save.cosm[id] = Object.assign({}, AH.save.cosm[id] || {}, patch); AH.persist(); };
 AH.rating = (s) => Math.round(s.top * 3.6 * 3 + s.accel * 22 + s.grip * 260 + s.nitroPow * 220);
 AH.fmtTime = (t) => { if (!isFinite(t)) return '—'; const m = Math.floor(t / 60), s = t - m * 60; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(2); };
 AH.fmt = (n) => Math.round(n).toLocaleString('pl-PL');

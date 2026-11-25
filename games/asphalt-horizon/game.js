@@ -133,51 +133,65 @@
   };
 
   // ---------------- garage scene ----------------
-  const garage = { scene: new THREE.Scene(), car: null, id: null, ang: 0.6 };
+  const garage = { scene: new THREE.Scene(), car: null, id: null, ang: 0.6, mirror: null };
   {
+    // Showroom: neutral studio softboxes for true paint colour, glossy turntable with a mirrored reflection.
     const s = garage.scene;
-    s.background = new THREE.Color(0x07080d);
-    s.fog = new THREE.Fog(0x07080d, 18, 48);
-    s.environment = makeEnvMap('#1b1d2c', '#3a2235', '#0a0b12', [
-      { w: 40, h: 8, c: 0xffffff, pos: [0, 60, 0] }, { w: 30, h: 6, c: 0xff3a6a, pos: [-70, 15, -30] }, { w: 30, h: 6, c: 0xff9a2a, pos: [70, 15, -30] }, { w: 50, h: 4, c: 0x8090ff, pos: [0, 20, 80] },
+    s.background = new THREE.Color(0x06070b);
+    s.fog = new THREE.Fog(0x06070b, 16, 46);
+    s.environment = makeEnvMap('#121318', '#0b0c10', '#050608', [
+      { w: 40, h: 14, c: 0xffffff, pos: [0, 70, 0] }, { w: 70, h: 5, c: 0xe8ecff, pos: [-70, 20, 0] }, { w: 70, h: 5, c: 0xfff1e2, pos: [70, 20, 0] },
+      { w: 60, h: 4, c: 0xcfd8ff, pos: [0, 16, 70] }, { w: 40, h: 3, c: 0xffffff, pos: [0, 16, -70] }, { w: 14, h: 2, c: 0xff3a6a, pos: [-50, 4, -60] }, { w: 14, h: 2, c: 0xff9a2a, pos: [50, 4, -60] },
     ]).texture;
-    const floor = new THREE.Mesh(new THREE.CircleGeometry(40, 64), new THREE.MeshStandardMaterial({ color: 0x0c0d14, metalness: 0.7, roughness: 0.32 }));
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(40, 64), new THREE.MeshStandardMaterial({ color: 0x0a0b10, metalness: 0.6, roughness: 0.38 }));
     floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; s.add(floor);
-    const plat = new THREE.Mesh(new THREE.CylinderGeometry(4.4, 4.6, 0.2, 64), new THREE.MeshStandardMaterial({ color: 0x15161f, metalness: 0.85, roughness: 0.25 }));
-    plat.position.y = 0.1; plat.receiveShadow = true; s.add(plat);
+    const plat = new THREE.Mesh(new THREE.CylinderGeometry(4.4, 4.6, 0.2, 96, 1, true), new THREE.MeshStandardMaterial({ color: 0x18191f, metalness: 0.9, roughness: 0.25 }));
+    plat.position.y = 0.1; s.add(plat);
+    const top = new THREE.Mesh(new THREE.CircleGeometry(4.4, 96), new THREE.MeshPhysicalMaterial({ color: 0x0b0c10, metalness: 0.4, roughness: 0.18, clearcoat: 1, transparent: true, opacity: 0.84 }));
+    top.rotation.x = -Math.PI / 2; top.position.y = 0.2; top.receiveShadow = true; top.renderOrder = 2; s.add(top);
     garage.plat = plat;
     const ringM = (c) => new THREE.MeshBasicMaterial({ color: c, side: THREE.DoubleSide });
-    for (const [r0, r1, c] of [[4.62, 4.75, 0xff1f5a], [5.4, 5.47, 0xff7a1a], [6.4, 6.44, 0xffc21a]]) { const r = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 96), ringM(c)); r.rotation.x = -Math.PI / 2; r.position.y = r0 < 5 ? 0.21 : 0.01; s.add(r); }
+    for (const [r0, r1, c] of [[4.62, 4.72, 0xff1f5a], [5.4, 5.45, 0xff7a1a], [6.4, 6.43, 0xffc21a]]) { const r = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 128), ringM(c)); r.rotation.x = -Math.PI / 2; r.position.y = r0 < 5 ? 0.21 : 0.01; s.add(r); }
     for (let i = 0; i < 18; i++) {
       const a = Math.PI * 0.15 + (i / 17) * Math.PI * 1.7;
-      const bar = new THREE.Mesh(new THREE.BoxGeometry(0.18, 7 + (i % 3) * 2, 0.18), ringM(i % 2 ? 0xff1f5a : 0xff7a1a));
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(0.14, 7 + (i % 3) * 2, 0.14), ringM(i % 2 ? 0xff1f5a : 0xff7a1a));
       bar.position.set(Math.sin(a) * 20, 4, -Math.cos(a) * 20 - 4); s.add(bar);
     }
-    const key = new THREE.SpotLight(0xffffff, 2.2, 40, 0.7, 0.6, 1); key.position.set(3, 12, 6); key.castShadow = true; key.shadow.mapSize.set(1024, 1024); s.add(key);
-    const l1 = new THREE.PointLight(0xff2a6a, 2.5, 25); l1.position.set(-7, 3, -5); s.add(l1);
-    const l2 = new THREE.PointLight(0xff9a2a, 2.2, 25); l2.position.set(7, 3, -4); s.add(l2);
-    s.add(new THREE.HemisphereLight(0x8890b0, 0x101018, 0.6));
+    // overhead softbox panel (visible light source, reads in the paint)
+    const sb = new THREE.Mesh(new THREE.PlaneGeometry(9, 4), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }));
+    sb.position.set(0, 9, 0); sb.rotation.x = Math.PI / 2; s.add(sb);
+    const key = new THREE.SpotLight(0xffffff, 2.6, 40, 0.65, 0.7, 1); key.position.set(2, 11, 5); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0003; key.shadow.radius = 4; s.add(key);
+    const fill = new THREE.DirectionalLight(0xdfe6ff, 0.55); fill.position.set(-6, 4, 3); s.add(fill);
+    const rim = new THREE.SpotLight(0xfff0e0, 2.2, 30, 0.7, 0.8, 1); rim.position.set(-3, 5, -9); s.add(rim);
+    const l1 = new THREE.PointLight(0xff2a6a, 0.6, 14); l1.position.set(-6, 1.2, -5); s.add(l1);
+    const l2 = new THREE.PointLight(0xff9a2a, 0.5, 14); l2.position.set(6, 1.2, -4); s.add(l2);
+    s.add(new THREE.HemisphereLight(0xcfd6e6, 0x101014, 0.45));
   }
-  function setGarageCar(id) {
-    if (garage.id === id && garage.car) return;
-    if (garage.car) garage.scene.remove(garage.car.group);
-    const c = AH.carById(id);
-    garage.car = AH.buildCar(c.style, c.color, { noFlames: true });
+  function setGarageCar(id, force) {
+    if (!force && garage.id === id && garage.car) return;
+    if (garage.car) { garage.scene.remove(garage.car.group); garage.scene.remove(garage.mirror); }
+    const c = AH.carById(id), cs = AH.cosm(id);
+    garage.car = AH.buildCar(c.style, cs.color, { noFlames: true, finish: cs.finish, rim: cs.rim, neon: cs.neon });
     garage.car.group.position.y = 0.2;
-    garage.car.group.traverse(o => { if (o.isMesh) o.castShadow = true; });
-    garage.scene.add(garage.car.group);
+    garage.car.group.traverse(o => { if (o.isMesh && o.material !== AH.carMats.blob) o.castShadow = true; });
+    // mirrored copy under the glossy turntable = floor reflection
+    const m = garage.car.group.clone();
+    m.scale.y = -1; m.position.y = 0.2;
+    m.traverse(o => { if (o.isMesh) { o.castShadow = false; if (o.material === AH.carMats.blob || (o.material && o.material.blending === THREE.AdditiveBlending)) o.visible = false; } });
+    garage.mirror = m;
+    garage.scene.add(m, garage.car.group);
     garage.id = id;
   }
 
   // ---------------- UI ----------------
-  const screens = ['menu', 'cities', 'garage', 'shop', 'hud', 'pause', 'results', 'loading'];
+  const screens = ['auth', 'party', 'menu', 'cities', 'garage', 'shop', 'hud', 'pause', 'results', 'loading'];
   let mode = 'menu';
   function show(name, keepHud) {
     for (const s of screens) { const el = $(s); if (el) el.hidden = !(s === name || (keepHud && s === 'hud')); }
     mode = name;
-    if (['menu', 'cities', 'garage', 'shop'].includes(name)) {
+    if (['menu', 'cities', 'garage', 'shop', 'party', 'auth'].includes(name)) {
       const narrow = window.innerWidth < 760;
-      viewOffset = name === 'menu' ? (narrow ? [0, 0.12] : [-0.2, 0]) : name === 'garage' ? (narrow ? [0, 0.3] : [0, 0.22]) : [0, 0];
+      viewOffset = name === 'menu' ? (narrow ? [0, 0.12] : [-0.2, 0]) : name === 'garage' ? (narrow ? [0, 0.36] : [0, 0.1]) : [0, 0];
       resize();
       renderTopbars();
     }
@@ -186,14 +200,22 @@
     const t = $('toast'); t.textContent = msg; t.hidden = false; t.style.opacity = 1;
     clearTimeout(toast.t); toast.t = setTimeout(() => { t.style.opacity = 0; setTimeout(() => (t.hidden = true), 300); }, 2200);
   }
+  const online = () => !!(AH.Net.enabled && AH.Net.user);
+  async function act(remote, local) {
+    if (online()) { try { await remote(); return true; } catch (e) { toast(e.message || 'Błąd serwera'); return false; } }
+    local(); return true;
+  }
   function renderTopbars() {
     const S = AH.save, L = AH.level(), a = AH.xpFor(L), b = AH.xpFor(L + 1);
     const pct = clamp((S.xp - a) / (b - a) * 100, 0, 100);
     const html = `<div class="profile"><div class="lvl">${L}</div><div class="xpwrap"><div class="xptext">Poziom ${L} · <span class="num">${AH.fmt(S.xp - a)} / ${AH.fmt(b - a)}</span> XP</div><div class="xpbar"><i style="width:${pct}%"></i></div></div></div>
       <div class="wallet"><span class="chip pts num">${AH.ICONS.pts}${AH.fmt(S.pts)} pkt</span>${AH.BOOSTS.map(bb => `<span class="chip num" style="color:${bb.color}" title="${bb.name}">${AH.ICONS[bb.id]}<span style="color:var(--chrome)">${S.boosts[bb.id] || 0}</span></span>`).join('')}
+      <span class="acct">${online() ? `<span class="chip" title="Zalogowano">${AH.Net.nickname || 'Kierowca'}</span><button class="iconbtn" data-logout aria-label="Wyloguj" title="Wyloguj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg></button>` : `<button class="chip" data-login>Zaloguj się</button>`}</span>
       <button class="iconbtn" data-mute aria-label="Dźwięk">${S.muted ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9h4l5-4v14l-5-4H4zM16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2"/></svg>' : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8a5 5 0 0 1 0 8M18.5 5.5a8.5 8.5 0 0 1 0 13" fill="none" stroke="currentColor" stroke-width="2"/></svg>'}</button></div>`;
     document.querySelectorAll('[data-topbar]').forEach(el => { el.innerHTML = html; el.style.display = 'contents'; });
     document.querySelectorAll('[data-mute]').forEach(b => b.onclick = () => { Snd.init(); Snd.setMuted(!AH.save.muted); renderTopbars(); });
+    document.querySelectorAll('[data-login]').forEach(b => b.onclick = () => showAuth('login'));
+    document.querySelectorAll('[data-logout]').forEach(b => b.onclick = logout);
     $('menu-car').textContent = AH.carById(S.sel).name;
   }
 
@@ -249,16 +271,36 @@
       return `<div class="up"><div><b>${up.name}</b><p>${up.desc}</p><div class="pips">${Array.from({ length: AH.UP_MAX }, (_, k) => `<i class="${k < lv ? 'on' : ''}"></i>`).join('')}</div></div>
         <button class="buy" data-up="${up.id}" ${!owned || max || S.pts < cost ? 'disabled' : ''}>${max ? 'MAX' : AH.fmt(cost) + ' pkt'}</button></div>`;
     }).join('')}</div>`;
+    if (owned) {
+      const cs = AH.cosm(car.id), def = AH.CAR_DEF[car.style];
+      const curFinish = cs.finish || def.finish, curRim = cs.rim || def.rimColor, curNeon = cs.neon !== undefined ? cs.neon : (def.neon ? cs.color : null);
+      const hex = (c) => '#' + new THREE.Color(c).getHexString();
+      $('uppanel').insertAdjacentHTML('beforeend', `<div class="cosm"><span class="eyebrow">Lakier i wygląd</span>
+        <div class="swatches">${AH.PAINTS.map(c => `<button class="sw ${c === cs.color ? 'on' : ''}" data-paint="${c}" style="background:${hex(c)}" aria-label="Kolor ${hex(c)}"></button>`).join('')}</div>
+        <div class="chips">${Object.entries(AH.FINISHES).map(([k, n]) => `<button class="cchip ${k === curFinish ? 'on' : ''}" data-finish="${k}">${n}</button>`).join('')}</div>
+        <div class="chips"><span class="clabel">Felgi</span>${Object.entries({ silver: 'Srebrne', gunmetal: 'Grafit', black: 'Czarne', bronze: 'Brąz', gold: 'Złote' }).map(([k, n]) => `<button class="cchip ${k === curRim ? 'on' : ''}" data-rim="${k}"><i style="background:${hex(AH.RIM_COLORS[k])}"></i>${n}</button>`).join('')}</div>
+        <div class="chips"><span class="clabel">Neon</span>${AH.NEONS.map(c => `<button class="cchip ${c === curNeon || (c === null && !curNeon) ? 'on' : ''}" data-neon="${c === null ? 'off' : c}">${c === null ? 'Wył.' : `<i style="background:${hex(c)};box-shadow:0 0 8px ${hex(c)}"></i>`}</button>`).join('')}</div></div>`);
+      const apply = (patch) => {
+        AH.setCosm(car.id, patch); setGarageCar(car.id, true); renderGarage(); AH.Net.retrack();
+        if (online()) AH.Net.setCosmetics(car.id, AH.save.cosm[car.id]).catch(e => toast(e.message));
+      };
+      $('uppanel').querySelectorAll('[data-paint]').forEach(b => b.onclick = () => apply({ color: +b.dataset.paint }));
+      $('uppanel').querySelectorAll('[data-finish]').forEach(b => b.onclick = () => apply({ finish: b.dataset.finish }));
+      $('uppanel').querySelectorAll('[data-rim]').forEach(b => b.onclick = () => apply({ rim: b.dataset.rim }));
+      $('uppanel').querySelectorAll('[data-neon]').forEach(b => b.onclick = () => apply({ neon: b.dataset.neon === 'off' ? null : +b.dataset.neon }));
+    }
     $('carpanel').querySelectorAll('[data-car]').forEach(b => b.onclick = () => { viewCar = b.dataset.car; renderGarage(); });
-    const sel = $('g-select'); if (sel) sel.onclick = () => { S.sel = car.id; AH.persist(); Snd.sfx('buy'); renderGarage(); renderTopbars(); };
-    const buy = $('g-buy'); if (buy) buy.onclick = () => {
+    const sel = $('g-select'); if (sel) sel.onclick = async () => { if (await act(() => AH.Net.selectCar(car.id), () => { S.sel = car.id; AH.persist(); })) { Snd.sfx('buy'); AH.Net.retrack(); renderGarage(); renderTopbars(); } };
+    const buy = $('g-buy'); if (buy) buy.onclick = async () => {
       if (S.pts < car.price) return;
-      S.pts -= car.price; S.owned[car.id] = true; S.sel = car.id; AH.persist(); Snd.sfx('buy'); toast(car.name + ' jest twój!'); renderGarage(); renderTopbars();
+      if (!(await act(() => AH.Net.purchase('car', car.id), () => { S.pts -= car.price; S.owned[car.id] = true; S.sel = car.id; AH.persist(); }))) return;
+      Snd.sfx('buy'); toast(car.name + ' jest twój!'); AH.Net.retrack(); renderGarage(); renderTopbars();
     };
-    $('uppanel').querySelectorAll('[data-up]').forEach(b => b.onclick = () => {
+    $('uppanel').querySelectorAll('[data-up]').forEach(b => b.onclick = async () => {
       const id = b.dataset.up, lv = AH.ups(car.id)[id], cost = AH.upCost(car, id, lv);
       if (S.pts < cost || lv >= AH.UP_MAX) return;
-      S.pts -= cost; S.ups[car.id] = Object.assign(AH.ups(car.id), { [id]: lv + 1 }); AH.persist(); Snd.sfx('buy');
+      if (!(await act(() => AH.Net.purchase('upgrade', car.id, id), () => { S.pts -= cost; S.ups[car.id] = Object.assign(AH.ups(car.id), { [id]: lv + 1 }); AH.persist(); }))) return;
+      Snd.sfx('buy');
       toast(AH.UPGRADES.find(x => x.id === id).name + ' → poziom ' + (lv + 1)); renderGarage(); renderTopbars();
     });
   }
@@ -268,16 +310,18 @@
       <div class="row"><div class="ico" style="background:${b.color}22;color:${b.color}">${AH.ICONS[b.id]}</div><span class="chip num">Masz: ${S.boosts[b.id] || 0}</span></div>
       <h3>${b.name}</h3><p>${b.desc}</p><p>Klawisz w wyścigu: <kbd>${b.key}</kbd></p>
       <div class="row"><button class="buy" data-buy="${b.id}" data-n="1" ${S.pts < b.price ? 'disabled' : ''}>+1 za ${AH.fmt(b.price)} pkt</button><button class="buy" data-buy="${b.id}" data-n="5" ${S.pts < b.price * 4 ? 'disabled' : ''}>+5 za ${AH.fmt(b.price * 4)} pkt</button></div></div>`).join('');
-    $('shopgrid').querySelectorAll('[data-buy]').forEach(btn => btn.onclick = () => {
+    $('shopgrid').querySelectorAll('[data-buy]').forEach(btn => btn.onclick = async () => {
       const b = AH.BOOSTS.find(x => x.id === btn.dataset.buy), n = +btn.dataset.n, cost = n === 5 ? b.price * 4 : b.price;
       if (S.pts < cost) return;
-      S.pts -= cost; S.boosts[b.id] = (S.boosts[b.id] || 0) + n; AH.persist(); Snd.sfx('buy'); toast(`${b.name}: +${n}`); renderShop(); renderTopbars();
+      if (!(await act(() => AH.Net.purchase('boost', b.id, null, n), () => { S.pts -= cost; S.boosts[b.id] = (S.boosts[b.id] || 0) + n; AH.persist(); }))) return;
+      Snd.sfx('buy'); toast(`${b.name}: +${n}`); renderShop(); renderTopbars();
     });
   }
 
   $('btn-race').onclick = () => { Snd.init(); renderCities(); show('cities'); };
   $('btn-garage').onclick = () => { Snd.init(); viewCar = AH.save.sel; renderGarage(); show('garage'); };
   $('btn-shop').onclick = () => { Snd.init(); renderShop(); show('shop'); };
+  $('btn-party').onclick = () => { Snd.init(); renderParty(); show('party'); };
   document.querySelectorAll('[data-back]').forEach(b => b.onclick = () => { setGarageCar(AH.save.sel); show('menu'); });
 
   // ---------------- input ----------------
@@ -307,6 +351,7 @@
     steer: clamp(((keys.ArrowRight || keys.KeyD || touch.r) ? 1 : 0) - ((keys.ArrowLeft || keys.KeyA || touch.l) ? 1 : 0), -1, 1),
     brake: !!(keys.ArrowDown || keys.KeyS || touch.drift),
     nitro: !!(keys.Space || keys.ShiftLeft || keys.ShiftRight || touch.nitro),
+    gas: isTouch || AH.save.autoGas !== false || !!(keys.KeyW || keys.ArrowUp),
   });
 
   // ---------------- particles ----------------
@@ -347,13 +392,16 @@
   const AI_COLORS = [0xffffff, 0x15161a, 0xe3203a, 0x1f6bff, 0xffc400, 0x16c96a, 0xff6a00, 0x8a2bff, 0x9aa3ae, 0x00c2c7];
 
   class Race {
-    constructor(cityIdx) {
+    constructor(cityIdx, net = null) {
       this.cityIdx = cityIdx;
+      this.online = net; this.remotes = []; this.netT = 0;
+      this.boostLog = { used: { freeze: 0, fly: 0, nitro: 0 }, picked: { freeze: 0, fly: 0, nitro: 0 } };
       const city = this.city = AH.CITIES[cityIdx];
       const env = city.env;
       const scene = this.scene = new THREE.Scene();
-      scene.fog = new THREE.Fog(new THREE.Color(env.fog), env.fogNear, env.fogFar);
-      this.envRT = makeEnvMap(env.skyTop, env.skyMid, env.skyBot, env.night > 0.5 ? [{ w: 30, h: 10, c: 0xff3a8a, pos: [-60, 10, 40] }, { w: 30, h: 10, c: 0x3ac8ff, pos: [60, 12, -30] }, { w: 40, h: 6, c: 0xffd9a0, pos: [0, 50, 0] }] : [{ w: 20, h: 20, c: new THREE.Color(env.sun).multiplyScalar(3), pos: env.sunDir.map(v => v * 90) }]);
+      scene.fog = new THREE.Fog(new THREE.Color(env.fog).convertSRGBToLinear(), env.fogNear, env.fogFar);
+      const dim = (c, k) => '#' + new THREE.Color(c).multiplyScalar(k).getHexString();
+      this.envRT = makeEnvMap(dim(env.skyTop, 0.8), dim(env.skyMid, 0.55), dim(env.skyBot, 0.45), env.night > 0.5 ? [{ w: 30, h: 10, c: 0xff3a8a, pos: [-60, 10, 40] }, { w: 30, h: 10, c: 0x3ac8ff, pos: [60, 12, -30] }, { w: 40, h: 6, c: 0xffd9a0, pos: [0, 50, 0] }] : [{ w: 20, h: 20, c: new THREE.Color(env.sun).multiplyScalar(3), pos: env.sunDir.map(v => v * 90) }]);
       renderer.toneMappingExposure = env.night > 0.5 ? 1.15 : 1.0;
       scene.add(new THREE.HemisphereLight(env.hemiSky, env.hemiGround, env.hemiInt));
       const sun = this.sun = new THREE.DirectionalLight(env.sun, env.sunInt);
@@ -373,7 +421,8 @@
       // player
       const carCfg = AH.carById(AH.save.sel);
       const st = AH.stats(carCfg);
-      this.player = this.makeRacer(carCfg, carCfg.color, 'Ty', true, -18, 0);
+      const cs = AH.cosm(carCfg.id);
+      this.player = this.makeRacer(carCfg, cs.color, 'Ty', true, -18, 0, { finish: cs.finish, rim: cs.rim, neon: cs.neon });
       this.player.st = st;
       this.player.nitro = 35;
       if (env.night > 0.4) {
@@ -381,24 +430,35 @@
         hl.position.set(0, 1, 2); hl.target.position.set(0, 0, 25);
         this.player.model.group.add(hl, hl.target);
       }
+      this.addIce(this.player);
+      const GRID6 = [[-8, -8], [0, -8], [8, -8], [-8, -18], [0, -18], [8, -18]];
+      if (net) {
+        // online party: real players only, grid slot = order of joining
+        net.roster.forEach((m, k) => {
+          const [gx, gd] = GRID6[k % 6];
+          if (m.id === net.selfId) { this.player.x = gx; this.player.dist = gd; return; }
+          const r = this.makeRacer(AH.carById(m.car), m.color, m.name, false, gd, gx, { finish: m.finish, rim: m.rim, neon: m.neon });
+          r.isRemote = true; r.id = m.id; r.snaps = [{ t: performance.now(), d: gd, x: gx, a: 0, v: 0, n: 0, f: 0, fr: 0 }];
+          this.addIce(r); this.remotes.push(r);
+        });
+      }
       // AI
       this.ai = [];
       const pool = AH.CARS.slice(0, Math.min(AH.CARS.length, cityIdx + 2));
       const names = AH.NAMES.slice().sort(() => this.rnd() - 0.5);
       const grid = [[-8, -8], [0, -8], [8, -8], [-8, -18], [8, -18]];
-      grid.forEach(([x, d], k) => {
+      if (!net) grid.forEach(([x, d], k) => {
         const c = pool[Math.floor(this.rnd() * pool.length)];
         const col = AI_COLORS[Math.floor(this.rnd() * AI_COLORS.length)];
-        const a = this.makeRacer(c, col, names[k], false, d, x);
+        const a = this.makeRacer(c, col, names[k], false, d, x, { finish: ['metallic', 'gloss', 'pearl', 'matte'][Math.floor(this.rnd() * 4)] });
         a.skill = 0.95 + this.rnd() * 0.1 - (k >= 3 ? 0.02 : 0);
         a.accel = 15 + cityIdx * 1.5;
         a.grip = 1 + cityIdx * 0.08;
         a.targetX = x; a.pref = x; a.laneT = this.rnd();
-        const ice = new THREE.Mesh(new THREE.BoxGeometry(2.6, 2.0, 5.4), new THREE.MeshStandardMaterial({ color: 0x9ff0ff, transparent: true, opacity: 0.5, emissive: 0x2aa8c8, emissiveIntensity: 0.6, roughness: 0.1 }));
-        ice.position.y = 1; ice.visible = false; a.model.group.add(ice); a.ice = ice;
+        this.addIce(a);
         this.ai.push(a);
       });
-      this.racers = [this.player, ...this.ai];
+      this.racers = [this.player, ...this.ai, ...this.remotes];
 
       // traffic
       this.traffic = [];
@@ -416,7 +476,7 @@
       this.buildPickups();
 
       // reflections only on shiny things (cars, glass, metal, water) so roads stay matte
-      scene.traverse(o => { if (o.isMesh && o.material && o.material.isMeshStandardMaterial && o.material.metalness >= 0.5) { o.material.envMap = this.envRT.texture; o.material.needsUpdate = true; } });
+      scene.traverse(o => { if (o.isMesh && o.material && o.material.isMeshStandardMaterial && (o.material.metalness >= 0.5 || o.material.userData.reflect)) { o.material.envMap = this.envRT.texture; o.material.needsUpdate = true; } });
       // fx
       this.sparks = new Particles(scene, 260, 0.45, true);
       this.smoke = new Particles(scene, 200, 2.6, true);
@@ -432,8 +492,18 @@
       this.buildMinimap();
       viewOffset = [0, 0]; resize();
     }
-    makeRacer(cfg, color, name, isPlayer, dist, x) {
-      const m = AH.buildCar(cfg.style, color, { glow: cfg.style === 'proto' });
+    addIce(e) {
+      const ice = new THREE.Mesh(new THREE.BoxGeometry(2.6, 2.0, 5.4), new THREE.MeshPhysicalMaterial({ color: 0xbff6ff, transparent: true, opacity: 0.45, emissive: 0x2aa8c8, emissiveIntensity: 0.5, roughness: 0.05, clearcoat: 1 }));
+      ice.position.y = 1; ice.visible = false; e.model.group.add(ice); e.ice = ice;
+    }
+    makeRacer(cfg, color, name, isPlayer, dist, x, look = {}) {
+      const m = AH.buildCar(cfg.style, color, look);
+      // position marker above the roof
+      const lc = document.createElement('canvas'); lc.width = 256; lc.height = 128;
+      const lt = new THREE.CanvasTexture(lc); lt.encoding = THREE.sRGBEncoding;
+      const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: lt, transparent: true, depthTest: false, depthWrite: false, fog: false }));
+      label.renderOrder = 10; label.scale.set(2.6, 1.3, 1); this.scene.add(label);
+      m.label = { sprite: label, canvas: lc, tex: lt, last: '' };
       this.scene.add(m.group);
       return { cfg, model: m, name, isPlayer, dist, x, v: 0, vx: 0, latV: 0, alt: 0, vy: 0, air: false, flyT: 0, frozen: 0, wreck: 0, spin: 0, nitro: 0, nitroOn: false, nitroT: 0, superT: 0, startBoost: 0, drift: false, driftAng: 0, steerVis: 0, finished: false, finishTime: 0, lastWall: 0, wheelRot: 0 };
     }
@@ -530,12 +600,15 @@
       if (p.superT > 0) p.superT -= dt;
       if (p.startBoost > 0) p.startBoost -= dt;
       p.drift = brake && Math.abs(steer) > 0.3 && p.v > 18;
-      const top = st.top * (p.nitroOn ? st.nitroPow * (p.superT > 0 ? 1.08 : 1) : 1);
+      let top = st.top * (p.nitroOn ? st.nitroPow * (p.superT > 0 ? 1.08 : 1) : 1);
+      if (p.frozen > 0) { p.frozen -= dt; top = Math.min(top, 6); }
+      p.ice.visible = p.frozen > 0;
       if (this.state === 'count') { p.v = 0; }
       else {
         if (brake && !p.drift) p.v -= 32 * dt;
         else if (p.drift) { p.v -= 5 * dt; p.nitro = Math.min(100, p.nitro + 17 * dt); }
-        if (!brake || p.drift) {
+        if (!inp.gas && !brake) p.v = Math.max(0, p.v - 5 * dt);
+        else if (!brake || p.drift) {
           if (p.v < top) p.v += st.accel * clamp(1.12 - p.v / top, 0.12, 1) * (p.nitroOn ? 1.8 : 1) * dt;
           else p.v = damp(p.v, top, 0.8, dt);
         }
@@ -565,10 +638,41 @@
       }
       if (!p.finished && p.dist >= this.laps * this.L) {
         p.finished = true; p.finishTime = this.t;
+        if (this.online) AH.Net.send('finish', { id: this.online.selfId, t: this.t });
         this.state = 'finished'; this.finishT = 0;
         const place = this.racers.filter(r => r.finished).length;
         this.pop(place === 1 ? 'ZWYCIĘSTWO!' : `META · ${place}. MIEJSCE`);
       }
+    }
+    onNet(ev, p) {
+      if (ev === 'state') {
+        const r = this.remotes.find(q => q.id === p.id); if (!r) return;
+        r.snaps.push(Object.assign({ t: performance.now() }, p)); if (r.snaps.length > 20) r.snaps.shift();
+      } else if (ev === 'finish') {
+        const r = this.remotes.find(q => q.id === p.id); if (!r) return;
+        r.finished = true; r.finishTime = p.t; if (!this.player.finished) this.pop(`${r.name} na mecie`, 'sm');
+      } else if (ev === 'freeze') {
+        if ((p.targets || []).includes(this.online.selfId) && this.state === 'race') {
+          this.player.frozen = Math.min(6, Math.max(0, +p.dur || 3)); this.pop('ZAMROŻONO CIĘ!', 'ice'); this.flash('vfreeze'); Snd.sfx('freeze');
+        }
+      }
+    }
+    updateRemote(r, dt) {
+      // render remote players ~150 ms in the past, interpolating between network snapshots
+      const now = performance.now(), rt = now - 150, S = r.snaps;
+      let a = S[0], b = S[S.length - 1];
+      for (let i = S.length - 1; i > 0; i--) if (S[i - 1].t <= rt) { a = S[i - 1]; b = S[i]; break; }
+      let d, x, al;
+      if (rt >= b.t) { const ex = Math.min(0.3, (rt - b.t) / 1000); d = b.d + b.v * ex; x = b.x; al = b.a; }
+      else { const k = b.t > a.t ? clamp((rt - a.t) / (b.t - a.t), 0, 1) : 1; d = a.d + (b.d - a.d) * k; x = a.x + (b.x - a.x) * k; al = a.a + (b.a - a.a) * k; }
+      const prevX = r.x;
+      r.dist = d; r.x = x; r.alt = al; r.v = b.v; r.nitroOn = !!b.n; r.flyT = b.f ? 1 : 0;
+      r.latV = damp(r.latV, dt > 0 ? (x - prevX) / dt : 0, 8, dt);
+      if (r.frozenFx > 0) r.frozenFx -= dt;
+      r.frozen = b.fr || r.frozenFx > 0 ? 1 : 0;
+      r.ice.visible = r.frozen > 0;
+      r.stale = now - b.t > 6000;
+      r.model.group.visible = !r.stale || r.finished;
     }
     chooseLane(a) {
       let best = a.targetX, bc = 1e9;
@@ -650,7 +754,7 @@
       const p = this.player, L = this.L;
       // racers vs traffic
       for (const r of this.racers) {
-        if (r.alt > 1.4 || r.wreck > 0) continue;
+        if (r.alt > 1.4 || r.wreck > 0 || r.isRemote) continue;
         for (const t of this.traffic) {
           if (t.wreck > 0) continue;
           const ds = wrap(t.dist - r.dist, L), dx = t.x - r.x;
@@ -697,7 +801,7 @@
           k.hidden = 14; k.g.visible = false;
           if (k.type === 'coin') { this.stats.coins++; Snd.sfx('coin'); }
           else if (k.type === 'nitro') { p.nitro = Math.min(100, p.nitro + 40); this.pop('+NITRO', 'sm'); Snd.sfx('pickup'); }
-          else { AH.save.boosts[k.type] = (AH.save.boosts[k.type] || 0) + 1; this.pop(k.type === 'freeze' ? '+ZAMROŻENIE' : '+LOT', 'sm ice'); Snd.sfx('pickup'); this.hudBoosts(); }
+          else { AH.save.boosts[k.type] = (AH.save.boosts[k.type] || 0) + 1; this.boostLog.picked[k.type]++; this.pop(k.type === 'freeze' ? '+ZAMROŻENIE' : '+LOT', 'sm ice'); Snd.sfx('pickup'); this.hudBoosts(); }
           const g = k.g.position; for (let n = 0; n < 10; n++) this.sparks.spawn(g.x, g.y, g.z, (this.rnd() - 0.5) * 8, this.rnd() * 6, (this.rnd() - 0.5) * 8, 0.5, 1, 0.85, 0.3);
         }
       }
@@ -709,6 +813,8 @@
       if (id === 'freeze') {
         const range = p.st.freezeRange; let n = 0;
         for (const a of this.ai) { const ds = wrap(a.dist - p.dist, this.L); if (ds > -25 && ds < range && a.wreck <= 0) { a.frozen = p.st.freezeDur; n++; } }
+        const hit = this.remotes.filter(r => { const ds = wrap(r.dist - p.dist, this.L); return ds > -25 && ds < range && !r.finished; });
+        if (hit.length) { AH.Net.send('freeze', { from: this.online.selfId, targets: hit.map(r => r.id), dur: p.st.freezeDur }); hit.forEach(r => (r.frozenFx = p.st.freezeDur)); n += hit.length; }
         if (!n) { this.pop('Brak rywali w zasięgu', 'sm'); return; }
         this.pop(`ZAMROŻENIE ×${n}`, 'ice'); Snd.sfx('freeze'); this.flash('vfreeze');
         this.ring(0x5fe1ff);
@@ -718,7 +824,7 @@
       } else if (id === 'nitro') {
         p.nitro = 100; p.superT = 2; this.pop('NITRO MAX!'); Snd.sfx('nitro'); this.ring(0xff7a1a);
       }
-      S.boosts[id]--; AH.persist(); this.hudBoosts();
+      S.boosts[id]--; this.boostLog.used[id]++; AH.persist(); this.hudBoosts();
     }
     ring(color) {
       const m = new THREE.Mesh(new THREE.RingGeometry(1, 2.2, 48), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, depthWrite: false }));
@@ -749,6 +855,14 @@
       const fl = e.model.flames;
       for (const f of fl) { f.visible = e.nitroOn; if (e.nitroOn) { const sc = 0.8 + Math.random() * 0.6; f.scale.set(1, sc, 1); } }
       if (e.model.glow && e.isPlayer) e.model.glow.material.opacity = e.flyT > 0 ? 1 : 0.85;
+      if (e.model.label) {
+        const lb = e.model.label, sp = lb.sprite;
+        sp.position.set(g.position.x, g.position.y + 2.25, g.position.z);
+        const dcam = camera.position.distanceTo(sp.position);
+        sp.visible = dcam < 320 && !(e.isPlayer && this.state === 'count');
+        const k = clamp(dcam * 0.045, e.isPlayer ? 0.75 : 1, 7);
+        sp.scale.set(2.6 * k, 1.3 * k, 1);
+      }
     }
     placeTraffic(t) {
       if (t.wreck > 0) return;
@@ -774,6 +888,14 @@
       if (this.state === 'race' && this.goT !== undefined && this.goT < 0.4) { this.goT += dt; if (input().nitro && this.player.startBoost <= 0 && this.goT < 0.35) { this.player.startBoost = 1.2; this.pop('IDEALNY START!', 'sm'); } }
       this.updatePlayer(dt);
       for (const a of this.ai) this.updateAI(a, dt);
+      for (const r of this.remotes) this.updateRemote(r, dt);
+      if (this.online && this.state !== 'count') {
+        this.netT += dt;
+        if (this.netT >= 0.12) {
+          this.netT = 0; const p = this.player;
+          AH.Net.send('state', { id: this.online.selfId, d: Math.round(p.dist * 10) / 10, x: Math.round(p.x * 100) / 100, a: Math.round(p.alt * 100) / 100, v: Math.round(p.v * 10) / 10, n: p.nitroOn ? 1 : 0, f: p.flyT > 0 ? 1 : 0, fr: p.frozen > 0 ? 1 : 0 });
+        }
+      }
       this.updateTraffic(dt);
       if (this.state !== 'count') this.collisions();
       this.pickupsUpdate(dt);
@@ -820,8 +942,27 @@
       this.sun.target.position.copy(g);
     }
     positionOf(e) { return 1 + this.racers.filter(r => r !== e && (r.finished && e.finished ? r.finishTime < e.finishTime : r.finished ? true : e.finished ? false : r.dist > e.dist)).length; }
+    drawLabel(e, pos) {
+      const lb = e.model.label; if (!lb) return;
+      const key = pos + '|' + e.name + '|' + (e.frozen > 0 ? 1 : 0);
+      if (lb.last === key) return; lb.last = key;
+      const g = lb.canvas.getContext('2d'), W = 256, H = 128;
+      g.clearRect(0, 0, W, H);
+      const col = e.isPlayer ? '#ffc21a' : e.frozen > 0 ? '#5fe1ff' : pos === 1 ? '#ff7a1a' : '#e9ecf2';
+      g.fillStyle = 'rgba(8,9,14,.72)'; g.strokeStyle = col; g.lineWidth = 5;
+      const rr = (x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); };
+      rr(8, 14, W - 16, 78, 22); g.fill(); g.stroke();
+      g.beginPath(); g.moveTo(W / 2 - 14, 92); g.lineTo(W / 2 + 14, 92); g.lineTo(W / 2, 112); g.closePath(); g.fillStyle = col; g.fill();
+      g.fillStyle = col; g.font = 'italic 700 58px "Chakra Petch", Arial, sans-serif'; g.textBaseline = 'middle';
+      g.fillText(String(pos), 24, 55);
+      g.font = '600 30px "Barlow Semi Condensed", Arial, sans-serif'; g.fillStyle = '#ffffff';
+      const nm = e.isPlayer ? 'TY' : e.name.toUpperCase();
+      g.fillText(nm.length > 10 ? nm.slice(0, 9) + '…' : nm, pos >= 10 ? 100 : 76, 56);
+      lb.tex.needsUpdate = true;
+    }
     hud() {
       const p = this.player;
+      for (const r of this.racers) this.drawLabel(r, this.positionOf(r));
       $('hpos').innerHTML = `${this.positionOf(p)}<small>/${this.racers.length}</small>`;
       $('hlap').textContent = `OKR. ${clamp(Math.floor(p.dist / this.L) + 1, 1, this.laps)}/${this.laps}`;
       $('htime').textContent = AH.fmtTime(p.finished ? p.finishTime : this.t);
@@ -854,29 +995,39 @@
   }
 
   // ---------------- flow ----------------
-  function startRace(idx) {
+  function startRace(idx, net = null) {
     Snd.init();
     if (race) { race.dispose(); race = null; }
+    clearInterval(showResults.live);
     show('loading');
-    $('loadtext').textContent = 'Ładowanie: ' + AH.CITIES[idx].name + '…';
+    $('loadtext').textContent = (net ? 'Wyścig online: ' : 'Ładowanie: ') + AH.CITIES[idx].name + '…';
     setTimeout(() => {
       try {
-        race = new Race(idx);
+        race = new Race(idx, net);
       } catch (e) {
         console.error(e); $('loadtext').textContent = 'Błąd ładowania trasy: ' + e.message; return;
       }
+      if (net) race.count = 1 + Math.max(0.4, (net.at - Date.now()) / 1000);
       $('touch').hidden = !isTouch;
+      $('p-restart').hidden = !!net;
       race.hudBoosts();
       show('hud');
     }, 50);
   }
+  // online events → current race / lobby
+  for (const ev of ['state', 'finish', 'freeze']) AH.Net.on('net:' + ev, (p) => { if (race && race.online) race.onNet(ev, p); });
+  AH.Net.on('net:start', (p) => { if (!AH.Net.party || !p || !Array.isArray(p.roster)) return; const idx = clamp(p.city | 0, 0, AH.CITIES.length - 1); startRace(idx, { roster: p.roster.slice(0, 6), at: +p.at || Date.now() + 3000, selfId: AH.Net.user.id }); });
+  AH.Net.on('party', () => { if (mode === 'party') renderParty(); });
   function pause() { if (!race || race.state === 'finished') return; show('pause', true); $('p-mute').textContent = 'Dźwięk: ' + (AH.save.muted ? 'wył.' : 'wł.'); Snd.engine(false, 0, false, 0); }
   function resume() { show('hud'); last = performance.now(); }
-  function quitToMenu() { if (race) { race.dispose(); race = null; } Snd.engine(false, 0, false, 0); renderer.toneMappingExposure = 1; setGarageCar(AH.save.sel); show('menu'); }
+  function quitToMenu() { clearInterval(showResults.live); if (race) { race.dispose(); race = null; } Snd.engine(false, 0, false, 0); renderer.toneMappingExposure = 1; setGarageCar(AH.save.sel); show('menu'); }
   $('pausebtn').onclick = pause;
   $('p-resume').onclick = resume;
   $('p-restart').onclick = () => startRace(race.cityIdx);
   $('p-quit').onclick = quitToMenu;
+  const gasLabel = () => 'Gaz: ' + (AH.save.autoGas === false ? 'klawisz W' : 'automatyczny');
+  const toggleGas = () => { AH.save.autoGas = AH.save.autoGas === false; AH.persist(); document.querySelectorAll('[data-gas]').forEach(b => b.textContent = gasLabel()); };
+  document.querySelectorAll('[data-gas]').forEach(b => { b.textContent = gasLabel(); b.onclick = toggleGas; });
   $('p-mute').onclick = () => { Snd.init(); Snd.setMuted(!AH.save.muted); $('p-mute').textContent = 'Dźwięk: ' + (AH.save.muted ? 'wył.' : 'wł.'); };
 
   function showResults(r) {
@@ -889,11 +1040,17 @@
     const total = Math.round(basePts + coinPts + tdPts + nmPts);
     const xp = Math.round([300, 220, 170, 130, 100, 80][pos] * (1 + (city.mult - 1) * 0.5));
     const lvBefore = AH.level();
-    S.pts += total; S.xp += xp; S.races++; if (pos === 0) S.wins++;
     const time = r.player.finishTime;
     const rec = !S.best[city.id] || time < S.best[city.id];
-    if (rec) S.best[city.id] = time;
-    AH.persist();
+    if (online()) {
+      AH.Net.submitRace({ city: city.id, place: pos + 1, coins: r.stats.coins, takedowns: r.stats.takedowns, near: r.stats.near, time, used: r.boostLog.used, picked: r.boostLog.picked })
+        .then((out) => { const el = $('res-total'); if (el) el.textContent = `+${AH.fmt(out.reward)} pkt · +${out.xp} XP`; const n = $('res-saved'); if (n) n.textContent = 'Zapisano na koncie.'; renderTopbars(); })
+        .catch((e) => { const n = $('res-saved'); if (n) n.textContent = 'Nie zapisano wyniku: ' + e.message; });
+    } else {
+      S.pts += total; S.xp += xp; S.races++; if (pos === 0) S.wins++;
+      if (rec) S.best[city.id] = time;
+      AH.persist();
+    }
     const lvAfter = AH.level();
     const unlocked = AH.CARS.filter(c => c.level > lvBefore && c.level <= lvAfter);
     const next = r.cityIdx + 1 < AH.CITIES.length ? r.cityIdx + 1 : null;
@@ -905,19 +1062,31 @@
         <div><span>Monety ×${r.stats.coins}</span><b>+${AH.fmt(coinPts)}</b></div>
         <div><span>Takedowny ×${r.stats.takedowns}</span><b>+${AH.fmt(tdPts)}</b></div>
         <div><span>O włos ×${r.stats.near}</span><b>+${AH.fmt(nmPts)}</b></div>
-        <div class="tot"><span>Razem</span><b class="pts">+${AH.fmt(total)} pkt · +${xp} XP</b></div>
+        <div class="tot"><span>Razem</span><b class="pts" id="res-total">+${AH.fmt(total)} pkt · +${xp} XP</b></div>
+        ${online() ? '<em id="res-saved" class="xptext">Zapisywanie na koncie…</em>' : ''}
       </div>
       ${lvAfter > lvBefore ? `<div class="levelup">Awans na poziom ${lvAfter}!${unlocked.length ? ' Odblokowano: ' + unlocked.map(c => c.name).join(', ') + ' (kup w garażu).' : ''}</div>` : ''}
-      <div class="btns">
+      <div class="btns">${r.online ? `<button class="solid" id="r-lobby">Wróć do lobby</button>` : `
         <button class="solid" id="r-again">Jeszcze raz</button>
-        ${next !== null ? `<button class="ghost" id="r-next">Dalej: ${AH.CITIES[next].name}</button>` : ''}
+        ${next !== null ? `<button class="ghost" id="r-next">Dalej: ${AH.CITIES[next].name}</button>` : ''}`}
         <button class="ghost" id="r-garage">Garaż</button>
         <button class="ghost" id="r-menu">Menu</button>
       </div>`;
     show('results', true);
     $('touch').hidden = true;
-    $('r-again').onclick = () => startRace(r.cityIdx);
-    if ($('r-next')) $('r-next').onclick = () => startRace(next);
+    if (r.online) {
+      $('r-lobby').onclick = () => { quitToMenu(); renderParty(); show('party'); };
+      // keep the table live while friends are still finishing
+      const t0 = Date.now();
+      showResults.live = setInterval(() => {
+        if (!race || race !== r || mode !== 'results' || Date.now() - t0 > 180000) { clearInterval(showResults.live); return; }
+        const box = document.querySelector('#resbox .standings'); if (!box) return;
+        box.innerHTML = r.standings().map((x, i) => `<div class="srow ${x.r.isPlayer ? 'me' : ''}"><b>${i + 1}</b><span>${x.r.isPlayer ? 'Ty' : x.r.name} · ${x.r.cfg.name}</span><em class="num">${x.r.finished ? AH.fmtTime(x.time) : 'w trasie…'}</em><em></em></div>`).join('');
+      }, 1000);
+    } else {
+      $('r-again').onclick = () => startRace(r.cityIdx);
+      if ($('r-next')) $('r-next').onclick = () => startRace(next);
+    }
     $('r-garage').onclick = () => { quitToMenu(); viewCar = AH.save.sel; renderGarage(); show('garage'); };
     $('r-menu').onclick = quitToMenu;
   }
@@ -931,9 +1100,11 @@
       race.update(dt);
       renderer.render(race.scene, camera);
     } else if (race && (mode === 'pause' || mode === 'loading')) {
+      if (mode === 'pause' && race.online) race.update(dt);
       if (mode === 'pause') renderer.render(race.scene, camera);
     } else {
       garage.ang += dt * 0.25;
+      if (garage.car) { garage.car.group.rotation.y = 0; }
       const narrow = window.innerWidth < 760;
       const R = narrow ? 9.5 : 8.2;
       camera.position.set(Math.sin(garage.ang) * R, 2.3, Math.cos(garage.ang) * R);
@@ -943,10 +1114,151 @@
     }
   }
 
-  // boot
+  // ---------------- accounts ----------------
+  let authMode = 'login', failCount = 0, lockUntil = 0, entering = false;
+  function showAuth(m = 'login') {
+    setAuthMode(m);
+    const note = $('auth-note');
+    if (!AH.Net.enabled) {
+      note.hidden = false;
+      note.textContent = 'Logowanie przez Google i e-mail włączy się po podłączeniu serwera gry. Do tego czasu zagraj jako gość: postęp zapisze się w tej przeglądarce.';
+    } else note.hidden = true;
+    $('auth-google').disabled = !AH.Net.enabled; $('auth-submit').disabled = !AH.Net.enabled; $('auth-forgot').hidden = !AH.Net.enabled || m !== 'login';
+    $('auth-err').textContent = ''; $('auth-err').className = 'autherr';
+    show('auth');
+  }
+  function setAuthMode(m) {
+    authMode = m;
+    $('tab-login').classList.toggle('on', m === 'login'); $('tab-register').classList.toggle('on', m === 'register');
+    $('fld-nick').hidden = m !== 'register';
+    $('pwmeter').hidden = m === 'login';
+    $('auth-email').closest('.fld').hidden = m === 'recover';
+    $('auth-pass').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+    $('auth-submit').textContent = m === 'login' ? 'Zaloguj się' : m === 'register' ? 'Załóż konto' : 'Ustaw nowe hasło';
+    $('auth-forgot').hidden = m !== 'login' || !AH.Net.enabled;
+    $('auth-google').hidden = m === 'recover';
+  }
+  const pwScore = (p) => { let k = 0; if (p.length >= 8) k++; if (p.length >= 12) k++; if (/[a-ząćęłńóśźż]/.test(p) && /[A-ZĄĆĘŁŃÓŚŹŻ]/.test(p)) k++; if (/\d/.test(p)) k++; if (/[^\w\sąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/.test(p)) k++; return k; };
+  $('auth-pass').addEventListener('input', () => {
+    const k = pwScore($('auth-pass').value), m = $('pwmeter');
+    m.style.setProperty('--w', (k / 5 * 100) + '%'); m.style.setProperty('--c', k <= 2 ? 'var(--hot)' : k === 3 ? 'var(--gold)' : 'var(--good)');
+    m.querySelector('span').textContent = ['Za krótkie', 'Słabe', 'Słabe', 'Średnie', 'Mocne', 'Bardzo mocne'][k];
+  });
+  $('tab-login').onclick = () => showAuth('login');
+  $('tab-register').onclick = () => showAuth('register');
+  $('auth-eye').onclick = () => { const i = $('auth-pass'); i.type = i.type === 'password' ? 'text' : 'password'; $('auth-eye').textContent = i.type === 'password' ? 'Pokaż' : 'Ukryj'; };
+  const authErr = (t, ok) => { $('auth-err').textContent = t; $('auth-err').className = 'autherr' + (ok ? ' ok' : ''); };
+  $('auth-google').onclick = async () => { try { authErr('Przekierowanie do Google…', true); await AH.Net.signInGoogle(); } catch (e) { authErr(e.message); } };
+  $('auth-forgot').onclick = async () => {
+    const email = $('auth-email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return authErr('Wpisz najpierw swój e-mail.');
+    try { await AH.Net.resetPassword(email); authErr('Wysłaliśmy link do zmiany hasła. Sprawdź skrzynkę.', true); } catch (e) { authErr(e.message); }
+  };
+  $('auth-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!AH.Net.enabled) return;
+    if (Date.now() < lockUntil) return authErr(`Za dużo nieudanych prób. Spróbuj za ${Math.ceil((lockUntil - Date.now()) / 1000)} s.`);
+    const email = $('auth-email').value.trim(), pass = $('auth-pass').value, nick = $('auth-nick').value.trim();
+    if (authMode !== 'recover' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return authErr('Podaj poprawny adres e-mail.');
+    if (pass.length < 8) return authErr('Hasło musi mieć co najmniej 8 znaków.');
+    if (authMode !== 'login' && pwScore(pass) < 3) return authErr('Hasło jest za słabe: dodaj wielkie litery, cyfry albo znaki specjalne.');
+    if (authMode === 'register' && !/^[\wąćęłńóśźżĄĆĘŁŃÓŚŹŻ .-]{3,20}$/.test(nick)) return authErr('Nick: 3–20 znaków (litery, cyfry, spacja, _ . -).');
+    $('auth-submit').disabled = true;
+    try {
+      if (authMode === 'login') { await AH.Net.signIn(email, pass); failCount = 0; await enterOnline(); }
+      else if (authMode === 'register') {
+        const r = await AH.Net.signUp(email, pass, nick);
+        if (r.needsConfirm) { authErr('Konto założone. Kliknij link aktywacyjny w mailu, a potem się zaloguj.', true); setAuthMode('login'); }
+        else await enterOnline();
+      } else {
+        const { error } = await AH.Net.sb.auth.updateUser({ password: pass }); if (error) throw new Error(AH.Net.msg(error));
+        authErr('Hasło zmienione.', true); await enterOnline();
+      }
+    } catch (err) {
+      if (authMode === 'login' && ++failCount >= 5) { lockUntil = Date.now() + 30000; failCount = 0; }
+      authErr(err.message);
+    } finally { $('auth-submit').disabled = false; }
+  });
+  $('auth-guest').onclick = () => { AH.save.guest = true; AH.persist(); setGarageCar(AH.save.sel, true); show('menu'); };
+  async function enterOnline() {
+    if (entering) return; entering = true;
+    try {
+      const prefs = { muted: AH.save.muted, autoGas: AH.save.autoGas };
+      AH.save = Object.assign(AH.load(), prefs);
+      await AH.Net.loadProfile();
+      setGarageCar(AH.save.sel, true);
+      show('menu'); toast('Witaj, ' + (AH.Net.nickname || 'kierowco') + '!');
+    } catch (e) { authErr(e.message); show('auth'); }
+    finally { entering = false; }
+  }
+  async function logout() {
+    if (race) quitToMenu();
+    try { await AH.Net.signOut(); } catch (e) { /* ignore */ }
+    AH.save = AH.load(); setGarageCar(AH.save.sel, true); renderTopbars(); toast('Wylogowano.'); showAuth('login');
+  }
+  AH.Net.on('auth', ({ event }) => {
+    if (event === 'PASSWORD_RECOVERY') showAuth('recover');
+    else if (event === 'SIGNED_IN' && mode === 'auth' && authMode !== 'recover') enterOnline();
+  });
+
+  // ---------------- party lobby ----------------
+  let partyCity = 0;
+  async function renderParty() {
+    const box = $('partybody'), N = AH.Net;
+    if (!N.enabled) {
+      box.innerHTML = `<div class="ppanel"><h3>Gra online jest jeszcze wyłączona</h3><p>Party ze znajomymi zadziała po podłączeniu serwera gry (konta i kanały na żywo). Na razie możesz ścigać się z komputerem.</p><button class="solid" data-go-race>Wyścig solo</button></div>`;
+      box.querySelector('[data-go-race]').onclick = () => { renderCities(); show('cities'); };
+      return;
+    }
+    if (!N.user) {
+      box.innerHTML = `<div class="ppanel"><h3>Zaloguj się, by grać ze znajomymi</h3><p>Party wymaga konta: dzięki temu tylko osoby z kodem i zalogowane mogą dołączyć.</p><button class="solid" data-login2>Zaloguj się</button></div>`;
+      box.querySelector('[data-login2]').onclick = () => showAuth('login');
+      return;
+    }
+    const P = N.party;
+    if (!P) {
+      box.innerHTML = `<div class="partygrid">
+        <div class="ppanel"><h3>Utwórz party</h3><p>Dostaniesz 6‑znakowy kod. Podaj go znajomym, a oni wpiszą go u siebie. Do 6 graczy.</p><button class="solid" id="pt-create">Utwórz party</button></div>
+        <div class="ppanel"><h3>Dołącz kodem</h3><p>Wpisz kod od znajomego.</p><form class="codein" id="pt-joinf"><input id="pt-code" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC234" aria-label="Kod party"><button class="solid" type="submit">Dołącz</button></form></div>
+      </div><p class="autherr" id="pt-err"></p>`;
+      $('pt-create').onclick = async () => { try { $('pt-create').disabled = true; await N.createParty(); renderParty(); } catch (e) { $('pt-err').textContent = e.message; $('pt-create').disabled = false; } };
+      $('pt-code').addEventListener('input', (e) => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
+      $('pt-joinf').addEventListener('submit', async (e) => { e.preventDefault(); try { await N.joinParty($('pt-code').value); renderParty(); } catch (err) { $('pt-err').textContent = err.message; } });
+      return;
+    }
+    const list = [...P.members.values()].sort((a, b) => a.t - b.t), host = N.isHost(), hex = (c) => '#' + new THREE.Color(c || 0x888888).getHexString();
+    box.innerHTML = `<div class="partygrid">
+      <div class="ppanel"><span class="eyebrow">Kod party</span><div class="bigcode"><b>${P.code}</b><button class="ghost small" id="pt-copy">Kopiuj</button></div>
+        <p>Znajomi wpisują ten kod w „Ze znajomymi → Dołącz kodem”.</p>
+        <div class="members">${list.map(m => `<div class="member"><span class="dot" style="background:${hex(m.color)}"></span><span><b>${m.name}</b> · ${AH.carById(m.car).name}</span>${m.id === P.hostId ? '<em class="host">HOST</em>' : m.ready ? '<em class="rdy">GOTOWY</em>' : '<em>czeka</em>'}</div>`).join('')}</div>
+        <div class="btns">${host ? '' : `<button class="ghost" id="pt-ready">${P.ready ? 'Nie jestem gotowy' : 'Jestem gotowy'}</button>`}<button class="ghost" id="pt-leave">Opuść party</button></div>
+      </div>
+      <div class="ppanel">${host ? `<h3>Wybierz trasę</h3><div class="citypick">${AH.CITIES.map((c, i) => `<button class="${i === partyCity ? 'on' : ''}" data-pc="${i}">${c.name}</button>`).join('')}</div>
+        <button class="solid" id="pt-start" ${list.length < 2 ? 'disabled' : ''}>${list.length < 2 ? 'Czekam na znajomych…' : 'Start wyścigu (' + list.length + ' graczy)'}</button>
+        <p>Auto i lakier bierzesz z garażu. Ruch uliczny jest u każdego lokalny; boost Zamrożenie działa na znajomych.</p>`
+        : `<h3>Czekamy na hosta</h3><p>Host wybiera miasto i startuje. Zaznacz „Jestem gotowy”, a potem zostań na tym ekranie.</p>`}</div>
+    </div><p class="autherr" id="pt-err"></p>`;
+    $('pt-copy').onclick = async () => { try { await navigator.clipboard.writeText(P.code); toast('Skopiowano kod ' + P.code); } catch (e) { toast('Kod: ' + P.code); } };
+    $('pt-leave').onclick = async () => { await N.leaveParty(); renderParty(); };
+    if ($('pt-ready')) $('pt-ready').onclick = () => { N.setReady(!P.ready); };
+    box.querySelectorAll('[data-pc]').forEach(b => b.onclick = () => { partyCity = +b.dataset.pc; renderParty(); });
+    if ($('pt-start')) $('pt-start').onclick = () => {
+      const roster = [...P.members.values()].sort((a, b) => a.t - b.t).slice(0, 6).map(m => ({ id: m.id, name: m.name, car: m.car, color: m.color, finish: m.finish, rim: m.rim, neon: m.neon }));
+      const payload = { city: partyCity, at: Date.now() + 4500, roster };
+      N.send('start', payload);
+      startRace(partyCity, { roster, at: payload.at, selfId: N.user.id });
+    };
+  }
+
+  // ---------------- boot ----------------
   setGarageCar(AH.save.sel);
   renderTopbars();
-  show('menu');
   requestAnimationFrame(frame);
+  (async () => {
+    if (AH.Net.init()) {
+      try { if (await AH.Net.restore()) { await enterOnline(); return; } } catch (e) { console.warn(e); }
+    }
+    if (AH.save.guest) show('menu'); else showAuth('login');
+  })();
   window.AH_DEBUG = { get race() { return race; }, startRace, show, garage, renderer, camera, setMode: (m) => { mode = m; } };
 })();
