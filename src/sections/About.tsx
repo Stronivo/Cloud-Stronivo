@@ -80,11 +80,11 @@ export function About() {
 
           <Reveal className="mt-16 md:mt-24">
             <h3 className="font-display text-[clamp(1.6rem,3vw,2.4rem)] font-semibold leading-[1.1] tracking-[-0.03em]">
-              Projektowanie stron internetowych — <span className="text-lime">Żory i Śląsk</span>
+              Strony internetowe i strony WWW — <span className="text-lime">Żory i Śląsk</span>
             </h3>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-mist">
-              Świadczymy usługi na terenie Żor i całego Śląska — tworzymy strony internetowe dla firm z Żor, Rybnika,
-              Jastrzębia-Zdroju, Katowic i okolic. Projektujemy dla małych firm usługowych, restauracji, kawiarni i
+              Świadczymy usługi na terenie Żor i całego Śląska — projektujemy strony internetowe i strony WWW dla firm z
+              Żor, Rybnika, Jastrzębia-Zdroju, Katowic i okolic. Pracujemy dla małych firm usługowych, restauracji, kawiarni i
               wszystkich, którym zależy na tym, żeby klienci z okolicy łatwo znaleźli ich w internecie.
             </p>
             <p className="mt-4 max-w-2xl text-lg leading-relaxed text-mist">
