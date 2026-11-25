@@ -206,9 +206,10 @@
     local(); return true;
   }
   function renderTopbars() {
-    const S = AH.save, L = AH.level(), a = AH.xpFor(L), b = AH.xpFor(L + 1);
-    const pct = clamp((S.xp - a) / (b - a) * 100, 0, 100);
-    const html = `<div class="profile"><div class="lvl">${L}</div><div class="xpwrap"><div class="xptext">Poziom ${L} · <span class="num">${AH.fmt(S.xp - a)} / ${AH.fmt(b - a)}</span> XP</div><div class="xpbar"><i style="width:${pct}%"></i></div></div></div>
+    const S = AH.save, U = AH.unlockedCount(), T = AH.CITIES.length;
+    const cleared = AH.CITIES.filter(c => ((S.cleared || {})[c.id] || 99) <= AH.PODIUM).length;
+    const nextCity = AH.CITIES[Math.min(U, T) - 1];
+    const html = `<div class="profile"><div class="lvl">${U}</div><div class="xpwrap"><div class="xptext">Trasy: <span class="num">${U}/${T}</span> · ${cleared === T ? 'wszystkie podia zdobyte' : 'podium w: ' + nextCity.name}</div><div class="xpbar"><i style="width:${cleared / T * 100}%"></i></div></div></div>
       <div class="wallet"><span class="chip pts num">${AH.ICONS.pts}${AH.fmt(S.pts)} pkt</span>${AH.BOOSTS.map(bb => `<span class="chip num" style="color:${bb.color}" title="${bb.name}">${AH.ICONS[bb.id]}<span style="color:var(--chrome)">${S.boosts[bb.id] || 0}</span></span>`).join('')}
       <span class="acct">${online() ? `<span class="chip" title="Zalogowano">${AH.Net.nickname || 'Kierowca'}</span><button class="iconbtn" data-logout aria-label="Wyloguj" title="Wyloguj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg></button>` : `<button class="chip" data-login>Zaloguj się</button>`}</span>
       <button class="iconbtn" data-mute aria-label="Dźwięk">${S.muted ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9h4l5-4v14l-5-4H4zM16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2"/></svg>' : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8a5 5 0 0 1 0 8M18.5 5.5a8.5 8.5 0 0 1 0 13" fill="none" stroke="currentColor" stroke-width="2"/></svg>'}</button></div>`;
@@ -227,18 +228,17 @@
     paris: '<svg viewBox="0 0 90 90" fill="#fff"><path d="M44 2h2l1 22 4 26 6 14 12 24H57c-3-12-7-16-12-16s-9 4-12 16H21l12-24 6-14 4-26z"/></svg>',
   };
   function renderCities() {
-    const lvl = AH.level();
     $('citygrid').innerHTML = AH.CITIES.map((c, i) => {
-      const best = AH.save.best[c.id];
-      return `<button class="city" data-city="${i}">
+      const best = AH.save.best[c.id], open = AH.cityUnlocked(i), place = (AH.save.cleared || {})[c.id];
+      return `<button class="city ${open ? '' : 'locked'}" data-city="${i}" ${open ? '' : 'aria-disabled="true"'}>
         <div class="city-art" style="background:linear-gradient(150deg, ${c.card[0]}, ${c.card[1]})">${CITY_ART[c.id]}<h3>${c.name}</h3><span>${c.landmarksText}</span></div>
         <div class="city-info"><p>${c.blurb}</p>
           <div class="city-row"><span>Trudność</span><span class="stars">${'★'.repeat(c.diff)}<span class="off">${'★'.repeat(5 - c.diff)}</span></span></div>
           <div class="city-row"><span>Za 1. miejsce</span><b class="pts num">${AH.fmt(1000 * c.mult)} pkt</b></div>
-          <div class="city-row"><span>Rekord</span><span class="num">${best ? AH.fmtTime(best) : '—'}</span></div>
-          <span class="go">START</span></div></button>`;
+          <div class="city-row"><span>Rekord</span><span class="num">${best ? AH.fmtTime(best) : '—'}${place ? ' · ' + place + '. msc' : ''}</span></div>
+          ${open ? '<span class="go">START</span>' : `<span class="go lock">🔒 Podium w: ${AH.CITIES[i - 1].name}</span>`}</div></button>`;
     }).join('');
-    $('citygrid').querySelectorAll('[data-city]').forEach(b => b.onclick = () => startRace(+b.dataset.city));
+    $('citygrid').querySelectorAll('[data-city]').forEach(b => b.onclick = () => { const i = +b.dataset.city; if (AH.cityUnlocked(i)) startRace(i); else toast(`Zajmij miejsce 1–3 w mieście ${AH.CITIES[i - 1].name}, żeby odblokować ${AH.CITIES[i].name}.`); });
   }
 
   let viewCar = AH.save.sel;
@@ -253,17 +253,16 @@
     return rows.map(([n, v, bv, lo, hi, txt]) => `<div class="stat"><span>${n}</span><div class="bar"><u style="width:${clamp((v - lo) / (hi - lo), 0.03, 1) * 100}%"></u><i style="width:${clamp((bv - lo) / (hi - lo), 0.03, 1) * 100}%"></i></div><em class="num">${txt}</em></div>`).join('');
   }
   function renderGarage() {
-    const car = AH.carById(viewCar), S = AH.save, lvl = AH.level();
-    const owned = !!S.owned[car.id], unlocked = lvl >= car.level;
+    const car = AH.carById(viewCar), S = AH.save;
+    const owned = !!S.owned[car.id];
     setGarageCar(car.id);
     let action;
     if (owned) action = S.sel === car.id ? `<button class="buy wide" disabled>Wybrane auto</button>` : `<button class="buy wide" id="g-select">Wybierz to auto</button>`;
-    else if (!unlocked) action = `<button class="buy wide" disabled>Odblokujesz na poziomie ${car.level}</button>`;
     else action = `<button class="buy wide" id="g-buy" ${S.pts < car.price ? 'disabled' : ''}>Kup za ${AH.fmt(car.price)} pkt</button>`;
     $('carpanel').innerHTML = `
       <div><span class="rank">KLASA ${car.cls} · RANGA ${AH.rating(AH.stats(car))}</span><h3><span class="cls">${car.cls}</span>${car.name}</h3></div>
       <div class="stats">${statRows(car)}</div>
-      <div class="carlist">${AH.CARS.map(c => `<button class="carchip ${c.id === viewCar ? 'sel' : ''} ${!S.owned[c.id] && lvl < c.level ? 'locked' : ''}" data-car="${c.id}"><b>${c.name}</b><span>${S.owned[c.id] ? (S.sel === c.id ? 'W użyciu' : 'W garażu') : lvl < c.level ? 'Poziom ' + c.level : AH.fmt(c.price) + ' pkt'}</span></button>`).join('')}</div>
+      <div class="carlist">${AH.CARS.map(c => `<button class="carchip ${c.id === viewCar ? 'sel' : ''} ${!S.owned[c.id] && S.pts < c.price ? 'locked' : ''}" data-car="${c.id}"><b>${c.name}</b><span>${S.owned[c.id] ? (S.sel === c.id ? 'W użyciu' : 'W garażu') : AH.fmt(c.price) + ' pkt'}</span></button>`).join('')}</div>
       ${action}`;
     const u = AH.ups(car.id);
     $('uppanel').innerHTML = `<div><span class="eyebrow">${owned ? 'Ulepszenia: ' + car.name : 'Kup auto, by je ulepszać'}</span></div><div class="ups">${AH.UPGRADES.map(up => {
@@ -444,15 +443,16 @@
       }
       // AI
       this.ai = [];
-      const pool = AH.CARS.slice(0, Math.min(AH.CARS.length, cityIdx + 2));
+      const D = city.ai;
+      const pool = AH.CARS.slice(0, Math.min(AH.CARS.length, cityIdx + 1));
       const names = AH.NAMES.slice().sort(() => this.rnd() - 0.5);
       const grid = [[-8, -8], [0, -8], [8, -8], [-8, -18], [8, -18]];
       if (!net) grid.forEach(([x, d], k) => {
         const c = pool[Math.floor(this.rnd() * pool.length)];
         const col = AI_COLORS[Math.floor(this.rnd() * AI_COLORS.length)];
         const a = this.makeRacer(c, col, names[k], false, d, x, { finish: ['metallic', 'gloss', 'pearl', 'matte'][Math.floor(this.rnd() * 4)] });
-        a.skill = 0.95 + this.rnd() * 0.1 - (k >= 3 ? 0.02 : 0);
-        a.accel = 15 + cityIdx * 1.5;
+        a.skill = D.skill[0] + this.rnd() * (D.skill[1] - D.skill[0]) - (k >= 3 ? 0.02 : 0);
+        a.accel = D.accel;
         a.grip = 1 + cityIdx * 0.08;
         a.targetX = x; a.pref = x; a.laneT = this.rnd();
         this.addIce(a);
@@ -462,7 +462,7 @@
 
       // traffic
       this.traffic = [];
-      const tcols = env.traffic, nT = 16;
+      const tcols = env.traffic, nT = city.traffic;
       for (let k = 0; k < nT; k++) {
         const style = this.rnd() < 0.2 ? 'van' : 'sedan';
         const col = tcols[Math.floor(this.rnd() * tcols.length)];
@@ -701,13 +701,13 @@
       } else {
         let target = this.city.aiSpeed * a.skill;
         const gap = this.player.dist - a.dist;
-        target *= clamp(1 + gap / 1400, 0.87, 1.16);
+        target *= clamp(1 + gap / 1400, 0.87, this.city.ai.catchUp);
         let mk = 0;
         for (let d = 0; d <= 80; d += 10) mk = Math.max(mk, Math.abs(AH.sample(tr, a.dist + d, tmpA).k));
         const vmax = Math.sqrt(13 * a.grip / (0.22 * mk + 1e-5)) * 1.08;
         target = Math.min(target, vmax);
         if (a.nitroT > 0) { a.nitroT -= dt; target *= 1.2; }
-        else if (this.state === 'race' && this.rnd() < dt * 0.07 && mk < 0.004) a.nitroT = 1.2 + this.rnd() * 1.5;
+        else if (this.state === 'race' && this.rnd() < dt * this.city.ai.nitro && mk < 0.004) a.nitroT = 1.2 + this.rnd() * 1.5;
         a.nitroOn = a.nitroT > 0;
         if (a.frozen > 0) { a.frozen -= dt; target = 5; a.nitroOn = false; }
         if (this.state === 'count') target = 0;
@@ -1038,21 +1038,23 @@
     const coinPts = r.stats.coins * 15 * r.player.st.coinMult;
     const tdPts = r.stats.takedowns * 150, nmPts = r.stats.near * 25;
     const total = Math.round(basePts + coinPts + tdPts + nmPts);
-    const xp = Math.round([300, 220, 170, 130, 100, 80][pos] * (1 + (city.mult - 1) * 0.5));
-    const lvBefore = AH.level();
+    const unlockedBefore = AH.unlockedCount();
+    // map progression: remember the best place in this city (podium unlocks the next one)
+    S.cleared = S.cleared || {};
+    if (!S.cleared[city.id] || pos + 1 < S.cleared[city.id]) S.cleared[city.id] = pos + 1;
     const time = r.player.finishTime;
     const rec = !S.best[city.id] || time < S.best[city.id];
     if (online()) {
       AH.Net.submitRace({ city: city.id, place: pos + 1, coins: r.stats.coins, takedowns: r.stats.takedowns, near: r.stats.near, time, used: r.boostLog.used, picked: r.boostLog.picked })
-        .then((out) => { const el = $('res-total'); if (el) el.textContent = `+${AH.fmt(out.reward)} pkt · +${out.xp} XP`; const n = $('res-saved'); if (n) n.textContent = 'Zapisano na koncie.'; renderTopbars(); })
+        .then((out) => { const el = $('res-total'); if (el) el.textContent = `+${AH.fmt(out.reward)} pkt`; const n = $('res-saved'); if (n) n.textContent = 'Zapisano na koncie.'; renderTopbars(); })
         .catch((e) => { const n = $('res-saved'); if (n) n.textContent = 'Nie zapisano wyniku: ' + e.message; });
     } else {
-      S.pts += total; S.xp += xp; S.races++; if (pos === 0) S.wins++;
+      S.pts += total; S.races++; if (pos === 0) S.wins++;
       if (rec) S.best[city.id] = time;
       AH.persist();
     }
-    const lvAfter = AH.level();
-    const unlocked = AH.CARS.filter(c => c.level > lvBefore && c.level <= lvAfter);
+    AH.persist();
+    const newCity = AH.unlockedCount() > unlockedBefore ? AH.CITIES[AH.unlockedCount() - 1] : null;
     const next = r.cityIdx + 1 < AH.CITIES.length ? r.cityIdx + 1 : null;
     $('resbox').innerHTML = `
       <div><span class="eyebrow">${city.name} · ${AH.fmtTime(time)}${rec ? ' · nowy rekord!' : ''}</span><h2>${pos === 0 ? 'Zwycięstwo!' : pos + 1 + '. miejsce'}</h2></div>
@@ -1062,13 +1064,13 @@
         <div><span>Monety ×${r.stats.coins}</span><b>+${AH.fmt(coinPts)}</b></div>
         <div><span>Takedowny ×${r.stats.takedowns}</span><b>+${AH.fmt(tdPts)}</b></div>
         <div><span>O włos ×${r.stats.near}</span><b>+${AH.fmt(nmPts)}</b></div>
-        <div class="tot"><span>Razem</span><b class="pts" id="res-total">+${AH.fmt(total)} pkt · +${xp} XP</b></div>
+        <div class="tot"><span>Razem</span><b class="pts" id="res-total">+${AH.fmt(total)} pkt</b></div>
         ${online() ? '<em id="res-saved" class="xptext">Zapisywanie na koncie…</em>' : ''}
       </div>
-      ${lvAfter > lvBefore ? `<div class="levelup">Awans na poziom ${lvAfter}!${unlocked.length ? ' Odblokowano: ' + unlocked.map(c => c.name).join(', ') + ' (kup w garażu).' : ''}</div>` : ''}
+      ${newCity ? `<div class="levelup">Odblokowano nową trasę: ${newCity.name}! Rywale będą tam szybsi.</div>` : (!r.online && pos + 1 > AH.PODIUM && r.cityIdx + 1 < AH.CITIES.length && !AH.cityUnlocked(r.cityIdx + 1) ? `<div class="rewards">Zajmij miejsce 1–3, żeby odblokować: ${AH.CITIES[r.cityIdx + 1].name}. Ulepsz auto w garażu, jeśli rywale uciekają.</div>` : '')}
       <div class="btns">${r.online ? `<button class="solid" id="r-lobby">Wróć do lobby</button>` : `
         <button class="solid" id="r-again">Jeszcze raz</button>
-        ${next !== null ? `<button class="ghost" id="r-next">Dalej: ${AH.CITIES[next].name}</button>` : ''}`}
+        ${next !== null && AH.cityUnlocked(next) ? `<button class="ghost" id="r-next">Dalej: ${AH.CITIES[next].name}</button>` : ''}`}
         <button class="ghost" id="r-garage">Garaż</button>
         <button class="ghost" id="r-menu">Menu</button>
       </div>`;

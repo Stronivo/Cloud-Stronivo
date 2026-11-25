@@ -3,12 +3,12 @@
 window.AH = window.AH || {};
 
 AH.CARS = [
-  { id: 'vento',   name: 'Vento GT',     cls: 'D', level: 1,  price: 0,     color: 0xe3203a, top: 58, accel: 15.5, grip: 1.00, nitro: 1.00, style: 'hatch',  desc: 'Zwinny hatchback na start kariery.' },
-  { id: 'raptor',  name: 'Raptor S',     cls: 'C', level: 2,  price: 1500,  color: 0xffc400, top: 61, accel: 16.5, grip: 0.96, nitro: 1.05, style: 'muscle', desc: 'Ciężki muscle car z potężnym V8.' },
-  { id: 'nebula',  name: 'Nebula R',     cls: 'C', level: 4,  price: 4000,  color: 0x1f6bff, top: 64, accel: 18,   grip: 1.10, nitro: 1.08, style: 'coupe',  desc: 'Coupé, które trzyma się zakrętów jak przyklejone.' },
-  { id: 'falco',   name: 'Falco X',      cls: 'B', level: 6,  price: 8000,  color: 0x16c96a, top: 68, accel: 19.5, grip: 1.15, nitro: 1.12, style: 'wedge',  desc: 'Klinowy supersamochód z centralnym silnikiem.' },
-  { id: 'tempest', name: 'Tempest V12',  cls: 'A', level: 9,  price: 15000, color: 0xff6a00, top: 72, accel: 21.5, grip: 1.20, nitro: 1.18, style: 'hyper',  desc: 'Hypercar V12 z aktywnym spojlerem.' },
-  { id: 'phantom', name: 'Phantom Zero', cls: 'S', level: 12, price: 26000, color: 0x8a2bff, top: 77, accel: 24,   grip: 1.30, nitro: 1.25, style: 'proto',  desc: 'Prototyp z hybrydowym napędem i neonowym podświetleniem.' },
+  { id: 'vento',   name: 'Vento GT',     cls: 'D', price: 0,     color: 0xe3203a, top: 58, accel: 15.5, grip: 1.00, nitro: 1.00, style: 'hatch',  desc: 'Zwinny hatchback na start kariery.' },
+  { id: 'raptor',  name: 'Raptor S',     cls: 'C', price: 1500,  color: 0xffc400, top: 61, accel: 16.5, grip: 0.96, nitro: 1.05, style: 'muscle', desc: 'Ciężki muscle car z potężnym V8.' },
+  { id: 'nebula',  name: 'Nebula R',     cls: 'C', price: 4000,  color: 0x1f6bff, top: 64, accel: 18,   grip: 1.10, nitro: 1.08, style: 'coupe',  desc: 'Coupé, które trzyma się zakrętów jak przyklejone.' },
+  { id: 'falco',   name: 'Falco X',      cls: 'B', price: 8000,  color: 0x16c96a, top: 68, accel: 19.5, grip: 1.15, nitro: 1.12, style: 'wedge',  desc: 'Klinowy supersamochód z centralnym silnikiem.' },
+  { id: 'tempest', name: 'Tempest V12',  cls: 'A', price: 15000, color: 0xff6a00, top: 72, accel: 21.5, grip: 1.20, nitro: 1.18, style: 'hyper',  desc: 'Hypercar V12 z aktywnym spojlerem.' },
+  { id: 'phantom', name: 'Phantom Zero', cls: 'S', price: 26000, color: 0x8a2bff, top: 77, accel: 24,   grip: 1.30, nitro: 1.25, style: 'proto',  desc: 'Prototyp z hybrydowym napędem i neonowym podświetleniem.' },
 ];
 
 AH.UPGRADES = [
@@ -35,7 +35,7 @@ AH.ICONS = {
 // ---- Cities. Track points are [x, z, y]; `seg` values are positions along the control-point loop.
 AH.CITIES = [
   {
-    id: 'sf', name: 'San Francisco', country: 'USA', diff: 1, mult: 1.0, laps: 2, aiSpeed: 54,
+    id: 'sf', name: 'San Francisco', country: 'USA', diff: 1, mult: 1.0, laps: 2, aiSpeed: 49, ai: { accel: 12.5, nitro: 0.02, catchUp: 1.05, skill: [0.92, 1.0] }, traffic: 8,
     blurb: 'Przejazd przez Golden Gate, wzgórza, Transamerica Pyramid i Alcatraz w zatoce.',
     landmarksText: 'Golden Gate · Transamerica · Alcatraz · Coit Tower',
     card: ['#ff8a4c', '#5a3a8c'],
@@ -51,7 +51,7 @@ AH.CITIES = [
     env: { skyTop: '#2c3a7a', skyMid: '#f2875a', skyBot: '#ffd2a0', fog: '#eaa47e', fogNear: 160, fogFar: 1500, sun: '#ffb071', sunInt: 2.1, sunDir: [-0.55, 0.22, 0.8], hemiSky: '#ffd0a8', hemiGround: '#4d3d55', hemiInt: 0.75, night: 0.25, lamps: false, ground: '#6f7b55', traffic: [0xd9d9d9, 0x2f4f7f, 0x9b1b1b, 0x222222, 0xe8e2d0, 0x4f6f4f] },
   },
   {
-    id: 'ny', name: 'Nowy Jork', country: 'USA', diff: 2, mult: 1.25, laps: 2, aiSpeed: 57,
+    id: 'ny', name: 'Nowy Jork', country: 'USA', diff: 2, mult: 1.25, laps: 2, aiSpeed: 55, ai: { accel: 15, nitro: 0.04, catchUp: 1.08, skill: [0.95, 1.02] }, traffic: 12,
     blurb: 'Nocny Manhattan: neony, żółte taksówki, tunel i Statua Wolności nad rzeką.',
     landmarksText: 'Statua Wolności · Empire State · Chrysler · One WTC',
     card: ['#6a3cff', '#120a2a'],
@@ -70,7 +70,7 @@ AH.CITIES = [
     env: { skyTop: '#04050d', skyMid: '#1a1540', skyBot: '#4b2a5c', fog: '#251a3d', fogNear: 120, fogFar: 1400, sun: '#8ea6ff', sunInt: 0.55, sunDir: [0.4, 0.6, -0.5], hemiSky: '#6a6aa0', hemiGround: '#20152a', hemiInt: 0.55, night: 1, lamps: true, stars: true, ground: '#24232b', traffic: [0xffc915, 0xffc915, 0xffc915, 0x1d1d22, 0xcfcfcf, 0x7a1220] },
   },
   {
-    id: 'waw', name: 'Warszawa', country: 'Polska', diff: 3, mult: 1.5, laps: 2, aiSpeed: 60,
+    id: 'waw', name: 'Warszawa', country: 'Polska', diff: 3, mult: 1.5, laps: 2, aiSpeed: 62, ai: { accel: 18, nitro: 0.07, catchUp: 1.12, skill: [0.96, 1.04] }, traffic: 15,
     blurb: 'Pałac Kultury w centrum, Stare Miasto z Kolumną Zygmunta i Stadion nad Wisłą.',
     landmarksText: 'Pałac Kultury · Zamek Królewski · Kolumna Zygmunta · Stadion Narodowy',
     card: ['#e8314a', '#1c2a52'],
@@ -87,7 +87,7 @@ AH.CITIES = [
     env: { skyTop: '#2a72d8', skyMid: '#86bdf2', skyBot: '#dbecfb', fog: '#c6dcf0', fogNear: 220, fogFar: 1800, sun: '#fff2dc', sunInt: 2.4, sunDir: [0.5, 0.75, 0.35], hemiSky: '#cfe6ff', hemiGround: '#5d6b48', hemiInt: 0.85, night: 0, lamps: false, ground: '#78935a', traffic: [0xffffff, 0x2a2a2a, 0x8a8f99, 0xc4161c, 0x1e3f8a, 0xe6c34a] },
   },
   {
-    id: 'rome', name: 'Rzym', country: 'Włochy', diff: 4, mult: 1.8, laps: 2, aiSpeed: 63,
+    id: 'rome', name: 'Rzym', country: 'Włochy', diff: 4, mult: 1.8, laps: 2, aiSpeed: 69, ai: { accel: 21, nitro: 0.1, catchUp: 1.15, skill: [0.97, 1.05] }, traffic: 18,
     blurb: 'Złota godzina: Koloseum tuż przy krawężniku i przejazd przez Łuk Konstantyna.',
     landmarksText: 'Koloseum · Łuk Konstantyna · Bazylika św. Piotra · Obelisk',
     card: ['#f5b04a', '#7a2f1c'],
@@ -103,7 +103,7 @@ AH.CITIES = [
     env: { skyTop: '#4f7fc4', skyMid: '#f5bf78', skyBot: '#ffe2ae', fog: '#efcf9c', fogNear: 200, fogFar: 1700, sun: '#ffcf86', sunInt: 2.3, sunDir: [-0.7, 0.3, -0.45], hemiSky: '#ffe0b0', hemiGround: '#6a5034', hemiInt: 0.8, night: 0.1, lamps: false, ground: '#a99660', traffic: [0xf2f2f2, 0x9e1b1b, 0x2d2d2d, 0x3d6b3d, 0xc7a252, 0x6a90b8] },
   },
   {
-    id: 'paris', name: 'Paryż', country: 'Francja', diff: 5, mult: 2.2, laps: 2, aiSpeed: 66,
+    id: 'paris', name: 'Paryż', country: 'Francja', diff: 5, mult: 2.2, laps: 2, aiSpeed: 75, ai: { accel: 24, nitro: 0.13, catchUp: 1.18, skill: [0.98, 1.06] }, traffic: 22,
     blurb: 'Zmierzch nad Sekwaną: świecąca Wieża Eiffla, Łuk Triumfalny i piramida Luwru.',
     landmarksText: 'Wieża Eiffla · Łuk Triumfalny · Luwr · Sacré‑Cœur',
     card: ['#ff9a7a', '#24205a'],
@@ -124,7 +124,7 @@ AH.NAMES = ['Vortex', 'Nocna Mara', 'Kobra', 'Blaze', 'Glacier', 'Rekin', 'Neon'
 
 // ---- save / progression
 AH.SAVE_KEY = 'asphaltHorizon.v1';
-AH.defaultSave = () => ({ pts: 1000, xp: 0, owned: { vento: true }, sel: 'vento', ups: {}, boosts: { freeze: 2, fly: 2, nitro: 2 }, best: {}, races: 0, wins: 0, muted: false });
+AH.defaultSave = () => ({ pts: 1000, xp: 0, cleared: {}, owned: { vento: true }, sel: 'vento', ups: {}, boosts: { freeze: 2, fly: 2, nitro: 2 }, best: {}, races: 0, wins: 0, muted: false });
 AH.saveKey = () => AH.SAVE_KEY + (AH.Net && AH.Net.user ? '.' + AH.Net.user.id : '');
 AH.load = () => {
   try {
@@ -136,8 +136,10 @@ AH.load = () => {
 AH.save = AH.load();
 AH.persist = () => { try { localStorage.setItem(AH.saveKey(), JSON.stringify(AH.save)); } catch (e) { /* ignore */ } };
 
-AH.xpFor = (L) => 75 * (L - 1) * L;   // cumulative XP needed to reach level L
-AH.level = (xp = AH.save.xp) => { let L = 1; while (xp >= AH.xpFor(L + 1)) L++; return L; };
+// Progression by maps: city 1 is open, each next city unlocks after a podium (top 3) in the previous one.
+AH.PODIUM = 3;
+AH.cityUnlocked = (i) => i === 0 || ((AH.save.cleared || {})[AH.CITIES[i - 1].id] || 99) <= AH.PODIUM;
+AH.unlockedCount = () => AH.CITIES.filter((c, i) => AH.cityUnlocked(i)).length;
 AH.carById = (id) => AH.CARS.find(c => c.id === id) || AH.CARS[0];
 AH.ups = (id) => { const u = AH.save.ups[id] || {}; return { engine: u.engine || 0, tires: u.tires || 0, nitro: u.nitro || 0, boost: u.boost || 0 }; };
 AH.upCost = (car, upId, lvl) => {

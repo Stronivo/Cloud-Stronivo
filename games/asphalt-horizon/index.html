@@ -139,6 +139,9 @@ kbd { font-family: var(--display); font-size: 12px; padding: 1px 6px; border: 1p
 .city-row { display: flex; justify-content: space-between; font-size: 14px; gap: 8px; }
 .stars { color: var(--gold); letter-spacing: 2px; }
 .stars .off { color: rgba(255,255,255,.18); }
+.city.locked { filter: grayscale(.75) brightness(.7); }
+.city.locked:hover { transform: none; border-color: var(--line); }
+.go.lock { background: rgba(255,255,255,.08); color: var(--muted); letter-spacing: .02em; font-size: 13px; }
 .go { margin-top: 4px; display: block; text-align: center; padding: 10px; border-radius: 10px; background: var(--grad); font-family: var(--display); font-weight: 700; letter-spacing: .12em; color: #fff; }
 
 /* ---------- garage ---------- */

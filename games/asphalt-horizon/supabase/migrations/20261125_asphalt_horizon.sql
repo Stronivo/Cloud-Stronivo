@@ -59,6 +59,7 @@ create table if not exists public.ah_profiles (
   ups jsonb not null default '{}'::jsonb,
   boosts jsonb not null default '{"freeze": 2, "fly": 2, "nitro": 2}'::jsonb,
   best jsonb not null default '{}'::jsonb,
+  cleared jsonb not null default '{}'::jsonb,
   cosm jsonb not null default '{}'::jsonb check (pg_column_size(cosm) < 4096),
   races integer not null default 0,
   wins integer not null default 0,
@@ -66,6 +67,7 @@ create table if not exists public.ah_profiles (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+alter table public.ah_profiles add column if not exists cleared jsonb not null default '{}'::jsonb;  -- best place per city (podium unlocks the next map)
 alter table public.ah_profiles enable row level security;
 drop policy if exists "read own profile" on public.ah_profiles;
 create policy "read own profile" on public.ah_profiles for select to authenticated using ((select auth.uid()) = id);
@@ -134,7 +136,7 @@ end $$;
 create or replace function public.ah_profile_json(p public.ah_profiles)
 returns jsonb language sql stable set search_path = '' as $$
   select jsonb_build_object('nickname', p.nickname, 'pts', p.pts, 'xp', p.xp, 'level', public.ah_level(p.xp),
-    'owned', to_jsonb(p.owned), 'sel', p.sel, 'ups', p.ups, 'boosts', p.boosts, 'best', p.best, 'cosm', p.cosm,
+    'owned', to_jsonb(p.owned), 'sel', p.sel, 'ups', p.ups, 'boosts', p.boosts, 'best', p.best, 'cleared', p.cleared, 'cosm', p.cosm,
     'races', p.races, 'wins', p.wins);
 $$;
 
@@ -204,7 +206,6 @@ begin
     select * into car from public.ah_cars where id = p_item;
     if not found then raise exception 'unknown_item'; end if;
     if p_item = any (prof.owned) then raise exception 'already_owned'; end if;
-    if public.ah_level(prof.xp) < car.min_level then raise exception 'level_too_low'; end if;
     if prof.pts < car.price then raise exception 'not_enough_points'; end if;
     update public.ah_profiles set pts = pts - car.price, owned = array_append(owned, p_item), sel = p_item, updated_at = now()
     where id = prof.id returning * into prof;
@@ -267,6 +268,8 @@ begin
     pts = pts + reward, xp = xp + gain_xp, races = races + 1, wins = wins + (case when p_place = 1 then 1 else 0 end),
     boosts = b,
     best = case when v_best is null or p_time < v_best then jsonb_set(prof.best, array[p_city], to_jsonb(p_time)) else prof.best end,
+    cleared = case when (prof.cleared ->> p_city) is null or p_place < (prof.cleared ->> p_city)::integer
+                   then jsonb_set(prof.cleared, array[p_city], to_jsonb(p_place)) else prof.cleared end,
     last_race_at = now(), updated_at = now()
   where id = prof.id returning * into prof;
   return jsonb_build_object('reward', reward, 'xp', gain_xp, 'profile', public.ah_profile_json(prof));

@@ -43,7 +43,6 @@ AH.Net = (() => {
       party_full: 'To party jest pełne (maks. 6 graczy).',
       too_fast: 'Wynik wysłany zbyt szybko po poprzednim. Spróbuj za chwilę.',
       not_enough_points: 'Za mało punktów.',
-      level_too_low: 'Za niski poziom.',
       invalid_code: 'Kod ma 6 znaków (litery i cyfry).',
     };
     for (const k in map) if (m.includes(k)) return map[k];
@@ -92,7 +91,7 @@ AH.Net = (() => {
   N.applyProfile = (p) => {
     if (!p) return;
     const S = AH.save;
-    S.pts = p.pts; S.xp = p.xp; S.sel = p.sel; S.races = p.races; S.wins = p.wins;
+    S.pts = p.pts; S.sel = p.sel; S.cleared = p.cleared || {}; S.races = p.races; S.wins = p.wins;
     S.owned = {}; (p.owned || []).forEach(id => (S.owned[id] = true));
     S.ups = p.ups || {}; S.boosts = p.boosts || {}; S.best = p.best || {}; S.cosm = p.cosm || {};
     N.nickname = p.nickname;
