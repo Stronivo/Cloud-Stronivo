@@ -4,14 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#F7F8F5">
+<!-- Adres API backendu Trashly (domyślnie ten sam serwer). -->
+<meta name="trashly-api" content="/api">
 <title>Trashly – kalendarz wywozu odpadów</title>
-<meta name="description" content="Trashly – sprawdź, kiedy odbierane są odpady spod Twojego adresu i jaki worek przygotować.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23174C3C'/%3E%3Cpath d='M10 13h12l-1.2 10.2a2 2 0 0 1-2 1.8h-5.6a2 2 0 0 1-2-1.8Z' fill='%23F7F8F5'/%3E%3Cpath d='M9 11h14' stroke='%23F7F8F5' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M16 9.6c0-3.1 2.3-4.6 5.2-4.6 0 3.1-2.1 4.6-5.2 4.6Z' fill='%2364B57A'/%3E%3C/svg%3E">
+<meta name="description" content="Trashly – sprawdź, kiedy odbierane są odpady spod Twojego adresu. Dane z oficjalnych źródeł gmin.">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/logo-mark.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
+
 /* ============ Tokeny projektu ============ */
 :root{
   --forest:#174C3C; --forest-2:#1F5E4B; --fresh:#64B57A; --fresh-soft:#E7F3EA;
@@ -339,52 +342,155 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
 }
 @media (min-width:1200px){ .cats{grid-template-columns:repeat(6,1fr)} .cat{min-height:170px} .cat.wide{min-height:0} }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ============ Rozszerzenia: dane rzeczywiste, zaufanie, stany ============ */
+.brand img{width:34px;height:34px;display:block;object-fit:contain}
+.brand .word{font-weight:700;letter-spacing:-.03em;color:var(--forest)}
+.brand .word b{color:#4E9E4A;font-weight:700}
+.topbar .brand img{width:38px;height:38px}
+.setup-hero .brand img{width:52px;height:52px}
+.setup-hero .brand{font-size:24px}
+
+/* pasek zaufania pod hero */
+.trust{grid-column:1 / -1;display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-top:14px;font-size:13px;color:#4A534D}
+.trust .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 8px;border-radius:9px;background:var(--fresh-soft);color:var(--forest);font-weight:600}
+.trust .pill .i{width:15px;height:15px;stroke-width:2.2}
+.trust.stale .pill{background:#FCF0D9;color:#8A5A00}
+.trust.updated .pill{background:#E4EDFB;color:#1F55AD}
+.trust .sep{color:var(--muted-2)}
+.trust .more{font-weight:600;color:var(--forest);padding:4px 2px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(23,76,60,.3)}
+.trust .more:hover{text-decoration-color:var(--forest)}
+.badge.chg{background:#FCF0D9;color:#8A5A00}
+.row .chg-note{display:inline-flex;align-items:center;gap:4px;margin-left:6px;font-size:12px;font-weight:600;color:#8A5A00}
+.row .chg-note .i{width:13px;height:13px}
+
+/* karty stanów: brak harmonogramu, brak danych, offline */
+.state{padding:24px;display:grid;gap:14px}
+.state-top{display:flex;gap:14px;align-items:flex-start}
+.state-ic{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;flex:none;background:#FCF0D9;color:#8A5A00}
+.state-ic .i{width:24px;height:24px}
+.state.err .state-ic{background:#FDE8E4;color:#B8341F}
+.state.info .state-ic{background:var(--fresh-soft);color:var(--forest)}
+.state h2{font-size:19px;font-weight:650;letter-spacing:-.02em;line-height:1.3}
+.state p{color:#4A534D;font-size:14px;margin-top:4px}
+.state .actions{display:flex;flex-wrap:wrap;gap:8px}
+.state .docs{display:grid;gap:6px;margin-top:2px}
+.state .docs a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--bg);font-size:14px;font-weight:500;text-decoration:none;color:var(--text)}
+.state .docs a:hover{background:#ECEFE9}
+.state .docs a .i{width:16px;height:16px;color:var(--forest)}
+.addr-level{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 8px;border-radius:8px;background:var(--fresh-soft);color:var(--forest)}
+.addr-level.partial{background:#FCF0D9;color:#8A5A00}
+.addr-level .i{width:13px;height:13px;stroke-width:2.4}
+.offline{display:none;align-items:center;gap:10px;margin:0 0 12px;padding:10px 14px;border-radius:14px;background:#FCF0D9;color:#6B4600;font-size:14px;font-weight:500}
+.offline.show{display:flex}
+.offline .i{width:18px;height:18px}
+
+/* ładowanie */
+.skel{border-radius:var(--r-lg);background:linear-gradient(90deg,#EEF0EC 0%,#F6F7F4 50%,#EEF0EC 100%);background-size:200% 100%;animation:shim 1.2s infinite linear}
+@keyframes shim{from{background-position:200% 0}to{background-position:-200% 0}}
+.loading-note{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;margin:12px 4px}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--forest);animation:rot .8s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* autouzupełnianie */
+.ac-wrap{position:relative}
+.ac{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:5;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);padding:6px;display:none;max-height:260px;overflow:auto}
+.ac.show{display:block}
+.ac button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:10px 12px;border-radius:10px;font-size:15px}
+.ac button:hover,.ac button[aria-selected="true"]{background:var(--hover)}
+.ac button small{color:var(--muted);font-size:12px}
+.ac .ac-empty{padding:10px 12px;color:var(--muted);font-size:14px}
+.city-note{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:#4A534D;background:var(--bg);border-radius:12px;padding:10px 12px}
+.city-note .i{width:16px;height:16px;color:var(--forest);margin-top:2px}
+.city-note.warn .i{color:#8A5A00}
+.form-row3{display:grid;grid-template-columns:1fr 96px 84px;gap:10px}
+.field-err{font-size:13px;color:#B8341F;display:flex;gap:6px;align-items:flex-start}
+.field-err .i{width:16px;height:16px;margin-top:2px}
+.setup-close{position:absolute;top:16px;right:16px}
+
+/* szczegóły źródła */
+.kv{display:grid;gap:0;margin:4px 0 12px}
+.kv div{display:grid;grid-template-columns:140px 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--line-2);font-size:14px}
+.kv div:first-child{border-top:0}
+.kv dt{color:var(--muted)}
+.kv dd{color:var(--text);word-break:break-word}
+.kv dd a{color:var(--forest);font-weight:550}
+.chg-list{display:grid;gap:6px;margin-top:6px}
+.chg-list span{font-size:13px;color:#4A534D}
+@media (max-width:420px){ .kv div{grid-template-columns:1fr;gap:2px} .form-row3{grid-template-columns:1fr 1fr} .form-row3 .field:first-child{grid-column:1 / -1} }
+
+/* wybór typu zabudowy */
+.bt{border:0;padding:0;margin:0}
+.bt legend{font-size:13px;font-weight:550;color:#4A534D;margin-bottom:6px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg label{position:relative;cursor:pointer}
+.seg input{position:absolute;opacity:0;inset:0}
+.seg span{display:flex;align-items:center;gap:8px;min-height:52px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-weight:550;font-size:14px;transition:all .15s}
+.seg span .i{width:18px;height:18px;color:var(--muted)}
+.seg input:checked + span{border-color:var(--forest);background:var(--fresh-soft);color:var(--forest);box-shadow:0 0 0 3px var(--fresh-soft)}
+.seg input:checked + span .i{color:var(--forest)}
+.seg input:focus-visible + span{outline:2px solid var(--fresh);outline-offset:2px}
+
 </style>
 </head>
 <body>
 
-<!-- ============ Ekran pierwszego wyboru adresu ============ -->
+<!-- ============ Wybór adresu ============ -->
 <section class="setup" id="setup" aria-labelledby="setupTitle">
+  <button class="icon-btn setup-close" id="setupClose" aria-label="Zamknij" hidden><svg class="i"><use href="#i-x"/></svg></button>
   <div class="setup-inner">
     <div class="setup-hero">
-      <a class="brand" href="#" aria-label="Trashly"><span data-logo></span><span>Trashly</span></a>
+      <a class="brand" href="#" aria-label="Trashly"><img src="assets/logo-mark.png" alt=""><span class="word">Trash<b>ly</b></span></a>
       <h1 id="setupTitle">Sprawdź harmonogram<br>dla <span>swojej okolicy</span></h1>
-      <p>Trashly podpowie, kiedy przyjedzie śmieciarka i który worek wystawić przed dom. Bez szukania w PDF-ach.</p>
+      <p>Trashly pokazuje terminy odbioru prosto z oficjalnych źródeł Twojej gminy – i mówi wprost, gdy czegoś nie da się potwierdzić.</p>
       <div class="setup-points">
-        <div><span class="ic" data-ic="calendar"></span>Wszystkie terminy odbioru w jednym miejscu</div>
-        <div><span class="ic" data-ic="bell"></span>Przypomnienie wieczorem dzień przed odbiorem</div>
-        <div><span class="ic" data-ic="search"></span>Podpowiedź, do którego worka co wyrzucić</div>
+        <div><span class="ic"><svg class="i"><use href="#i-shield"/></svg></span>Adres sprawdzamy w rejestrach urzędowych</div>
+        <div><span class="ic"><svg class="i"><use href="#i-calendar"/></svg></span>Terminy z systemów i dokumentów gminy</div>
+        <div><span class="ic"><svg class="i"><use href="#i-bell"/></svg></span>Informacja, gdy harmonogram się zmieni</div>
       </div>
     </div>
     <div class="card setup-card">
-      <h2>Twój adres</h2>
-      <p>Harmonogram jest wspólny dla całej ulicy.</p>
-      <form class="form-grid" id="setupForm" novalidate>
+      <h2 id="setupFormTitle">Twój adres</h2>
+      <p>Wybierz miasto, ulicę i numer budynku.</p>
+      <form class="form-grid" id="setupForm" novalidate autocomplete="off">
         <div class="field">
           <label for="sCity">Miasto</label>
-          <select class="select" id="sCity" data-city></select>
+          <select class="select" id="sCity"></select>
         </div>
-        <div class="form-row">
-          <div class="field">
+        <div class="city-note" id="cityNote" hidden></div>
+        <div class="form-row3">
+          <div class="field ac-wrap">
             <label for="sStreet">Ulica</label>
-            <select class="select" id="sStreet" data-streets required></select>
+            <input class="input" id="sStreet" placeholder="np. Wodzisławska" maxlength="120" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="acStreet">
+            <div class="ac" id="acStreet" role="listbox"></div>
+          </div>
+          <div class="field ac-wrap">
+            <label for="sNo">Numer</label>
+            <input class="input" id="sNo" placeholder="np. 12" maxlength="16" inputmode="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="acNo">
+            <div class="ac" id="acNo" role="listbox"></div>
           </div>
           <div class="field">
-            <label for="sNo">Numer</label>
-            <input class="input" id="sNo" inputmode="text" autocomplete="address-line2" placeholder="np. 12" maxlength="10">
+            <label for="sApt">Lokal</label>
+            <input class="input" id="sApt" placeholder="opc." maxlength="10">
           </div>
         </div>
-        <button class="btn btn-primary btn-block" type="submit">Zobacz mój harmonogram <svg class="i"><use href="#i-arrow"/></svg></button>
-        <p class="note" id="setupErr" role="alert" hidden></p>
+        <fieldset class="field bt" id="btField" hidden>
+          <legend>Typ zabudowy</legend>
+          <div class="seg">
+            <label><input type="radio" name="bt" value="SINGLE"><span><svg class="i"><use href="#i-house"/></svg>Dom jednorodzinny</span></label>
+            <label><input type="radio" name="bt" value="MULTI"><span><svg class="i"><use href="#i-block"/></svg>Budynek wielorodzinny</span></label>
+          </div>
+        </fieldset>
+        <p class="field-err" id="setupErr" role="alert" hidden></p>
+        <button class="btn btn-primary btn-block" type="submit" id="setupSubmit">Zobacz mój harmonogram <svg class="i"><use href="#i-arrow"/></svg></button>
       </form>
-      <div class="preview" data-legend></div>
     </div>
   </div>
 </section>
 
 <!-- ============ Nawigacja boczna (desktop) ============ -->
 <aside class="sidebar" aria-label="Menu główne">
-  <a class="brand" href="#" data-go="home"><span data-logo></span><span>Trashly</span></a>
+  <a class="brand" href="#" data-go="home"><img src="assets/logo-mark.png" alt=""><span class="word">Trash<b>ly</b></span></a>
   <nav class="nav" id="sideNav">
     <button data-go="home"><svg class="i"><use href="#i-home"/></svg>Dashboard</button>
     <button data-go="calendar"><svg class="i"><use href="#i-calendar"/></svg>Kalendarz</button>
@@ -392,33 +498,31 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
     <button data-go="addresses"><svg class="i"><use href="#i-pin"/></svg>Moje adresy</button>
     <button data-go="settings"><svg class="i"><use href="#i-settings"/></svg>Ustawienia</button>
   </nav>
-  <div class="side-card"><b>Segregujesz – oszczędzasz</b>Za niesegregowanie odpadów opłata może być nawet czterokrotnie wyższa.</div>
+  <div class="side-card"><b>Dane z oficjalnych źródeł</b>Każdy termin ma źródło i datę weryfikacji. Gdy czegoś nie da się potwierdzić – mówimy o tym wprost.</div>
 </aside>
 
 <!-- ============ Główna część ============ -->
 <div class="main">
   <header class="topbar">
-    <a class="brand" href="#" data-go="home" aria-label="Trashly – strona główna"><span data-logo></span><span>Trashly</span></a>
+    <a class="brand" href="#" data-go="home" aria-label="Trashly – strona główna"><img src="assets/logo-mark.png" alt=""><span class="word">Trash<b>ly</b></span></a>
     <button class="addr-btn" id="addrBtn" aria-label="Zmień adres">
       <svg class="i"><use href="#i-pin"/></svg>
-      <span class="txt"><small data-city-name></small><strong id="addrLabel">—</strong></span>
+      <span class="txt"><small id="addrCity"></small><strong id="addrLabel">—</strong></span>
       <svg class="i chev"><use href="#i-down"/></svg>
     </button>
     <span class="spacer"></span>
     <button class="icon-btn" id="bellBtn" aria-label="Powiadomienia" aria-expanded="false"><svg class="i"><use href="#i-bell"/></svg><span class="dot" id="bellDot" hidden></span></button>
-    <button class="avatar" data-go="settings" aria-label="Ustawienia profilu">MK</button>
+    <button class="avatar" data-go="settings" aria-label="Ustawienia"><svg class="i" style="width:18px;height:18px"><use href="#i-user"/></svg></button>
   </header>
 
   <div class="popover card" id="bellPop" role="dialog" aria-label="Powiadomienia"></div>
 
   <main class="container">
-    <!-- Dashboard -->
+    <div class="offline" id="offline" role="status"><svg class="i"><use href="#i-wifi-off"/></svg><span>Brak połączenia z internetem. Pokazujemy ostatnio pobrane dane.</span></div>
     <section class="view" id="view-home" aria-label="Dashboard"></section>
-    <!-- Kalendarz -->
     <section class="view" id="view-calendar" aria-label="Kalendarz"></section>
-    <!-- Wyszukiwarka -->
     <section class="view" id="view-guide" aria-label="Co gdzie wyrzucić?">
-      <div class="page-title"><h1>Co gdzie wyrzucić?</h1><p>Wpisz nazwę odpadu, a powiemy Ci, do którego worka trafia i jak go przygotować.</p></div>
+      <div class="page-title"><h1>Co gdzie wyrzucić?</h1><p>Wpisz nazwę odpadu, a podpowiemy, gdzie go wyrzucić i jak przygotować.</p></div>
       <div class="search">
         <svg class="i"><use href="#i-search"/></svg>
         <label class="sr" for="q">Szukaj odpadu</label>
@@ -428,12 +532,8 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
       <div class="chips" id="chips"></div>
       <div class="results" id="results" aria-live="polite"></div>
     </section>
-    <!-- Adresy -->
     <section class="view" id="view-addresses" aria-label="Moje adresy"></section>
-    <!-- Ustawienia -->
     <section class="view" id="view-settings" aria-label="Ustawienia"></section>
-
-    <p class="demo-note">Dane przykładowe – przed publikacją podmień je na oficjalny harmonogram gminy.</p>
   </main>
 </div>
 
@@ -445,7 +545,7 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
   <button data-go="profile"><svg class="i"><use href="#i-user"/></svg>Profil</button>
 </nav>
 
-<!-- ============ Okno eksportu do kalendarza ============ -->
+<!-- ============ Okno: eksport .ics ============ -->
 <div class="scrim" id="icsModal" role="dialog" aria-modal="true" aria-labelledby="icsTitle">
   <div class="modal">
     <div class="modal-head">
@@ -459,9 +559,20 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
   </div>
 </div>
 
+<!-- ============ Okno: szczegóły źródła ============ -->
+<div class="scrim" id="detailsModal" role="dialog" aria-modal="true" aria-labelledby="detTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="detTitle">Szczegóły harmonogramu</h2>
+      <button class="icon-btn" data-close aria-label="Zamknij"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div id="detBody"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status"><svg class="i"><use href="#i-check"/></svg><span></span></div>
 
-<!-- ============ Ikony (styl Lucide, rysowane ręcznie) ============ -->
+<!-- ============ Ikony (styl Lucide) ============ -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.2 12 3l9 7.2"/><path d="M5 8.8V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V8.8"/></symbol>
@@ -485,807 +596,729 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
     <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20Z"/><path d="M12 10v4M12 17h.01"/></symbol>
     <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m5.5 6 1.2 14.2A2 2 0 0 0 8.7 22h6.6a2 2 0 0 0 2-1.8L18.5 6"/></symbol>
-    <symbol id="i-coffee" viewBox="0 0 24 24"><path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5Z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 2.5v2.5M12 2.5v2.5"/></symbol>
+    <symbol id="i-house" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></symbol>
+    <symbol id="i-block" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M11 21v-3h2v3"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.5-4.5L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.5 4.5L20 16"/><path d="M20 21v-5h-5"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
+    <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M2 2l20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 12.9a10 10 0 0 1 5.2-2.7M19 12.9a10 10 0 0 0-2.4-1.6"/><path d="M12 20h.01"/></symbol>
     <!-- Ikony kategorii -->
     <symbol id="c-zmieszane" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m5.5 6 1.2 14.2A2 2 0 0 0 8.7 22h6.6a2 2 0 0 0 2-1.8L18.5 6"/><path d="M10 11v6M14 11v6"/></symbol>
     <symbol id="c-plastik" viewBox="0 0 24 24"><path d="M10 2h4v2.5l2.2 3.3a3 3 0 0 1 .5 1.7V20a2 2 0 0 1-2 2H9.3a2 2 0 0 1-2-2V9.5a3 3 0 0 1 .5-1.7L10 4.5Z"/><path d="M7.3 12h9.4M7.3 16h9.4"/></symbol>
     <symbol id="c-papier" viewBox="0 0 24 24"><path d="M4 4h12v15a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M16 8h4v11a2 2 0 0 1-4 0"/><path d="M7.5 8h5M7.5 12h5M7.5 16h3"/></symbol>
     <symbol id="c-szklo" viewBox="0 0 24 24"><path d="M8 2h8v3H8z"/><path d="M7 5h10a1 1 0 0 1 1 1v13a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V6a1 1 0 0 1 1-1Z"/><path d="M9.5 10v6"/></symbol>
     <symbol id="c-bio" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 4 13c0-6 5-10 16-10 0 11-4 17-9 17Z"/><path d="M4 21c3-6 7-9 11-11"/></symbol>
+    <symbol id="c-segregowane" viewBox="0 0 24 24"><path d="M7 7 4 12h6Z"/><path d="M17 7l3 5h-6Z"/><path d="M9 17h6l-3 4Z"/><path d="M8.5 9.5 11 5.5h2l2.5 4M14.5 15.5 13 18M9.5 15.5 11 18"/></symbol>
+    <symbol id="c-popiol" viewBox="0 0 24 24"><path d="M12 3c2 3 5 5 5 9a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-5 1-7.5Z"/><path d="M4 21h16"/></symbol>
     <symbol id="c-gabaryty" viewBox="0 0 24 24"><path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Z"/><path d="M5 19v2M19 19v2"/></symbol>
+    <symbol id="c-elektro" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01M9 6h6"/></symbol>
+    <symbol id="c-opony" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v5M12 16v5M3 12h5M16 12h5"/></symbol>
+    <symbol id="c-choinki" viewBox="0 0 24 24"><path d="M12 2 7 9h3l-4 6h4l-4 5h12l-4-5h4l-4-6h3Z"/><path d="M12 20v2"/></symbol>
     <symbol id="c-pszok" viewBox="0 0 24 24"><rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 11v2M6 10v4M10 10v4"/></symbol>
   </defs>
 </svg>
 
 <script>
 "use strict";
+/* =====================================================================
+   Trashly – frontend. Wszystkie dane harmonogramów pochodzą z backendu
+   (server/), który pobiera je z oficjalnych źródeł gmin. Frontend nie
+   zawiera żadnych przykładowych terminów.
+   ===================================================================== */
+const API = (document.querySelector('meta[name="trashly-api"]')?.content || "/api").replace(/\/$/, "");
 
-/* ==========================================================================
-   DANE HARMONOGRAMU
-   --------------------------------------------------------------------------
-   UWAGA: To są DANE PRZYKŁADOWE wygenerowane według typowych cykli
-   (zmieszane – co tydzień, plastik i metale oraz papier – co 2 tygodnie,
-   szkło – co 4 tygodnie, bio – co tydzień od kwietnia do października
-   i co 2 tygodnie zimą, gabaryty – 2 razy w półroczu).
-   Terminy wypadające w święta przesunięto na kolejny dzień roboczy.
-
-   PRZED PUBLIKACJĄ ZASTĄP JE OFICJALNYM HARMONOGRAMEM swojej gminy
-   (zwykle PDF lub tabela na stronie urzędu / operatora odbioru).
-   Format: daty "RRRR-MM-DD", klucze rodzajów jak poniżej.
-   Brak gabarytów na danej ulicy → pusta tablica lub brak klucza.
-   ========================================================================== */
-const MIASTO = "Poznań";
-
-const HARMONOGRAM = [
-  {
-    ulica: "ul. Dąbrowskiego",
-    odbiory: {
-      zmieszane: ["2026-11-06", "2026-11-13", "2026-11-20", "2026-11-27", "2026-12-04", "2026-12-11", "2026-12-18", "2026-12-28", "2027-01-02", "2027-01-08", "2027-01-15", "2027-01-22", "2027-01-29", "2027-02-05", "2027-02-12", "2027-02-19", "2027-02-26", "2027-03-05", "2027-03-12", "2027-03-19", "2027-03-26", "2027-04-02", "2027-04-09", "2027-04-16", "2027-04-23", "2027-04-30", "2027-05-07", "2027-05-14", "2027-05-21", "2027-05-28", "2027-06-04", "2027-06-11", "2027-06-18", "2027-06-25"],
-      plastik: ["2026-11-03", "2026-11-17", "2026-12-01", "2026-12-15", "2026-12-29", "2027-01-12", "2027-01-26", "2027-02-09", "2027-02-23", "2027-03-09", "2027-03-23", "2027-04-06", "2027-04-20", "2027-05-04", "2027-05-18", "2027-06-01", "2027-06-15", "2027-06-29"],
-      papier: ["2026-11-02", "2026-11-16", "2026-11-30", "2026-12-14", "2026-12-28", "2027-01-11", "2027-01-25", "2027-02-08", "2027-02-22", "2027-03-08", "2027-03-22", "2027-04-05", "2027-04-19", "2027-05-04", "2027-05-17", "2027-05-31", "2027-06-14", "2027-06-28"],
-      "szkło": ["2026-11-18", "2026-12-16", "2027-01-13", "2027-02-10", "2027-03-10", "2027-04-07", "2027-05-05", "2027-06-02", "2027-06-30"],
-      bio: ["2026-11-05", "2026-11-19", "2026-12-03", "2026-12-17", "2026-12-31", "2027-01-14", "2027-01-28", "2027-02-11", "2027-02-25", "2027-03-11", "2027-03-25", "2027-04-08", "2027-04-15", "2027-04-22", "2027-04-29", "2027-05-06", "2027-05-13", "2027-05-20", "2027-05-28", "2027-06-03", "2027-06-10", "2027-06-17", "2027-06-24"],
-      gabaryty: ["2026-12-16", "2027-04-21"]
-    }
-  },
-  {
-    ulica: "ul. Garbary",
-    odbiory: {
-      zmieszane: ["2026-11-06", "2026-11-13", "2026-11-20", "2026-11-27", "2026-12-04", "2026-12-11", "2026-12-18", "2026-12-28", "2027-01-02", "2027-01-08", "2027-01-15", "2027-01-22", "2027-01-29", "2027-02-05", "2027-02-12", "2027-02-19", "2027-02-26", "2027-03-05", "2027-03-12", "2027-03-19", "2027-03-26", "2027-04-02", "2027-04-09", "2027-04-16", "2027-04-23", "2027-04-30", "2027-05-07", "2027-05-14", "2027-05-21", "2027-05-28", "2027-06-04", "2027-06-11", "2027-06-18", "2027-06-25"],
-      plastik: ["2026-11-03", "2026-11-17", "2026-12-01", "2026-12-15", "2026-12-29", "2027-01-12", "2027-01-26", "2027-02-09", "2027-02-23", "2027-03-09", "2027-03-23", "2027-04-06", "2027-04-20", "2027-05-04", "2027-05-18", "2027-06-01", "2027-06-15", "2027-06-29"],
-      papier: ["2026-11-02", "2026-11-16", "2026-11-30", "2026-12-14", "2026-12-28", "2027-01-11", "2027-01-25", "2027-02-08", "2027-02-22", "2027-03-08", "2027-03-22", "2027-04-05", "2027-04-19", "2027-05-04", "2027-05-17", "2027-05-31", "2027-06-14", "2027-06-28"],
-      "szkło": ["2026-11-18", "2026-12-16", "2027-01-13", "2027-02-10", "2027-03-10", "2027-04-07", "2027-05-05", "2027-06-02", "2027-06-30"],
-      bio: ["2026-11-05", "2026-11-19", "2026-12-03", "2026-12-17", "2026-12-31", "2027-01-14", "2027-01-28", "2027-02-11", "2027-02-25", "2027-03-11", "2027-03-25", "2027-04-08", "2027-04-15", "2027-04-22", "2027-04-29", "2027-05-06", "2027-05-13", "2027-05-20", "2027-05-28", "2027-06-03", "2027-06-10", "2027-06-17", "2027-06-24"],
-      gabaryty: ["2026-12-16", "2027-04-21"]
-    }
-  },
-  {
-    ulica: "ul. Grunwaldzka",
-    odbiory: {
-      zmieszane: ["2026-11-02", "2026-11-09", "2026-11-16", "2026-11-23", "2026-11-30", "2026-12-07", "2026-12-14", "2026-12-21", "2026-12-28", "2027-01-04", "2027-01-11", "2027-01-18", "2027-01-25", "2027-02-01", "2027-02-08", "2027-02-15", "2027-02-22", "2027-03-01", "2027-03-08", "2027-03-15", "2027-03-22", "2027-03-30", "2027-04-05", "2027-04-12", "2027-04-19", "2027-04-26", "2027-05-04", "2027-05-10", "2027-05-17", "2027-05-24", "2027-05-31", "2027-06-07", "2027-06-14", "2027-06-21", "2027-06-28"],
-      plastik: ["2026-11-12", "2026-11-26", "2026-12-10", "2026-12-24", "2027-01-07", "2027-01-21", "2027-02-04", "2027-02-18", "2027-03-04", "2027-03-18", "2027-04-01", "2027-04-15", "2027-04-29", "2027-05-13", "2027-05-28", "2027-06-10", "2027-06-24"],
-      papier: ["2026-11-03", "2026-11-17", "2026-12-01", "2026-12-15", "2026-12-29", "2027-01-12", "2027-01-26", "2027-02-09", "2027-02-23", "2027-03-09", "2027-03-23", "2027-04-06", "2027-04-20", "2027-05-04", "2027-05-18", "2027-06-01", "2027-06-15", "2027-06-29"],
-      "szkło": ["2026-11-06", "2026-12-04", "2027-01-02", "2027-01-29", "2027-02-26", "2027-03-26", "2027-04-23", "2027-05-21", "2027-06-18"],
-      bio: ["2026-11-04", "2026-11-18", "2026-12-02", "2026-12-16", "2026-12-30", "2027-01-13", "2027-01-27", "2027-02-10", "2027-02-24", "2027-03-10", "2027-03-24", "2027-04-07", "2027-04-14", "2027-04-21", "2027-04-28", "2027-05-05", "2027-05-12", "2027-05-19", "2027-05-26", "2027-06-02", "2027-06-09", "2027-06-16", "2027-06-23", "2027-06-30"],
-      gabaryty: ["2026-12-09", "2027-04-14"]
-    }
-  },
-  {
-    ulica: "ul. Głogowska",
-    odbiory: {
-      zmieszane: ["2026-11-02", "2026-11-09", "2026-11-16", "2026-11-23", "2026-11-30", "2026-12-07", "2026-12-14", "2026-12-21", "2026-12-28", "2027-01-04", "2027-01-11", "2027-01-18", "2027-01-25", "2027-02-01", "2027-02-08", "2027-02-15", "2027-02-22", "2027-03-01", "2027-03-08", "2027-03-15", "2027-03-22", "2027-03-30", "2027-04-05", "2027-04-12", "2027-04-19", "2027-04-26", "2027-05-04", "2027-05-10", "2027-05-17", "2027-05-24", "2027-05-31", "2027-06-07", "2027-06-14", "2027-06-21", "2027-06-28"],
-      plastik: ["2026-11-12", "2026-11-26", "2026-12-10", "2026-12-24", "2027-01-07", "2027-01-21", "2027-02-04", "2027-02-18", "2027-03-04", "2027-03-18", "2027-04-01", "2027-04-15", "2027-04-29", "2027-05-13", "2027-05-28", "2027-06-10", "2027-06-24"],
-      papier: ["2026-11-03", "2026-11-17", "2026-12-01", "2026-12-15", "2026-12-29", "2027-01-12", "2027-01-26", "2027-02-09", "2027-02-23", "2027-03-09", "2027-03-23", "2027-04-06", "2027-04-20", "2027-05-04", "2027-05-18", "2027-06-01", "2027-06-15", "2027-06-29"],
-      "szkło": ["2026-11-06", "2026-12-04", "2027-01-02", "2027-01-29", "2027-02-26", "2027-03-26", "2027-04-23", "2027-05-21", "2027-06-18"],
-      bio: ["2026-11-04", "2026-11-18", "2026-12-02", "2026-12-16", "2026-12-30", "2027-01-13", "2027-01-27", "2027-02-10", "2027-02-24", "2027-03-10", "2027-03-24", "2027-04-07", "2027-04-14", "2027-04-21", "2027-04-28", "2027-05-05", "2027-05-12", "2027-05-19", "2027-05-26", "2027-06-02", "2027-06-09", "2027-06-16", "2027-06-23", "2027-06-30"],
-      gabaryty: ["2026-12-09", "2027-04-14"]
-    }
-  },
-  {
-    ulica: "ul. Hetmańska",
-    odbiory: {
-      zmieszane: ["2026-11-02", "2026-11-09", "2026-11-16", "2026-11-23", "2026-11-30", "2026-12-07", "2026-12-14", "2026-12-21", "2026-12-28", "2027-01-04", "2027-01-11", "2027-01-18", "2027-01-25", "2027-02-01", "2027-02-08", "2027-02-15", "2027-02-22", "2027-03-01", "2027-03-08", "2027-03-15", "2027-03-22", "2027-03-30", "2027-04-05", "2027-04-12", "2027-04-19", "2027-04-26", "2027-05-04", "2027-05-10", "2027-05-17", "2027-05-24", "2027-05-31", "2027-06-07", "2027-06-14", "2027-06-21", "2027-06-28"],
-      plastik: ["2026-11-12", "2026-11-26", "2026-12-10", "2026-12-24", "2027-01-07", "2027-01-21", "2027-02-04", "2027-02-18", "2027-03-04", "2027-03-18", "2027-04-01", "2027-04-15", "2027-04-29", "2027-05-13", "2027-05-28", "2027-06-10", "2027-06-24"],
-      papier: ["2026-11-03", "2026-11-17", "2026-12-01", "2026-12-15", "2026-12-29", "2027-01-12", "2027-01-26", "2027-02-09", "2027-02-23", "2027-03-09", "2027-03-23", "2027-04-06", "2027-04-20", "2027-05-04", "2027-05-18", "2027-06-01", "2027-06-15", "2027-06-29"],
-      "szkło": ["2026-11-06", "2026-12-04", "2027-01-02", "2027-01-29", "2027-02-26", "2027-03-26", "2027-04-23", "2027-05-21", "2027-06-18"],
-      bio: ["2026-11-04", "2026-11-18", "2026-12-02", "2026-12-16", "2026-12-30", "2027-01-13", "2027-01-27", "2027-02-10", "2027-02-24", "2027-03-10", "2027-03-24", "2027-04-07", "2027-04-14", "2027-04-21", "2027-04-28", "2027-05-05", "2027-05-12", "2027-05-19", "2027-05-26", "2027-06-02", "2027-06-09", "2027-06-16", "2027-06-23", "2027-06-30"],
-      gabaryty: ["2026-12-09", "2027-04-14"]
-    }
-  },
-  {
-    ulica: "ul. Kościelna",
-    odbiory: {
-      zmieszane: ["2026-11-04", "2026-11-11", "2026-11-18", "2026-11-25", "2026-12-02", "2026-12-09", "2026-12-16", "2026-12-23", "2026-12-30", "2027-01-07", "2027-01-13", "2027-01-20", "2027-01-27", "2027-02-03", "2027-02-10", "2027-02-17", "2027-02-24", "2027-03-03", "2027-03-10", "2027-03-17", "2027-03-24", "2027-03-31", "2027-04-07", "2027-04-14", "2027-04-21", "2027-04-28", "2027-05-05", "2027-05-12", "2027-05-19", "2027-05-26", "2027-06-02", "2027-06-09", "2027-06-16", "2027-06-23", "2027-06-30"],
-      plastik: ["2026-11-13", "2026-11-27", "2026-12-11", "2026-12-28", "2027-01-08", "2027-01-22", "2027-02-05", "2027-02-19", "2027-03-05", "2027-03-19", "2027-04-02", "2027-04-16", "2027-04-30", "2027-05-14", "2027-05-28", "2027-06-11", "2027-06-25"],
-      papier: ["2026-11-05", "2026-11-19", "2026-12-03", "2026-12-17", "2026-12-31", "2027-01-14", "2027-01-28", "2027-02-11", "2027-02-25", "2027-03-11", "2027-03-25", "2027-04-08", "2027-04-22", "2027-05-06", "2027-05-20", "2027-06-03", "2027-06-17"],
-      "szkło": ["2026-11-09", "2026-12-07", "2027-01-04", "2027-02-01", "2027-03-01", "2027-03-30", "2027-04-26", "2027-05-24", "2027-06-21"],
-      bio: ["2026-11-03", "2026-11-17", "2026-12-01", "2026-12-15", "2026-12-29", "2027-01-12", "2027-01-26", "2027-02-09", "2027-02-23", "2027-03-09", "2027-03-23", "2027-04-06", "2027-04-13", "2027-04-20", "2027-04-27", "2027-05-04", "2027-05-11", "2027-05-18", "2027-05-25", "2027-06-01", "2027-06-08", "2027-06-15", "2027-06-22", "2027-06-29"],
-      gabaryty: ["2027-01-13", "2027-05-12"]
-    }
-  },
-  {
-    ulica: "ul. Mickiewicza",
-    odbiory: {
-      zmieszane: ["2026-11-04", "2026-11-11", "2026-11-18", "2026-11-25", "2026-12-02", "2026-12-09", "2026-12-16", "2026-12-23", "2026-12-30", "2027-01-07", "2027-01-13", "2027-01-20", "2027-01-27", "2027-02-03", "2027-02-10", "2027-02-17", "2027-02-24", "2027-03-03", "2027-03-10", "2027-03-17", "2027-03-24", "2027-03-31", "2027-04-07", "2027-04-14", "2027-04-21", "2027-04-28", "2027-05-05", "2027-05-12", "2027-05-19", "2027-05-26", "2027-06-02", "2027-06-09", "2027-06-16", "2027-06-23", "2027-06-30"],
-      plastik: ["2026-11-13", "2026-11-27", "2026-12-11", "2026-12-28", "2027-01-08", "2027-01-22", "2027-02-05", "2027-02-19", "2027-03-05", "2027-03-19", "2027-04-02", "2027-04-16", "2027-04-30", "2027-05-14", "2027-05-28", "2027-06-11", "2027-06-25"],
-      papier: ["2026-11-05", "2026-11-19", "2026-12-03", "2026-12-17", "2026-12-31", "2027-01-14", "2027-01-28", "2027-02-11", "2027-02-25", "2027-03-11", "2027-03-25", "2027-04-08", "2027-04-22", "2027-05-06", "2027-05-20", "2027-06-03", "2027-06-17"],
-      "szkło": ["2026-11-09", "2026-12-07", "2027-01-04", "2027-02-01", "2027-03-01", "2027-03-30", "2027-04-26", "2027-05-24", "2027-06-21"],
-      bio: ["2026-11-03", "2026-11-17", "2026-12-01", "2026-12-15", "2026-12-29", "2027-01-12", "2027-01-26", "2027-02-09", "2027-02-23", "2027-03-09", "2027-03-23", "2027-04-06", "2027-04-13", "2027-04-20", "2027-04-27", "2027-05-04", "2027-05-11", "2027-05-18", "2027-05-25", "2027-06-01", "2027-06-08", "2027-06-15", "2027-06-22", "2027-06-29"],
-      gabaryty: ["2027-01-13", "2027-05-12"]
-    }
-  },
-  {
-    ulica: "os. Piastowskie",
-    odbiory: {
-      zmieszane: ["2026-11-04", "2026-11-11", "2026-11-18", "2026-11-25", "2026-12-02", "2026-12-09", "2026-12-16", "2026-12-23", "2026-12-30", "2027-01-07", "2027-01-13", "2027-01-20", "2027-01-27", "2027-02-03", "2027-02-10", "2027-02-17", "2027-02-24", "2027-03-03", "2027-03-10", "2027-03-17", "2027-03-24", "2027-03-31", "2027-04-07", "2027-04-14", "2027-04-21", "2027-04-28", "2027-05-05", "2027-05-12", "2027-05-19", "2027-05-26", "2027-06-02", "2027-06-09", "2027-06-16", "2027-06-23", "2027-06-30"],
-      plastik: ["2026-11-13", "2026-11-27", "2026-12-11", "2026-12-28", "2027-01-08", "2027-01-22", "2027-02-05", "2027-02-19", "2027-03-05", "2027-03-19", "2027-04-02", "2027-04-16", "2027-04-30", "2027-05-14", "2027-05-28", "2027-06-11", "2027-06-25"],
-      papier: ["2026-11-05", "2026-11-19", "2026-12-03", "2026-12-17", "2026-12-31", "2027-01-14", "2027-01-28", "2027-02-11", "2027-02-25", "2027-03-11", "2027-03-25", "2027-04-08", "2027-04-22", "2027-05-06", "2027-05-20", "2027-06-03", "2027-06-17"],
-      "szkło": ["2026-11-09", "2026-12-07", "2027-01-04", "2027-02-01", "2027-03-01", "2027-03-30", "2027-04-26", "2027-05-24", "2027-06-21"],
-      bio: ["2026-11-03", "2026-11-17", "2026-12-01", "2026-12-15", "2026-12-29", "2027-01-12", "2027-01-26", "2027-02-09", "2027-02-23", "2027-03-09", "2027-03-23", "2027-04-06", "2027-04-13", "2027-04-20", "2027-04-27", "2027-05-04", "2027-05-11", "2027-05-18", "2027-05-25", "2027-06-01", "2027-06-08", "2027-06-15", "2027-06-22", "2027-06-29"],
-      gabaryty: ["2027-01-13", "2027-05-12"]
-    }
-  },
-  {
-    ulica: "ul. Szamarzewskiego",
-    odbiory: {
-      zmieszane: ["2026-11-06", "2026-11-13", "2026-11-20", "2026-11-27", "2026-12-04", "2026-12-11", "2026-12-18", "2026-12-28", "2027-01-02", "2027-01-08", "2027-01-15", "2027-01-22", "2027-01-29", "2027-02-05", "2027-02-12", "2027-02-19", "2027-02-26", "2027-03-05", "2027-03-12", "2027-03-19", "2027-03-26", "2027-04-02", "2027-04-09", "2027-04-16", "2027-04-23", "2027-04-30", "2027-05-07", "2027-05-14", "2027-05-21", "2027-05-28", "2027-06-04", "2027-06-11", "2027-06-18", "2027-06-25"],
-      plastik: ["2026-11-03", "2026-11-17", "2026-12-01", "2026-12-15", "2026-12-29", "2027-01-12", "2027-01-26", "2027-02-09", "2027-02-23", "2027-03-09", "2027-03-23", "2027-04-06", "2027-04-20", "2027-05-04", "2027-05-18", "2027-06-01", "2027-06-15", "2027-06-29"],
-      papier: ["2026-11-02", "2026-11-16", "2026-11-30", "2026-12-14", "2026-12-28", "2027-01-11", "2027-01-25", "2027-02-08", "2027-02-22", "2027-03-08", "2027-03-22", "2027-04-05", "2027-04-19", "2027-05-04", "2027-05-17", "2027-05-31", "2027-06-14", "2027-06-28"],
-      "szkło": ["2026-11-18", "2026-12-16", "2027-01-13", "2027-02-10", "2027-03-10", "2027-04-07", "2027-05-05", "2027-06-02", "2027-06-30"],
-      bio: ["2026-11-05", "2026-11-19", "2026-12-03", "2026-12-17", "2026-12-31", "2027-01-14", "2027-01-28", "2027-02-11", "2027-02-25", "2027-03-11", "2027-03-25", "2027-04-08", "2027-04-15", "2027-04-22", "2027-04-29", "2027-05-06", "2027-05-13", "2027-05-20", "2027-05-28", "2027-06-03", "2027-06-10", "2027-06-17", "2027-06-24"],
-      gabaryty: ["2026-12-16", "2027-04-21"]
-    }
-  },
-  {
-    ulica: "ul. Winogrady",
-    odbiory: {
-      zmieszane: ["2026-11-04", "2026-11-11", "2026-11-18", "2026-11-25", "2026-12-02", "2026-12-09", "2026-12-16", "2026-12-23", "2026-12-30", "2027-01-07", "2027-01-13", "2027-01-20", "2027-01-27", "2027-02-03", "2027-02-10", "2027-02-17", "2027-02-24", "2027-03-03", "2027-03-10", "2027-03-17", "2027-03-24", "2027-03-31", "2027-04-07", "2027-04-14", "2027-04-21", "2027-04-28", "2027-05-05", "2027-05-12", "2027-05-19", "2027-05-26", "2027-06-02", "2027-06-09", "2027-06-16", "2027-06-23", "2027-06-30"],
-      plastik: ["2026-11-13", "2026-11-27", "2026-12-11", "2026-12-28", "2027-01-08", "2027-01-22", "2027-02-05", "2027-02-19", "2027-03-05", "2027-03-19", "2027-04-02", "2027-04-16", "2027-04-30", "2027-05-14", "2027-05-28", "2027-06-11", "2027-06-25"],
-      papier: ["2026-11-05", "2026-11-19", "2026-12-03", "2026-12-17", "2026-12-31", "2027-01-14", "2027-01-28", "2027-02-11", "2027-02-25", "2027-03-11", "2027-03-25", "2027-04-08", "2027-04-22", "2027-05-06", "2027-05-20", "2027-06-03", "2027-06-17"],
-      "szkło": ["2026-11-09", "2026-12-07", "2027-01-04", "2027-02-01", "2027-03-01", "2027-03-30", "2027-04-26", "2027-05-24", "2027-06-21"],
-      bio: ["2026-11-03", "2026-11-17", "2026-12-01", "2026-12-15", "2026-12-29", "2027-01-12", "2027-01-26", "2027-02-09", "2027-02-23", "2027-03-09", "2027-03-23", "2027-04-06", "2027-04-13", "2027-04-20", "2027-04-27", "2027-05-04", "2027-05-11", "2027-05-18", "2027-05-25", "2027-06-01", "2027-06-08", "2027-06-15", "2027-06-22", "2027-06-29"],
-      gabaryty: ["2027-01-13", "2027-05-12"]
-    }
-  }
-];
-
-// Przesunięcia terminów z powodu świąt (do pokazania w powiadomieniach).
-const ZMIANY = [
-  { rodzaj: "zmieszane", z: "2027-03-29", na: "2027-03-30", ulice: ["ul. Głogowska", "ul. Grunwaldzka", "ul. Hetmańska"] },
-  { rodzaj: "zmieszane", z: "2027-05-03", na: "2027-05-04", ulice: ["ul. Głogowska", "ul. Grunwaldzka", "ul. Hetmańska"] },
-  { rodzaj: "plastik", z: "2027-05-27", na: "2027-05-28", ulice: ["ul. Głogowska", "ul. Grunwaldzka", "ul. Hetmańska"] },
-  { rodzaj: "szkło", z: "2027-01-01", na: "2027-01-02", ulice: ["ul. Głogowska", "ul. Grunwaldzka", "ul. Hetmańska"] },
-  { rodzaj: "zmieszane", z: "2026-12-25", na: "2026-12-28", ulice: ["ul. Dąbrowskiego", "ul. Garbary", "ul. Szamarzewskiego"] },
-  { rodzaj: "zmieszane", z: "2027-01-01", na: "2027-01-02", ulice: ["ul. Dąbrowskiego", "ul. Garbary", "ul. Szamarzewskiego"] },
-  { rodzaj: "papier", z: "2027-05-03", na: "2027-05-04", ulice: ["ul. Dąbrowskiego", "ul. Garbary", "ul. Szamarzewskiego"] },
-  { rodzaj: "bio", z: "2027-05-27", na: "2027-05-28", ulice: ["ul. Dąbrowskiego", "ul. Garbary", "ul. Szamarzewskiego"] },
-  { rodzaj: "zmieszane", z: "2027-01-06", na: "2027-01-07", ulice: ["os. Piastowskie", "ul. Winogrady", "ul. Kościelna", "ul. Mickiewicza"] },
-  { rodzaj: "plastik", z: "2026-12-25", na: "2026-12-28", ulice: ["os. Piastowskie", "ul. Winogrady", "ul. Kościelna", "ul. Mickiewicza"] },
-  { rodzaj: "szkło", z: "2027-03-29", na: "2027-03-30", ulice: ["os. Piastowskie", "ul. Winogrady", "ul. Kościelna", "ul. Mickiewicza"] }
-];
-
-/* ============ Definicje rodzajów odpadów ============ */
-// kolor – barwa worka/pojemnika, ink – kolor tekstu na jasnym tle, on – kolor ikon na pełnym kolorze
-const KATEGORIE = {
-  zmieszane: { nazwa: "Odpady zmieszane", krotko: "odpady zmieszane", pojemnik: "Czarny pojemnik", typ: "pojemnik", kolor: "#363B38", soft: "#ECEDEC", ink: "#2A2E2C", on: "#fff", emoji: "⚫", ikona: "c-zmieszane" },
-  plastik:   { nazwa: "Plastik i metale", krotko: "plastik i metale", pojemnik: "Żółty worek", typ: "worek", kolor: "#F2C230", soft: "#FCF3D6", ink: "#8A6300", on: "#3A2C00", emoji: "🟡", ikona: "c-plastik" },
-  papier:    { nazwa: "Papier", krotko: "papier", pojemnik: "Niebieski worek", typ: "worek", kolor: "#2F6FD6", soft: "#E4EDFB", ink: "#1F55AD", on: "#fff", emoji: "🔵", ikona: "c-papier" },
-  "szkło":   { nazwa: "Szkło", krotko: "szkło", pojemnik: "Zielony worek", typ: "worek", kolor: "#2E9A5B", soft: "#E2F3E8", ink: "#1F7442", on: "#fff", emoji: "🟢", ikona: "c-szklo" },
-  bio:       { nazwa: "Bioodpady", krotko: "bioodpady", pojemnik: "Brązowy pojemnik", typ: "pojemnik", kolor: "#8A5A35", soft: "#F2EAE2", ink: "#6E4524", on: "#fff", emoji: "🟤", ikona: "c-bio" },
-  gabaryty:  { nazwa: "Gabaryty", krotko: "odpady wielkogabarytowe", pojemnik: "Wystaw przy posesji", typ: "gabaryt", kolor: "#7A6FA8", soft: "#EEEBF6", ink: "#574C86", on: "#fff", emoji: "🛋️", ikona: "c-gabaryty" }
+/* ---------- Prezentacja kategorii (kolory z API, tu tylko ikony i odcienie) ---------- */
+const ORDER = ["zmieszane", "plastik", "papier", "szklo", "segregowane", "bio", "zielone", "popiol", "gabaryty", "elektro", "opony", "choinki", "liscie"];
+const LOOK = {
+  zmieszane:   { icon: "c-zmieszane", soft: "#ECEDEC", ink: "#2A2E2C", shape: "pojemnik" },
+  plastik:     { icon: "c-plastik", soft: "#FCF3D6", ink: "#8A6300", shape: "worek" },
+  papier:      { icon: "c-papier", soft: "#E4EDFB", ink: "#1F55AD", shape: "worek" },
+  szklo:       { icon: "c-szklo", soft: "#E2F3E8", ink: "#1F7442", shape: "worek" },
+  segregowane: { icon: "c-segregowane", soft: "#E6EEF6", ink: "#2D5F8A", shape: "worek" },
+  bio:         { icon: "c-bio", soft: "#F2EAE2", ink: "#6E4524", shape: "pojemnik" },
+  zielone:     { icon: "c-bio", soft: "#E9F1E2", ink: "#4A6E2D", shape: "pojemnik" },
+  popiol:      { icon: "c-popiol", soft: "#EEEFEE", ink: "#4A534D", shape: "pojemnik" },
+  gabaryty:    { icon: "c-gabaryty", soft: "#EEEBF6", ink: "#574C86", shape: "gabaryt" },
+  elektro:     { icon: "c-elektro", soft: "#EEEFEE", ink: "#4A534D", shape: "gabaryt" },
+  opony:       { icon: "c-opony", soft: "#EEEFEE", ink: "#4A534D", shape: "gabaryt" },
+  choinki:     { icon: "c-choinki", soft: "#E9F1E2", ink: "#3F6B2A", shape: "gabaryt" },
+  liscie:      { icon: "c-bio", soft: "#F3EFE2", ink: "#6B5A1E", shape: "worek" },
+  pszok:       { icon: "c-pszok", soft: "#EEF0ED", ink: "#4A534D", shape: "gabaryt" }
 };
-const KOLEJNOSC = ["zmieszane", "plastik", "papier", "szkło", "bio", "gabaryty"];
-// PSZOK nie ma terminów – to punkt stacjonarny
-const PSZOK = { nazwa: "PSZOK / odpady specjalne", krotko: "PSZOK", pojemnik: "Punkt selektywnej zbiórki", kolor: "#B9BFB9", soft: "#EEF0ED", ink: "#4A534D", on: "#202823", ikona: "c-pszok" };
+const NEUTRAL = "#5B625D";
+let META = { cities: [], categories: {} };
+const catDef = k => k === "pszok"
+  ? { key: "pszok", name: "PSZOK / odpady specjalne", container: "Punkt selektywnej zbiórki", color: null }
+  : (META.categories[k] || { key: k, name: k, container: "", color: null });
+const colorOf = k => catDef(k).color || NEUTRAL;
+const vars = k => { const l = LOOK[k] || LOOK.pszok; return `--c:${colorOf(k)};--c-soft:${l.soft};--c-ink:${l.ink};--c-on:${k === "plastik" ? "#3A2C00" : "#fff"}`; };
+const cityOf = id => META.cities.find(c => c.id === id);
 
-/* ============ Baza „Co gdzie wyrzucić?” ============ */
-const PRZEWODNIK = [
-  { n: "Karton po mleku", k: "plastik", t: "Opróżnij i zgnieć. Kartony po napojach (tzw. tetrapaki) trafiają do metali i tworzyw, nie do papieru.", s: "tetrapak sok karton napój" },
-  { n: "Butelka plastikowa", k: "plastik", t: "Zgnieć i zakręć nakrętkę – zajmie mniej miejsca. Nie musisz zdejmować etykiety.", s: "pet woda butelka plastik" },
-  { n: "Słoik", k: "szkło", t: "Opróżnij z resztek. Metalową nakrętkę odkręć i wrzuć do plastiku i metali.", s: "słoik szkło przetwory" },
-  { n: "Baterie", k: "pszok", t: "Nigdy do zwykłego kosza. Oddaj w sklepie z elektroniką, w szkole lub w PSZOK-u.", s: "bateria akumulator paluszki" },
-  { n: "Zużyta żarówka LED / świetlówka", k: "pszok", t: "Zawiera elektronikę lub rtęć. Oddaj w sklepie, który je sprzedaje, albo w PSZOK-u.", s: "żarówka świetlówka led energooszczędna" },
-  { n: "Tradycyjna żarówka", k: "zmieszane", t: "Zwykła żarówka z żarnikiem nie nadaje się do szkła – wyrzuć ją do zmieszanych.", s: "żarówka żarnik halogen" },
-  { n: "Gazeta, ulotki", k: "papier", t: "Wrzucaj suche i czyste. Zszywki nie przeszkadzają.", s: "gazeta ulotka czasopismo magazyn" },
-  { n: "Karton, pudełko tekturowe", k: "papier", t: "Złóż na płasko i usuń taśmę, jeśli łatwo schodzi.", s: "karton tektura pudło paczka" },
-  { n: "Pudełko po pizzy", k: "zmieszane", t: "Zatłuszczony karton nie nadaje się do recyklingu. Czystą pokrywę możesz oderwać i dać do papieru.", s: "pizza pudełko tłuste" },
-  { n: "Paragon", k: "zmieszane", t: "Papier termiczny zawiera chemikalia – nie wrzucaj go do papieru.", s: "paragon rachunek bilet" },
-  { n: "Puszka po napoju", k: "plastik", t: "Opróżnij i zgnieć. Metale trafiają do żółtego worka.", s: "puszka aluminium konserwa" },
-  { n: "Folia aluminiowa", k: "plastik", t: "Zgnieć w kulkę – wtedy łatwiej ją wysortować.", s: "folia aluminiowa sreberko" },
-  { n: "Fusy po kawie, herbata", k: "bio", t: "Torebki herbaty z metalową zszywką lepiej wyrzucić do zmieszanych.", s: "fusy kawa herbata torebka" },
-  { n: "Skorupki jajek", k: "bio", t: "Mogą trafić do bioodpadów razem z obierkami.", s: "skorupki jajka" },
-  { n: "Obierki, resztki warzyw i owoców", k: "bio", t: "Wrzucaj bez foliowych reklamówek.", s: "obierki owoce warzywa jabłko banan" },
-  { n: "Kości, mięso", k: "zmieszane", t: "Odpady pochodzenia zwierzęcego nie trafiają do bio.", s: "kości mięso ryba" },
-  { n: "Liście, trawa, gałęzie", k: "bio", t: "Większe ilości odpadów zielonych możesz bezpłatnie oddać w PSZOK-u.", s: "liście trawa gałęzie ogród" },
-  { n: "Talerz, kubek ceramiczny", k: "zmieszane", t: "Ceramika i porcelana topią się w innej temperaturze niż szkło – nie wrzucaj ich do zielonego worka.", s: "talerz kubek porcelana ceramika" },
-  { n: "Szyba, lustro", k: "pszok", t: "Szkło okienne i lustra oddaj w PSZOK-u.", s: "szyba lustro okno" },
-  { n: "Kubek papierowy po kawie", k: "zmieszane", t: "Ma warstwę plastiku w środku, więc nie nadaje się do papieru.", s: "kubek papierowy kawa na wynos" },
-  { n: "Styropian opakowaniowy", k: "plastik", t: "Czysty styropian z opakowań – do plastiku. Budowlany oddaj w PSZOK-u.", s: "styropian opakowanie" },
-  { n: "Chusteczki, ręczniki papierowe", k: "zmieszane", t: "Zużyte chusteczki nie nadają się do recyklingu.", s: "chusteczka ręcznik papierowy serwetka" },
-  { n: "Pieluchy", k: "zmieszane", t: "Wrzucaj zawinięte, najlepiej w worku.", s: "pielucha pampers" },
-  { n: "Przeterminowane leki", k: "pszok", t: "Oddaj do pojemnika w aptece lub w PSZOK-u. Ulotkę i kartonik – do papieru.", s: "leki tabletki apteka" },
-  { n: "Elektrośmieci", k: "pszok", t: "Stary telefon, czajnik czy suszarkę oddaj w PSZOK-u albo w sklepie przy zakupie nowego.", s: "elektronika telefon czajnik suszarka komputer" },
-  { n: "Farby, rozpuszczalniki", k: "pszok", t: "Odpady niebezpieczne – tylko PSZOK.", s: "farba lakier rozpuszczalnik chemia" },
-  { n: "Stara kanapa, szafa", k: "gabaryty", t: "Wystaw przed posesję wieczorem przed terminem odbioru gabarytów.", s: "kanapa szafa mebel materac krzesło dywan" },
-  { n: "Ubrania, buty", k: "pszok", t: "Rzeczy w dobrym stanie oddaj do pojemnika na tekstylia lub organizacji charytatywnej.", s: "ubrania buty tekstylia odzież" },
-  { n: "Butelka po oleju", k: "plastik", t: "Plastikową opróżnij do końca. Szklaną – do szkła.", s: "olej butelka" },
-  { n: "Opakowanie po jogurcie", k: "plastik", t: "Wystarczy wylać resztki – nie musisz myć opakowania.", s: "jogurt kubeczek serek" },
-  { n: "Butelka po winie", k: "szkło", t: "Korek wyrzuć do zmieszanych, nakrętkę – do metali.", s: "wino piwo butelka szklana" },
-  { n: "Opony", k: "pszok", t: "Do 4 opon rocznie zwykle przyjmuje PSZOK bezpłatnie.", s: "opona" }
-];
-
-/* ============ Pomocnicze: daty ============ */
+/* ---------- Daty ---------- */
 const DNI = ["niedziela", "poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota"];
 const DNI_W = ["w niedzielę", "w poniedziałek", "we wtorek", "w środę", "w czwartek", "w piątek", "w sobotę"];
 const DNI_KR = ["nd", "pon", "wt", "śr", "czw", "pt", "sob"];
 const MIES_D = ["stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "października", "listopada", "grudnia"];
 const MIES = ["styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec", "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień"];
-
-// „RRRR-MM-DD” → Date w czasie lokalnym (bez przesunięć strefy)
 const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
 const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 const diffDays = (a, b) => Math.round((Date.UTC(b.getFullYear(), b.getMonth(), b.getDate()) - Date.UTC(a.getFullYear(), a.getMonth(), a.getDate())) / 864e5);
-
-// Dzisiejsza data; do testów można ją podmienić parametrem ?dzis=2026-12-24
-function getToday() {
-  const p = new URLSearchParams(location.search).get("dzis");
-  if (p && /^\d{4}-\d{2}-\d{2}$/.test(p)) return parse(p);
-  const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate());
-}
+// Dzisiejsza data w Polsce (niezależnie od strefy urządzenia)
+function getToday() { return parse(new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Warsaw" }).format(new Date())); }
 let TODAY = getToday();
-
-// Względny opis terminu: „Dziś”, „Jutro”, „Za 2 dni”, „Za tydzień”
 function rel(n) {
-  if (n === 0) return "Dziś";
-  if (n === 1) return "Jutro";
-  if (n === 7) return "Za tydzień";
-  if (n === 14) return "Za 2 tygodnie";
-  if (n >= 60) return `Za ${Math.round(n / 30)} mies.`;
-  if (n >= 21) return `Za ${Math.round(n / 7)} tyg.`;
+  if (n === 0) return "Dziś"; if (n === 1) return "Jutro"; if (n === 7) return "Za tydzień"; if (n === 14) return "Za 2 tygodnie";
+  if (n >= 60) return `Za ${Math.round(n / 30)} mies.`; if (n >= 21) return `Za ${Math.round(n / 7)} tyg.`;
   return `Za ${n} dni`;
 }
 const fmtLong = d => `${d.getDate()} ${MIES_D[d.getMonth()]}`;
-const fmtDay = d => `${DNI[d.getDay()][0].toUpperCase() + DNI[d.getDay()].slice(1)}, ${fmtLong(d)}`;
-// „w poniedziałek” albo „za 9 dni (12 grudnia)” – do krótkich komunikatów
-function whenPhrase(d) {
-  const n = diffDays(TODAY, d);
-  if (n === 0) return "dziś";
-  if (n === 1) return "jutro";
-  if (n < 7) return DNI_W[d.getDay()];
-  return fmtLong(d);
-}
-// Łączenie listy: „papier, szkło i bioodpady”
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const fmtDay = d => `${cap(DNI[d.getDay()])}, ${fmtLong(d)}`;
+function whenPhrase(d) { const n = diffDays(TODAY, d); return n === 0 ? "dziś" : n === 1 ? "jutro" : n < 7 ? DNI_W[d.getDay()] : fmtLong(d); }
 const joinPl = arr => arr.length < 2 ? (arr[0] || "") : arr.slice(0, -1).join(", ") + " i " + arr[arr.length - 1];
+// Prawdziwy czas weryfikacji z backendu: „dziś o 08:42”
+function verifiedAt(isoTs) {
+  const t = new Date(isoTs); if (isNaN(t)) return "";
+  const hm = t.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Warsaw" });
+  const day = parse(new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Warsaw" }).format(t));
+  const n = diffDays(day, TODAY);
+  return n === 0 ? `dziś o ${hm}` : n === 1 ? `wczoraj o ${hm}` : `${fmtLong(day)} o ${hm}`;
+}
 
-/* ============ Stan aplikacji (localStorage) ============ */
-const LS = "trashly.v1";
-const defaults = {
-  adresy: [],          // [{ulica, numer}]
-  aktywny: 0,          // indeks aktywnego adresu
-  powiad: { wieczor: true, godzWieczor: "19:00", rano: false, godzRano: "06:00", zmiany: true },
-  wystawione: {}       // { "2026-11-26": true } – odhaczone „wystawione”
-};
+/* ---------- Stan (localStorage – tylko wygoda; źródłem prawdy jest backend) ---------- */
+const LS = "trashly.v2";
+const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)).replace(/[^a-zA-Z0-9-]/g, "").padEnd(16, "0");
+const defaults = () => ({
+  deviceId: uuid(), adresy: [], aktywny: 0,
+  powiad: { eveningBefore: true, eveningTime: "19:00", collectionDay: false, morningTime: "06:00", scheduleChanges: true },
+  wystawione: {}, cache: {}, meta: null
+});
 let state = load();
 function load() {
-  try { return Object.assign(structuredClone(defaults), JSON.parse(localStorage.getItem(LS)) || {}); }
-  catch { return structuredClone(defaults); }
+  try { const s = JSON.parse(localStorage.getItem(LS)); return s ? Object.assign(defaults(), s) : defaults(); }
+  catch { return defaults(); }
 }
 function save() { try { localStorage.setItem(LS, JSON.stringify(state)); } catch {} }
-
 const active = () => state.adresy[state.aktywny] || null;
-const streetData = () => { const a = active(); return a && HARMONOGRAM.find(s => s.ulica === a.ulica); };
-const addrText = a => a ? `${a.ulica}${a.numer ? " " + a.numer : ""}` : "";
+const addrKey = a => a ? `${a.city}|${a.street}|${a.number}|${a.buildingType || ""}`.toLowerCase() : "";
+const BT = { SINGLE: "Dom jednorodzinny", MULTI: "Budynek wielorodzinny" };
+const addrText = a => a ? `${a.street}${a.number ? " " + a.number : ""}${a.apartment ? "/" + a.apartment : ""}` : "";
 
-/* ============ Logika harmonogramu ============ */
-// Wszystkie odbiory dla ulicy jako lista {date, key}, posortowana
-function allPickups(s) {
-  if (!s) return [];
-  const out = [];
-  for (const k of KOLEJNOSC) for (const d of (s.odbiory[k] || [])) out.push({ d: parse(d), key: k, iso: d });
-  return out.sort((a, b) => a.d - b.d || KOLEJNOSC.indexOf(a.key) - KOLEJNOSC.indexOf(b.key));
-}
-// Tylko od dziś w przód
-const upcoming = s => allPickups(s).filter(p => p.d >= TODAY);
-// Grupowanie po dacie → [{iso, d, keys:[]}]
-function byDate(list) {
-  const m = new Map();
-  for (const p of list) { if (!m.has(p.iso)) m.set(p.iso, { iso: p.iso, d: p.d, keys: [] }); m.get(p.iso).keys.push(p.key); }
-  return [...m.values()];
-}
-const nextOf = (s, k) => (s?.odbiory[k] || []).map(parse).find(d => d >= TODAY) || null;
+/* ---------- Dane bieżące ---------- */
+let current = null;        // odpowiedź /api/resolve dla aktywnego adresu
+let loading = false;
+let offlineData = false;   // pokazujemy dane z pamięci podręcznej
+let notices = [];          // powiadomienia z backendu
 
-/* ============ Pomocnicze: HTML ============ */
+/* ---------- Pomocnicze ---------- */
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const ico = (id, cls = "i") => `<svg class="${cls}"><use href="#${id}"/></svg>`;
-const vars = c => `--c:${c.kolor};--c-soft:${c.soft};--c-ink:${c.ink};--c-on:${c.on}`;
-const cat = k => k === "pszok" ? PSZOK : KATEGORIE[k];
+const safeUrl = u => /^https:\/\//.test(u || "") ? u : "#";
 
-const LOGO = `<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#174C3C"/><path d="M10 13h12l-1.2 10.2a2 2 0 0 1-2 1.8h-5.6a2 2 0 0 1-2-1.8Z" fill="#F7F8F5"/><path d="M9 11h14" stroke="#F7F8F5" stroke-width="2" stroke-linecap="round"/><path d="M16 9.6c0-3.1 2.3-4.6 5.2-4.6 0 3.1-2.1 4.6-5.2 4.6Z" fill="#64B57A"/><path d="M14 16.5v5M18 16.5v5" stroke="#174C3C" stroke-width="1.4" stroke-linecap="round" opacity=".35"/></svg>`;
-
-// Ilustracja worka lub pojemnika w kolorze kategorii
-function illustration(k) {
-  const c = KATEGORIE[k];
-  if (c.typ === "worek") return `<svg viewBox="0 0 120 140" aria-hidden="true">
-    <ellipse cx="60" cy="133" rx="40" ry="5" fill="rgba(0,0,0,.07)"/>
-    <path d="M47 27c-6-7-3-15 5-14 3 0 5 2 8 5 3-3 5-5 8-5 8-1 11 7 5 14" fill="none" stroke="${c.kolor}" stroke-width="6" stroke-linecap="round"/>
-    <path d="M49 27h22l4 6c14 10 24 26 22 52-2 28-17 43-37 43S25 113 23 85c-2-26 8-42 22-52Z" fill="${c.kolor}"/>
-    <path d="M49 27h22l4 6H45Z" fill="#000" opacity=".12"/>
-    <path d="M40 52c-7 10-10 22-9 36" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".28" fill="none"/>
-    <path d="M60 60c-2 16-2 40 1 60M78 58c4 18 4 40 0 58" stroke="#000" stroke-width="2" opacity=".08" fill="none"/>
-  </svg>`;
-  if (c.typ === "pojemnik") return `<svg viewBox="0 0 120 140" aria-hidden="true">
-    <ellipse cx="60" cy="133" rx="42" ry="5" fill="rgba(0,0,0,.07)"/>
-    <path d="M24 38h72l-7 84a6 6 0 0 1-6 5H37a6 6 0 0 1-6-5Z" fill="${c.kolor}"/>
-    <rect x="18" y="26" width="84" height="14" rx="5" fill="${c.kolor}"/>
-    <rect x="18" y="26" width="84" height="14" rx="5" fill="#fff" opacity=".14"/>
-    <rect x="48" y="20" width="24" height="8" rx="3" fill="${c.kolor}"/>
-    <path d="M38 54v58M60 54v58M82 54v58" stroke="#000" stroke-width="3" stroke-linecap="round" opacity=".12"/>
-    <path d="M33 50 37 110" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".2"/>
-    <circle cx="38" cy="128" r="8" fill="#2A2E2C"/><circle cx="38" cy="128" r="3" fill="#8C938E"/>
-    <circle cx="82" cy="128" r="8" fill="#2A2E2C"/><circle cx="82" cy="128" r="3" fill="#8C938E"/>
-  </svg>`;
-  return `<svg viewBox="0 0 120 140" aria-hidden="true">
-    <ellipse cx="60" cy="133" rx="46" ry="5" fill="rgba(0,0,0,.07)"/>
-    <path d="M22 66V54a14 14 0 0 1 14-14h48a14 14 0 0 1 14 14v12" fill="${c.kolor}"/>
-    <path d="M12 76a10 10 0 0 1 20 0v10h56V76a10 10 0 0 1 20 0v30a8 8 0 0 1-8 8H20a8 8 0 0 1-8-8Z" fill="${c.kolor}"/>
-    <path d="M32 86h56v10H32Z" fill="#000" opacity=".12"/>
-    <path d="M24 114v12M96 114v12" stroke="#2A2E2C" stroke-width="6" stroke-linecap="round"/>
-    <path d="M36 52h46" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".25"/>
-  </svg>`;
+async function api(path, opts = {}) {
+  const res = await fetch(API + path, {
+    method: opts.body ? "POST" : "GET",
+    headers: opts.body ? { "Content-Type": "application/json" } : {},
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  let data = null;
+  try { data = await res.json(); } catch {}
+  if (!res.ok) { const e = new Error(data?.error || `Błąd serwera (${res.status}).`); e.status = res.status; e.code = data?.code; throw e; }
+  return data;
 }
 
-/* ============ Widok: Dashboard ============ */
+/* ---------- Grupowanie terminów ---------- */
+function byDate(events) {
+  const m = new Map();
+  for (const e of events) { if (!m.has(e.date)) m.set(e.date, { iso: e.date, d: parse(e.date), keys: [] }); const g = m.get(e.date); if (!g.keys.includes(e.category)) g.keys.push(e.category); }
+  for (const g of m.values()) g.keys.sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+  return [...m.values()].sort((a, b) => a.d - b.d);
+}
+const sched = () => (current && current.schedule) || null;
+const upcomingGroups = () => { const s = sched(); return s ? byDate(s.events.filter(e => e.date >= iso(TODAY))) : []; };
+const changedDates = () => new Set((sched()?.changes || []).filter(c => c.to).map(c => c.to + "|" + c.category));
+const isChanged = (g) => { const ch = changedDates(); return g.keys.some(k => ch.has(g.iso + "|" + k)); };
+
+/* ---------- Ilustracje worka/pojemnika ---------- */
+function illustration(k) {
+  const c = colorOf(k), shape = (LOOK[k] || LOOK.pszok).shape;
+  if (shape === "worek") return `<svg viewBox="0 0 120 140" aria-hidden="true"><ellipse cx="60" cy="133" rx="40" ry="5" fill="rgba(0,0,0,.07)"/><path d="M47 27c-6-7-3-15 5-14 3 0 5 2 8 5 3-3 5-5 8-5 8-1 11 7 5 14" fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round"/><path d="M49 27h22l4 6c14 10 24 26 22 52-2 28-17 43-37 43S25 113 23 85c-2-26 8-42 22-52Z" fill="${c}"/><path d="M49 27h22l4 6H45Z" fill="#000" opacity=".12"/><path d="M40 52c-7 10-10 22-9 36" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".28" fill="none"/></svg>`;
+  if (shape === "pojemnik") return `<svg viewBox="0 0 120 140" aria-hidden="true"><ellipse cx="60" cy="133" rx="42" ry="5" fill="rgba(0,0,0,.07)"/><path d="M24 38h72l-7 84a6 6 0 0 1-6 5H37a6 6 0 0 1-6-5Z" fill="${c}"/><rect x="18" y="26" width="84" height="14" rx="5" fill="${c}"/><rect x="18" y="26" width="84" height="14" rx="5" fill="#fff" opacity=".14"/><rect x="48" y="20" width="24" height="8" rx="3" fill="${c}"/><path d="M38 54v58M60 54v58M82 54v58" stroke="#000" stroke-width="3" stroke-linecap="round" opacity=".12"/><circle cx="38" cy="128" r="8" fill="#2A2E2C"/><circle cx="38" cy="128" r="3" fill="#8C938E"/><circle cx="82" cy="128" r="8" fill="#2A2E2C"/><circle cx="82" cy="128" r="3" fill="#8C938E"/></svg>`;
+  return `<svg viewBox="0 0 120 140" aria-hidden="true"><ellipse cx="60" cy="133" rx="46" ry="5" fill="rgba(0,0,0,.07)"/><path d="M22 66V54a14 14 0 0 1 14-14h48a14 14 0 0 1 14 14v12" fill="${c}"/><path d="M12 76a10 10 0 0 1 20 0v10h56V76a10 10 0 0 1 20 0v30a8 8 0 0 1-8 8H20a8 8 0 0 1-8-8Z" fill="${c}"/><path d="M24 114v12M96 114v12" stroke="#2A2E2C" stroke-width="6" stroke-linecap="round"/></svg>`;
+}
+
+/* ---------- Pasek zaufania ---------- */
+function trustRow() {
+  const s = sched(); if (!s) return "";
+  const st = current.status;
+  const cls = st === "STALE" ? "stale" : st === "UPDATED" ? "updated" : "";
+  const pill = st === "STALE" ? `${ico("i-alert")}Dane mogą być nieaktualne`
+    : st === "UPDATED" ? `${ico("i-refresh")}Termin odbioru został zmieniony`
+    : `${ico("i-shield")}Harmonogram potwierdzony`;
+  const when = st === "STALE" ? `ostatnie potwierdzenie ${verifiedAt(s.lastSuccessAt)}` : `Zaktualizowano ${verifiedAt(s.lastSuccessAt)}`;
+  return `<div class="trust ${cls}"><span class="pill">${pill}</span><span>Źródło oficjalne</span><span class="sep">·</span><span>${when}</span>${offlineData ? '<span class="sep">·</span><span>offline</span>' : ""}<button class="more" data-details>Szczegóły</button></div>`;
+}
+function levelChip(a) {
+  if (!a) return "";
+  if (a.level === "BUILDING_VERIFIED") return `<span class="addr-level">${ico("i-check")}Adres potwierdzony</span>`;
+  if (a.level === "STREET_VERIFIED") return `<span class="addr-level partial">${ico("i-info")}Potwierdzona tylko ulica</span>`;
+  return `<span class="addr-level partial">${ico("i-alert")}Adres niepotwierdzony</span>`;
+}
+
+/* ---------- Widok: Dashboard ---------- */
 function renderHome() {
-  const s = streetData();
-  const groups = byDate(upcoming(s));
+  const a = active(), city = cityOf(a?.city);
+  const h = new Date().getHours();
+  let html = `<div class="greet"><h1>${h < 5 || h >= 18 ? "Dobry wieczór" : "Dzień dobry"}</h1><p>${fmtDay(TODAY)} · ${esc(addrText(a))}${city ? ", " + esc(city.name) : ""}</p></div>`;
+
+  if (!current && loading) {
+    html += `<div class="loading-note"><span class="spin"></span>Sprawdzamy aktualny harmonogram…</div><div class="home-grid"><div class="skel" style="height:320px"></div><div class="skel" style="height:320px"></div></div>`;
+    $("#view-home").innerHTML = html; return;
+  }
+  if (!current || current.status === "UNCONFIRMED" || current.status === "UNAVAILABLE" || !sched()) {
+    html += stateCard();
+    html += guideTeaser();
+    $("#view-home").innerHTML = html; return;
+  }
+
+  const s = sched();
+  const groups = upcomingGroups();
   const next = groups[0];
   const todayG = next && diffDays(TODAY, next.d) === 0 ? next : null;
-  const h = new Date().getHours();
-  const hello = h < 5 ? "Dobry wieczór" : h < 18 ? "Dzień dobry" : "Dobry wieczór";
-  let html = `<div class="greet"><h1>${hello}</h1><p>${fmtDay(TODAY)} · ${esc(addrText(active()))}</p></div>`;
-
   html += `<div class="home-grid">`;
-  // --- Hero: najbliższy odbiór ---
   if (next) {
     const n = diffDays(TODAY, next.d);
-    const main = KATEGORIE[next.keys[0]];
-    const names = joinPl(next.keys.map(k => KATEGORIE[k].krotko));
-    const verb = n === 0 ? "Dziś odbieramy" : n === 1 ? "Jutro odbieramy" : `${DNI_W[next.d.getDay()][0].toUpperCase() + DNI_W[next.d.getDay()].slice(1)} odbieramy`;
-    const title = n <= 6 ? `${verb} <em>${names}</em>` : `${fmtLong(next.d)} odbieramy <em>${names}</em>`;
-    const prep = next.keys.includes("gabaryty")
-      ? "Gabaryty wystaw przed posesję wieczorem dzień wcześniej, tak by nie blokowały chodnika."
-      : n === 0
-        ? (state.wystawione[next.iso] ? "Świetnie, wszystko gotowe. Śmieciarka może przyjechać do 22:00." : "Jeśli odpady nie stoją jeszcze przed domem – wystaw je teraz. Śmieciarka przyjeżdża między 6:00 a 22:00.")
-        : `Wystaw ${next.keys.length > 1 ? "je" : "go"} przed posesję do 6:00 rano w dniu odbioru – najwygodniej wieczorem dzień wcześniej.`;
+    const main = next.keys[0];
+    const names = next.keys.length > 2
+      ? `${next.keys.length} ${next.keys.length < 5 ? "rodzaje" : "rodzajów"} odpadów`
+      : joinPl(next.keys.map(k => catDef(k).name.toLowerCase()));
+    const verb = n === 0 ? "Dziś odbieramy" : n === 1 ? "Jutro odbieramy" : n <= 6 ? `${cap(DNI_W[next.d.getDay()])} odbieramy` : `${fmtLong(next.d)} odbieramy`;
+    const rules = city?.rules || {};
+    const things = next.keys.length > 1 ? "odpady" : catDef(main).container.toLowerCase().startsWith("worek") ? "worek" : "odpady";
+    const prep = rules.setOutBy
+      ? `Wystaw ${things} przed posesję do ${rules.setOutBy} w dniu odbioru – najwygodniej wieczorem dzień wcześniej.`
+      : `Wystaw ${things} przed posesję wieczorem dzień wcześniej lub rano w dniu odbioru – godzinę określa regulamin Twojej gminy.`;
     html += `<article class="card hero" style="${vars(main)}">
       <div class="label"><span class="pulse"></span>Najbliższy odbiór</div>
-      <h2>${title}</h2>
-      <div class="hero-illu">${illustration(next.keys[0])}</div>
-      <div class="hero-meta"><div class="when"><span class="when-badge ${n === 0 ? "today" : ""}">${rel(n)}</span><span class="when-date">${fmtDay(next.d)}</span></div></div>
-      <div class="containers">${next.keys.map(k => { const c = KATEGORIE[k]; return `<div class="container-chip" style="${vars(c)}"><span class="swatch"></span><span>${c.pojemnik}<small>${c.nazwa}</small></span></div>`; }).join("")}</div>
-      <div class="hint">${ico("i-clock")}<span>${prep}</span></div>
+      <h2>${verb} <em>${esc(names)}</em></h2>
+      <div class="hero-illu">${illustration(main)}</div>
+      <div class="hero-meta"><div class="when"><span class="when-badge ${n === 0 ? "today" : ""}">${rel(n)}</span><span class="when-date">${fmtDay(next.d)}</span>${isChanged(next) ? '<span class="badge chg">Zmieniony termin</span>' : ""}</div></div>
+      <div class="containers">${next.keys.map(k => { const c = catDef(k); return `<div class="container-chip" style="${vars(k)}"><span class="swatch"></span><span>${esc(c.container)}<small>${esc(c.name)}</small></span></div>`; }).join("")}</div>
+      <div class="hint">${ico("i-clock")}<span>${prep}${rules.setOutBy && rules.setOutSource ? ` <span class="note">(${esc(rules.setOutSource)})</span>` : ""}</span></div>
+      ${trustRow()}
       <div class="hero-actions">
         <button class="btn btn-primary" data-ics>${ico("i-calendar")}Dodaj do kalendarza</button>
-        <button class="btn btn-ghost" data-go="calendar">Cały harmonogram</button>
+        <button class="btn btn-ghost" data-refresh>${ico("i-refresh")}Odśwież</button>
       </div>
     </article>`;
   } else {
-    html += `<article class="card hero" style="${vars(PSZOK)}"><div class="empty" style="grid-column:1/-1">${ico("i-calendar")}<h3>Brak zaplanowanych odbiorów</h3><p>Harmonogram dla tej ulicy się skończył. Sprawdź nowy na stronie gminy.</p></div></article>`;
+    html += `<article class="card state info"><div class="state-top"><span class="state-ic">${ico("i-calendar")}</span><div><h2>Brak kolejnych terminów w źródle</h2><p>Oficjalne źródło nie opublikowało jeszcze terminów po ${s.periodEnd ? fmtLong(parse(s.periodEnd)) + " " + s.periodEnd.slice(0, 4) : "ostatniej dacie"}. Sprawdzamy je automatycznie – pokażemy je, gdy tylko się pojawią.</p></div></div>${trustRow()}<div class="actions"><a class="btn btn-outline" href="${safeUrl(current.officialInfoUrl)}" target="_blank" rel="noopener">${ico("i-link")}Oficjalne informacje</a></div></article>`;
   }
 
-  // --- Dzisiaj ---
+  // Dzisiaj
   html += `<div><div class="sec-head" style="margin-top:4px"><h2>Dzisiaj</h2><span class="note">${DNI[TODAY.getDay()]}, ${fmtLong(TODAY)}</span></div>`;
   if (todayG) {
-    const c = KATEGORIE[todayG.keys[0]];
-    const done = !!state.wystawione[todayG.iso];
-    html += `<div class="card today has" style="${vars(c)}">
-      <div class="today-icon">${ico(c.ikona)}</div>
-      <div><h3>Dziś odbiór: ${joinPl(todayG.keys.map(k => KATEGORIE[k].krotko))}</h3>
-      <p>${todayG.keys.map(k => KATEGORIE[k].pojemnik).join(" + ")} · odbiór od 6:00 do 22:00</p>
-      <button class="check" data-done="${todayG.iso}" aria-pressed="${done}"><span class="box">${ico("i-check")}</span>${done ? "Wystawione" : "Oznacz jako wystawione"}</button></div>
-    </div>`;
+    const k = todayG.keys[0], done = !!state.wystawione[addrKey(active()) + todayG.iso];
+    html += `<div class="card today has" style="${vars(k)}"><div class="today-icon">${ico((LOOK[k] || LOOK.pszok).icon)}</div>
+      <div><h3>Dziś odbiór: ${esc(joinPl(todayG.keys.map(x => catDef(x).name.toLowerCase())))}</h3>
+      <p>${esc(todayG.keys.map(x => catDef(x).container).join(" + "))}</p>
+      <button class="check" data-done="${todayG.iso}" aria-pressed="${done}"><span class="box">${ico("i-check")}</span>${done ? "Wystawione" : "Oznacz jako wystawione"}</button></div></div>`;
   } else {
-    const nx = groups[0];
-    const tomorrow = nx && diffDays(TODAY, nx.d) === 1;
-    html += `<div class="card today">
-      <div class="today-icon">${ico(tomorrow ? "i-moon" : "i-sun")}</div>
-      <div><h3>Dziś nie ma odbioru.</h3>
-      <p>${nx ? `Następny odbiór: ${joinPl(nx.keys.map(k => KATEGORIE[k].krotko))} – ${whenPhrase(nx.d)}.${tomorrow ? " Wieczorem wystaw " + joinPl(nx.keys.map(k => KATEGORIE[k].pojemnik.toLowerCase())) + "." : ""}` : "Brak kolejnych terminów w harmonogramie."}</p></div>
-    </div>`;
+    const nx = groups[0], tomorrow = nx && diffDays(TODAY, nx.d) === 1;
+    html += `<div class="card today"><div class="today-icon">${ico(tomorrow ? "i-moon" : "i-sun")}</div>
+      <div><h3>Dziś nie ma odbioru.</h3><p>${nx ? `Następny odbiór: ${esc(joinPl(nx.keys.map(k => catDef(k).name.toLowerCase())))} – ${whenPhrase(nx.d)}.${tomorrow ? " Wieczorem przygotuj: " + esc(joinPl(nx.keys.map(k => catDef(k).container.toLowerCase()))) + "." : ""}` : "Brak kolejnych terminów w oficjalnym źródle."}</p></div></div>`;
   }
-  // --- Najbliższe terminy (krótka lista) ---
-  html += `<div class="sec-head"><h2>Najbliższe terminy</h2><button class="link" data-go="calendar">Kalendarz ${ico("i-right", "i")}</button></div>
-    <div class="card list">${groups.slice(todayG ? 1 : 0, (todayG ? 1 : 0) + 4).map(rowHTML).join("") || `<div class="empty"><h3>Brak terminów</h3></div>`}</div></div>`;
+  const list = groups.slice(todayG ? 1 : 0, (todayG ? 1 : 0) + 6);
+  html += `<div class="sec-head"><h2>Najbliższe terminy</h2><button class="link" data-go="calendar">Kalendarz ${ico("i-right")}</button></div>
+    <div class="card list">${list.map(rowHTML).join("") || `<div class="empty"><h3>Brak dalszych terminów</h3><p>${s.coverage === "NEXT_ONLY" ? "Źródło podaje tylko najbliższy termin każdej frakcji." : "Źródło nie opublikowało dalszych terminów."}</p></div>`}</div></div>`;
   html += `</div>`;
 
-  // --- Kategorie ---
-  html += `<div class="sec-head"><h2>Rodzaje odpadów</h2><button class="link" data-go="guide">Co gdzie wyrzucić? ${ico("i-right", "i")}</button></div><div class="cats">`;
-  for (const k of KOLEJNOSC) {
-    const c = KATEGORIE[k]; const d = nextOf(s, k);
-    if (k === "gabaryty" && !(s?.odbiory.gabaryty || []).length) continue;
-    const n = d ? diffDays(TODAY, d) : null;
-    const b = d == null ? `<span class="badge">Brak terminu</span>` : n <= 1 ? `<span class="badge now">${rel(n)}</span>` : n <= 7 ? `<span class="badge soon">${rel(n)}</span>` : `<span class="badge">${rel(n)}</span>`;
-    html += `<button class="card cat" style="${vars(c)}" data-cat="${k}">
-      <div class="cat-top"><span class="cat-ic">${ico(c.ikona)}</span>${b}</div>
-      <div><h3>${c.nazwa}</h3><div class="bin"><i></i>${c.pojemnik}</div></div>
-      <div class="next">${d ? `${DNI_KR[d.getDay()]}, <span>${fmtLong(d)}</span>` : "—"}</div>
+  // Kategorie obecne w harmonogramie tego adresu
+  const present = ORDER.filter(k => s.events.some(e => e.category === k && e.date >= iso(TODAY)) || s.onDemand.includes(k));
+  html += `<div class="sec-head"><h2>Rodzaje odpadów</h2><button class="link" data-go="guide">Co gdzie wyrzucić? ${ico("i-right")}</button></div><div class="cats">`;
+  for (const k of present) {
+    const c = catDef(k);
+    const nd = s.events.find(e => e.category === k && e.date >= iso(TODAY));
+    const d = nd ? parse(nd.date) : null, n = d ? diffDays(TODAY, d) : null;
+    const badge = s.onDemand.includes(k) && !d ? `<span class="badge">Na zgłoszenie</span>`
+      : d == null ? `<span class="badge">Brak terminu</span>`
+      : `<span class="badge ${n <= 1 ? "now" : n <= 7 ? "soon" : ""}">${rel(n)}</span>`;
+    html += `<button class="card cat" style="${vars(k)}" data-cat="${k}">
+      <div class="cat-top"><span class="cat-ic">${ico((LOOK[k] || LOOK.pszok).icon)}</span>${badge}</div>
+      <div><h3>${esc(c.name)}</h3><div class="bin"><i></i>${esc(c.container)}</div></div>
+      <div class="next">${d ? `${DNI_KR[d.getDay()]}, <span>${fmtLong(d)}</span>` : s.onDemand.includes(k) ? '<span>Zamów odbiór u operatora</span>' : "—"}</div>
     </button>`;
   }
-  html += `<button class="card cat wide" style="${vars(PSZOK)}" data-go="guide" data-q="baterie">
-      <div class="cat-top"><span class="cat-ic">${ico(PSZOK.ikona)}</span><span class="badge">Wt–sob</span></div>
-      <div><h3>${PSZOK.nazwa}</h3><div class="bin"><i></i>Dowozisz sam</div></div>
-      <div class="next">10:00–18:00 <span>· bezpłatnie</span></div>
-    </button></div>`;
-
+  const pszok = city?.pszokUrl || city?.officialInfoUrl;
+  html += `<a class="card cat wide" style="${vars("pszok")};text-decoration:none" href="${safeUrl(pszok)}" target="_blank" rel="noopener">
+      <div class="cat-top"><span class="cat-ic">${ico("c-pszok")}</span></div>
+      <div><h3>PSZOK / odpady specjalne</h3><div class="bin"><i></i>Baterie, elektrośmieci, chemia, gruz</div></div>
+      <div class="next"><span>Godziny i adres na stronie gminy</span> ${ico("i-link")}</div>
+    </a></div>`;
   $("#view-home").innerHTML = html;
 }
 
-// Wiersz listy terminów
+function stateCard() {
+  if (!current) return "";
+  const a = current.address;
+  const city = cityOf(active()?.city);
+  if (current.status === "UNCONFIRMED") {
+    return `<article class="card state" id="stateCard">
+      <div class="state-top"><span class="state-ic">${ico("i-alert")}</span>
+        <div><h2>Nie potwierdziliśmy harmonogramu</h2><p>${esc(current.message)}</p>${a ? `<p style="margin-top:8px">${levelChip(a)}</p>` : ""}</div></div>
+      <div class="docs" id="officialDocs"></div>
+      <div class="actions">
+        <button class="btn btn-primary" data-refresh>${ico("i-refresh")}Spróbuj ponownie</button>
+        <button class="btn btn-ghost" data-new-address>Wybierz inny adres</button>
+        <a class="btn btn-outline" href="${safeUrl(current.officialInfoUrl)}" target="_blank" rel="noopener">${ico("i-link")}Oficjalne informacje ${city ? esc(city.name) : ""}</a>
+      </div></article>`;
+  }
+  return `<article class="card state err">
+    <div class="state-top"><span class="state-ic">${ico("i-wifi-off")}</span>
+      <div><h2>Nie udało się teraz pobrać aktualnych danych.</h2><p>${esc(current.message)}</p></div></div>
+    <div class="actions">
+      <button class="btn btn-primary" data-refresh>${ico("i-refresh")}Spróbuj ponownie</button>
+      <a class="btn btn-outline" href="${safeUrl(current.officialInfoUrl || city?.officialInfoUrl)}" target="_blank" rel="noopener">${ico("i-link")}Oficjalne informacje</a>
+    </div></article>`;
+}
+async function loadOfficialDocs() {
+  const box = $("#officialDocs"); const a = active();
+  if (!box || !a) return;
+  try {
+    const { sources } = await api(`/sources?city=${encodeURIComponent(a.city)}`);
+    const pdfs = sources.filter(s => s.type === "PDF").slice(0, 8);
+    if (pdfs.length) box.innerHTML = `<p class="label" style="margin-top:4px">Oficjalne harmonogramy (PDF)</p>` + pdfs.map(s => `<a href="${safeUrl(s.url)}" target="_blank" rel="noopener">${ico("i-file")}<span>${esc(s.title)}</span></a>`).join("");
+  } catch { /* lista dokumentów jest dodatkiem */ }
+}
+const guideTeaser = () => `<div class="sec-head"><h2>Co gdzie wyrzucić?</h2><button class="link" data-go="guide">Wyszukiwarka ${ico("i-right")}</button></div>
+  <div class="chips">${["Karton po mleku", "Słoik", "Baterie", "Zużyta żarówka", "Paragon"].map(c => `<button class="chip" data-go="guide" data-q="${c}">${c}</button>`).join("")}</div>`;
+
 function rowHTML(g) {
   const n = diffDays(TODAY, g.d);
   return `<div class="row ${n === 0 ? "is-today" : ""}">
     <div class="date-tile"><small>${DNI_KR[g.d.getDay()]}</small><b>${g.d.getDate()}</b></div>
     <div class="row-body">
-      <div class="row-title">${g.keys.map(k => `<span style="${vars(KATEGORIE[k])}"><i class="dotc"></i>${KATEGORIE[k].nazwa}</span>`).join("")}</div>
-      <div class="row-sub">${g.keys.map(k => KATEGORIE[k].pojemnik).join(" · ")} · ${MIES_D[g.d.getMonth()]}</div>
+      <div class="row-title">${g.keys.map(k => `<span style="${vars(k)}"><i class="dotc"></i>${esc(catDef(k).name)}</span>`).join("")}</div>
+      <div class="row-sub">${esc(g.keys.map(k => catDef(k).container).join(" · "))} · ${MIES_D[g.d.getMonth()]}${isChanged(g) ? `<span class="chg-note">${ico("i-refresh")}zmieniony</span>` : ""}</div>
     </div>
     <span class="rel ${n <= 1 ? "hot" : n <= 7 ? "warm" : ""}">${rel(n)}</span>
   </div>`;
 }
 
-/* ============ Widok: Kalendarz ============ */
+/* ---------- Widok: Kalendarz ---------- */
 let calMonth = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
 let calSel = iso(TODAY);
-function dataRange() {
-  const all = allPickups(streetData());
-  if (!all.length) return [TODAY, TODAY];
-  return [all[0].d, all[all.length - 1].d];
-}
 function renderCalendar() {
-  const s = streetData();
-  const map = new Map(byDate(allPickups(s)).map(g => [g.iso, g]));
+  const s = sched(), a = active();
+  if (!s) { $("#view-calendar").innerHTML = `<div class="page-title"><h1>Kalendarz</h1></div>${stateCard() || `<div class="card empty">${ico("i-calendar")}<h3>Brak harmonogramu</h3></div>`}`; loadOfficialDocs(); return; }
+  const map = new Map(byDate(s.events).map(g => [g.iso, g]));
   const y = calMonth.getFullYear(), m = calMonth.getMonth();
-  const first = new Date(y, m, 1);
-  const offset = (first.getDay() + 6) % 7;     // poniedziałek jako pierwszy dzień
-  const start = addDays(first, -offset);
-  const [minD, maxD] = dataRange();
-  const minM = new Date(Math.max(new Date(TODAY.getFullYear(), TODAY.getMonth(), 1), new Date(minD.getFullYear(), minD.getMonth(), 1)));
-  const maxM = new Date(maxD.getFullYear(), maxD.getMonth(), 1);
-
+  const start = addDays(new Date(y, m, 1), -((new Date(y, m, 1).getDay() + 6) % 7));
+  const lastEv = s.events.length ? parse(s.events[s.events.length - 1].date) : TODAY;
+  const minM = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1), maxM = new Date(lastEv.getFullYear(), lastEv.getMonth(), 1);
   let days = "";
   for (let i = 0; i < 42; i++) {
-    const d = addDays(start, i); const k = iso(d); const g = map.get(k);
+    const d = addDays(start, i), k = iso(d), g = map.get(k);
     const cls = ["day", d.getMonth() !== m ? "out" : "", d < TODAY ? "past" : "", g ? "has" : "", k === iso(TODAY) ? "today" : "", k === calSel ? "sel" : ""].join(" ");
-    const label = `${d.getDate()} ${MIES_D[d.getMonth()]}${g ? ": " + g.keys.map(x => KATEGORIE[x].nazwa).join(", ") : ""}`;
-    days += `<button class="${cls}" data-day="${k}" aria-label="${label}"><span class="num">${d.getDate()}</span><span class="dots">${g ? g.keys.map(x => `<i style="--c:${KATEGORIE[x].kolor}"></i>`).join("") : ""}</span></button>`;
-    if (i === 34 && addDays(start, 35).getMonth() !== m) break; // 5 tygodni wystarczy
+    days += `<button class="${cls}" data-day="${k}" aria-label="${d.getDate()} ${MIES_D[d.getMonth()]}${g ? ": " + esc(g.keys.map(x => catDef(x).name).join(", ")) : ""}"><span class="num">${d.getDate()}</span><span class="dots">${g ? g.keys.map(x => `<i style="--c:${colorOf(x)}"></i>`).join("") : ""}</span></button>`;
+    if (i === 34 && addDays(start, 35).getMonth() !== m) break;
   }
-
-  // Lista terminów miesiąca (od dziś w przód)
-  const monthList = byDate(upcoming(s)).filter(g => g.d.getMonth() === m && g.d.getFullYear() === y);
-  const sel = map.get(calSel); const selD = parse(calSel);
-
+  const monthList = byDate(s.events.filter(e => e.date >= iso(TODAY))).filter(g => g.d.getMonth() === m && g.d.getFullYear() === y);
+  const sel = map.get(calSel), present = ORDER.filter(k => s.events.some(e => e.category === k));
   $("#view-calendar").innerHTML = `
-    <div class="page-title"><h1>Kalendarz</h1><p>${esc(addrText(active()))}, ${MIASTO}. Kolorowe kropki oznaczają dni odbioru.</p></div>
-    <div class="cal-wrap">
-      <div>
-        <div class="card cal">
-          <div class="cal-head">
-            <h2>${MIES[m]} ${y}</h2>
-            <div class="cal-nav">
-              <button class="today-btn" data-cal="today">Dziś</button>
-              <button data-cal="-1" aria-label="Poprzedni miesiąc" ${calMonth <= minM ? "disabled" : ""}>${ico("i-left")}</button>
-              <button data-cal="1" aria-label="Następny miesiąc" ${calMonth >= maxM ? "disabled" : ""}>${ico("i-right")}</button>
-            </div>
-          </div>
-          <div class="weekdays">${["pon", "wt", "śr", "czw", "pt", "sob", "nd"].map(d => `<span>${d}</span>`).join("")}</div>
-          <div class="days">${days}</div>
-          <div class="legend">${KOLEJNOSC.map(k => `<span><i class="dotc" style="--c:${KATEGORIE[k].kolor}"></i>${KATEGORIE[k].nazwa}</span>`).join("")}</div>
-        </div>
-        <div class="card day-detail" style="margin-top:16px">
-          <h3>${fmtDay(selD)}</h3>
-          ${sel ? sel.keys.map(k => { const c = KATEGORIE[k]; return `<div class="container-chip" style="${vars(c)};margin-top:8px;background:var(--c-soft)"><span class="swatch"></span><span>${c.nazwa}<small>${c.pojemnik}</small></span></div>`; }).join("") : `<p class="note">Tego dnia nie ma odbioru.</p>`}
-        </div>
+    <div class="page-title"><h1>Kalendarz</h1><p>${esc(addrText(a))}, ${esc(cityOf(a.city)?.name || "")} · ${esc(s.zoneLabel)}</p></div>
+    ${s.coverage === "NEXT_ONLY" ? `<div class="city-note" style="margin-bottom:16px">${ico("i-info")}<span>Oficjalne źródło dla tego miasta podaje tylko najbliższy termin każdej frakcji. Kolejne daty pojawią się po ich publikacji.</span></div>` : ""}
+    <div class="cal-wrap"><div>
+      <div class="card cal">
+        <div class="cal-head"><h2>${MIES[m]} ${y}</h2>
+          <div class="cal-nav"><button class="today-btn" data-cal="today">Dziś</button>
+            <button data-cal="-1" aria-label="Poprzedni miesiąc" ${calMonth <= minM ? "disabled" : ""}>${ico("i-left")}</button>
+            <button data-cal="1" aria-label="Następny miesiąc" ${calMonth >= maxM ? "disabled" : ""}>${ico("i-right")}</button></div></div>
+        <div class="weekdays">${["pon", "wt", "śr", "czw", "pt", "sob", "nd"].map(d => `<span>${d}</span>`).join("")}</div>
+        <div class="days">${days}</div>
+        <div class="legend">${present.map(k => `<span><i class="dotc" style="--c:${colorOf(k)}"></i>${esc(catDef(k).name)}</span>`).join("")}</div>
       </div>
-      <div>
-        <div class="sec-head" style="margin-top:0"><h2>Terminy – ${MIES[m]}</h2><button class="link" data-ics>${ico("i-download")}.ics</button></div>
-        <div class="card list">${monthList.map(rowHTML).join("") || `<div class="empty">${ico("i-calendar")}<h3>Brak nadchodzących terminów</h3><p>W tym miesiącu nie zostały już żadne odbiory.</p></div>`}</div>
-        <button class="btn btn-primary btn-block" style="margin-top:16px" data-ics>${ico("i-calendar")}Dodaj do kalendarza</button>
-      </div>
-    </div>`;
+      <div class="card day-detail" style="margin-top:16px"><h3>${fmtDay(parse(calSel))}</h3>
+        ${sel ? sel.keys.map(k => { const c = catDef(k); return `<div class="container-chip" style="${vars(k)};margin-top:8px;background:var(--c-soft)"><span class="swatch"></span><span>${esc(c.name)}<small>${esc(c.container)}</small></span></div>`; }).join("") : `<p class="note">Tego dnia nie ma odbioru w oficjalnym harmonogramie.</p>`}</div>
+    </div><div>
+      <div class="sec-head" style="margin-top:0"><h2>Terminy – ${MIES[m]}</h2><button class="link" data-ics>${ico("i-download")}.ics</button></div>
+      <div class="card list">${monthList.map(rowHTML).join("") || `<div class="empty">${ico("i-calendar")}<h3>Brak nadchodzących terminów</h3><p>W tym miesiącu nie ma już odbiorów w oficjalnym harmonogramie.</p></div>`}</div>
+      <button class="btn btn-primary btn-block" style="margin-top:16px" data-ics>${ico("i-calendar")}Dodaj do kalendarza</button>
+      <div style="margin-top:12px">${trustRow()}</div>
+    </div></div>`;
 }
 
-/* ============ Widok: Co gdzie wyrzucić? ============ */
-const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ł/g, "l");
-function renderGuide(q = $("#q").value) {
-  const nq = norm(q.trim());
+/* ---------- Widok: Co gdzie wyrzucić? (niezależny od harmonogramu) ---------- */
+let GUIDE = null;
+const norm = s => s.toLowerCase().replace(/ł/g, "l").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+async function renderGuide(q = $("#q").value) {
   $("#qClear").classList.toggle("show", !!q);
-  $("#chips").innerHTML = ["Karton po mleku", "Butelka plastikowa", "Słoik", "Baterie", "Zużyta żarówka", "Pudełko po pizzy", "Paragon"]
-    .map(c => `<button class="chip" data-chip="${c}">${c}</button>`).join("");
-  let items;
-  if (!nq) items = PRZEWODNIK.slice(0, 6);
-  else {
-    const words = nq.split(/\s+/);
-    items = PRZEWODNIK.map(it => {
-      const hay = norm(it.n + " " + it.s);
-      const score = words.reduce((a, w) => a + (hay.includes(w) ? (norm(it.n).startsWith(w) ? 3 : 1) : 0), 0);
-      return { it, score: words.every(w => hay.includes(w)) ? score + 5 : score };
-    }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).map(x => x.it);
+  $("#chips").innerHTML = ["Karton po mleku", "Butelka plastikowa", "Słoik", "Baterie", "Zużyta żarówka", "Paragon"].map(c => `<button class="chip" data-chip="${c}">${c}</button>`).join("");
+  if (!GUIDE) {
+    $("#results").innerHTML = `<div class="loading-note"><span class="spin"></span>Ładujemy przewodnik…</div>`;
+    try { GUIDE = await api("/guide"); state.guide = GUIDE; save(); }
+    catch { GUIDE = state.guide || null; }
+    if (!GUIDE) { $("#results").innerHTML = `<div class="card empty">${ico("i-wifi-off")}<h3>Przewodnik jest chwilowo niedostępny</h3><p>Sprawdź połączenie i spróbuj ponownie.</p></div>`; return; }
   }
+  const nq = norm(q.trim());
+  const items = !nq ? GUIDE.items.slice(0, 6) : GUIDE.items.filter(it => nq.split(/\s+/).every(w => norm(it.name + " " + it.keywords).includes(w)));
   const head = nq ? `<p class="note" style="margin:4px 4px 0">${items.length ? `Wyniki dla „${esc(q.trim())}”` : ""}</p>` : `<p class="label" style="margin:8px 4px 0">Najczęściej sprawdzane</p>`;
   $("#results").innerHTML = head + (items.length ? items.map(it => {
-    const c = cat(it.k);
-    return `<article class="card result" style="${vars(c)}">
-      <span class="cat-ic">${ico(c.ikona)}</span>
-      <h3>${esc(it.n)}</h3>
-      <div class="where"><span class="tag"><i class="dotc"></i>${c.nazwa}</span><small>${c.pojemnik}</small></div>
-      <p>${esc(it.t)}</p>
-    </article>`;
-  }).join("") : `<div class="card empty">${ico("i-search")}<h3>Nie znaleźliśmy „${esc(q.trim())}”</h3><p>Spróbuj innej nazwy, np. „butelka” albo „karton”. W razie wątpliwości – odpady zmieszane lub PSZOK.</p></div>`);
+    const c = catDef(it.category);
+    return `<article class="card result" style="${vars(it.category)}"><span class="cat-ic">${ico((LOOK[it.category] || LOOK.pszok).icon)}</span>
+      <h3>${esc(it.name)}</h3>
+      <div class="where"><span class="tag"><i class="dotc"></i>${esc(c.name)}</span><small>${esc(c.container)}</small></div>
+      <p>${esc(it.instructions)}${it.special ? ` <b>${esc(it.special)}</b>` : ""}</p></article>`;
+  }).join("") : `<div class="card empty">${ico("i-search")}<h3>Nie znaleźliśmy „${esc(q.trim())}”</h3><p>Spróbuj innej nazwy, np. „butelka” albo „karton”. W razie wątpliwości zapytaj w urzędzie gminy.</p></div>`)
+  + `<p class="note" style="margin:8px 4px">${esc(GUIDE.basis)}</p>`;
 }
 
-/* ============ Widok: Moje adresy ============ */
+/* ---------- Widok: Moje adresy ---------- */
 function addressesHTML() {
-  const opts = HARMONOGRAM.map(s => `<option>${esc(s.ulica)}</option>`).join("");
-  return `
-    <div class="page-title"><h1>Moje adresy</h1><p>Dodaj dom, działkę albo mieszkanie rodziców i przełączaj się jednym kliknięciem.</p></div>
-    <div class="two-col">
-      <div class="card settings">${state.adresy.map((a, i) => `
-        <div class="addr ${i === state.aktywny ? "active" : ""}">
-          <span class="ic">${ico("i-pin")}</span>
-          <div class="txt"><b>${esc(addrText(a))}</b><small>${MIASTO}</small></div>
-          ${i === state.aktywny ? `<span class="pill-on">Aktywny</span>` : `<button class="act" data-use="${i}">Wybierz</button>`}
-          ${state.adresy.length > 1 ? `<button class="rm" data-rm="${i}" aria-label="Usuń adres ${esc(addrText(a))}">${ico("i-trash")}</button>` : ""}
-        </div>`).join("")}
-      </div>
-      <form class="card pad form-grid" id="addForm" novalidate>
-        <h2 style="font-size:17px;font-weight:620">Dodaj adres</h2>
-        <div class="field"><label for="aCity">Miasto</label><select class="select" id="aCity"><option>${MIASTO}</option></select></div>
-        <div class="form-row">
-          <div class="field"><label for="aStreet">Ulica</label><select class="select" id="aStreet">${opts}</select></div>
-          <div class="field"><label for="aNo">Numer</label><input class="input" id="aNo" placeholder="np. 4A" maxlength="10"></div>
-        </div>
-        <button class="btn btn-outline btn-block" type="submit">${ico("i-plus")}Dodaj i pokaż harmonogram</button>
-      </form>
-    </div>`;
+  return `<div class="page-title"><h1>Moje adresy</h1><p>Dom, działka albo mieszkanie rodziców – przełączaj się jednym kliknięciem.</p></div>
+    <div class="two-col"><div class="card settings">${state.adresy.map((a, i) => {
+      const cached = state.cache[addrKey(a)]?.resp;
+      return `<div class="addr ${i === state.aktywny ? "active" : ""}"><span class="ic">${ico("i-pin")}</span>
+        <div class="txt"><b>${esc(addrText(a))}</b><small>${esc(cityOf(a.city)?.name || a.city)}${a.buildingType ? " · " + BT[a.buildingType].toLowerCase() : ""}</small>${cached?.address ? `<div style="margin-top:4px">${levelChip(cached.address)}</div>` : ""}</div>
+        ${i === state.aktywny ? `<span class="pill-on">Aktywny</span>` : `<button class="act" data-use="${i}">Wybierz</button>`}
+        <button class="rm" data-rm="${i}" aria-label="Usuń adres ${esc(addrText(a))}">${ico("i-trash")}</button></div>`;
+    }).join("") || `<div class="empty"><h3>Brak adresów</h3></div>`}</div>
+    <div class="card pad"><h2 style="font-size:17px;font-weight:620">Dodaj adres</h2><p class="note" style="margin:4px 0 14px">Każdy adres sprawdzamy w rejestrze adresów lub systemie gminy.</p>
+      <button class="btn btn-outline btn-block" data-new-address>${ico("i-plus")}Dodaj adres</button></div></div>`;
 }
 
-/* ============ Widok: Ustawienia ============ */
+/* ---------- Widok: Ustawienia ---------- */
 function settingsHTML() {
   const p = state.powiad;
-  const ev = ["18:00", "19:00", "20:00", "21:00"].map(t => `<option ${t === p.godzWieczor ? "selected" : ""}>${t}</option>`).join("");
-  const mo = ["05:00", "05:30", "06:00", "07:00"].map(t => `<option ${t === p.godzRano ? "selected" : ""}>${t}</option>`).join("");
-  return `
-    <div class="page-title"><h1>Ustawienia</h1><p>Wybierz, kiedy chcesz dostawać przypomnienia. Te same godziny trafią do pliku kalendarza.</p></div>
-    <div class="two-col">
-      <div>
-        <p class="label" style="margin:0 4px 10px">Powiadomienia</p>
-        <div class="card settings">
-          <div class="set-row"><span class="ic">${ico("i-moon")}</span><div class="txt"><b>Wieczór przed odbiorem</b><small>Najlepszy moment, żeby wystawić worek</small></div>
-            <select class="select" data-set="godzWieczor" aria-label="Godzina przypomnienia wieczorem">${ev}</select>
-            <label class="switch"><input type="checkbox" data-set="wieczor" ${p.wieczor ? "checked" : ""} aria-label="Przypomnienie wieczorem"><span></span></label></div>
-          <div class="set-row"><span class="ic">${ico("i-sun")}</span><div class="txt"><b>W dniu odbioru</b><small>Ostatnia szansa przed przyjazdem śmieciarki</small></div>
-            <select class="select" data-set="godzRano" aria-label="Godzina przypomnienia rano">${mo}</select>
-            <label class="switch"><input type="checkbox" data-set="rano" ${p.rano ? "checked" : ""} aria-label="Przypomnienie w dniu odbioru"><span></span></label></div>
-          <div class="set-row"><span class="ic">${ico("i-alert")}</span><div class="txt"><b>Zmiany w harmonogramie</b><small>Np. przesunięcia terminów przez święta</small></div>
-            <label class="switch"><input type="checkbox" data-set="zmiany" ${p.zmiany ? "checked" : ""} aria-label="Zmiany w harmonogramie"><span></span></label></div>
-        </div>
-      </div>
-      <div>
-        <p class="label" style="margin:0 4px 10px">Kalendarz i dane</p>
-        <div class="card settings">
-          <div class="set-row"><span class="ic">${ico("i-calendar")}</span><div class="txt"><b>Eksport do kalendarza</b><small>Plik .ics z przypomnieniami</small></div><button class="btn btn-ghost" data-ics style="min-height:40px">Pobierz</button></div>
-          <div class="set-row"><span class="ic">${ico("i-info")}</span><div class="txt"><b>Źródło danych</b><small>Dane przykładowe dla miasta ${MIASTO}. Zawsze sprawdzaj komunikaty gminy.</small></div></div>
-          <div class="set-row"><span class="ic">${ico("i-trash")}</span><div class="txt"><b>Wyczyść dane aplikacji</b><small>Usuwa zapisane adresy i ustawienia z tej przeglądarki</small></div><button class="btn btn-ghost" id="resetBtn" style="min-height:40px">Wyczyść</button></div>
-        </div>
-      </div>
-    </div>`;
+  const opt = (list, v) => list.map(t => `<option ${t === v ? "selected" : ""}>${t}</option>`).join("");
+  return `<div class="page-title"><h1>Ustawienia</h1><p>Przypomnienia trafiają do pliku kalendarza (.ics). Powiadomienia o zmianach harmonogramu wysyłamy tylko po potwierdzeniu w oficjalnym źródle.</p></div>
+    <div class="two-col"><div><p class="label" style="margin:0 4px 10px">Powiadomienia</p><div class="card settings">
+      <div class="set-row"><span class="ic">${ico("i-moon")}</span><div class="txt"><b>Wieczór przed odbiorem</b><small>Najlepszy moment, żeby przygotować worek</small></div>
+        <select class="select" data-set="eveningTime" aria-label="Godzina przypomnienia wieczorem">${opt(["18:00", "19:00", "20:00", "21:00"], p.eveningTime)}</select>
+        <label class="switch"><input type="checkbox" data-set="eveningBefore" ${p.eveningBefore ? "checked" : ""} aria-label="Przypomnienie wieczorem"><span></span></label></div>
+      <div class="set-row"><span class="ic">${ico("i-sun")}</span><div class="txt"><b>W dniu odbioru</b><small>Przypomnienie rano</small></div>
+        <select class="select" data-set="morningTime" aria-label="Godzina przypomnienia rano">${opt(["05:00", "05:30", "06:00", "07:00"], p.morningTime)}</select>
+        <label class="switch"><input type="checkbox" data-set="collectionDay" ${p.collectionDay ? "checked" : ""} aria-label="Przypomnienie w dniu odbioru"><span></span></label></div>
+      <div class="set-row"><span class="ic">${ico("i-alert")}</span><div class="txt"><b>Zmiany w harmonogramie</b><small>Gdy gmina przesunie termin</small></div>
+        <label class="switch"><input type="checkbox" data-set="scheduleChanges" ${p.scheduleChanges ? "checked" : ""} aria-label="Zmiany w harmonogramie"><span></span></label></div>
+    </div></div>
+    <div><p class="label" style="margin:0 4px 10px">Kalendarz i dane</p><div class="card settings">
+      <div class="set-row"><span class="ic">${ico("i-calendar")}</span><div class="txt"><b>Eksport do kalendarza</b><small>Plik .ics z przypomnieniami</small></div><button class="btn btn-ghost" data-ics style="min-height:40px">Pobierz</button></div>
+      <div class="set-row"><span class="ic">${ico("i-shield")}</span><div class="txt"><b>Źródło danych</b><small>Harmonogramy z oficjalnych źródeł gmin, adresy z PRG (GUGiK) lub systemów miast. Szczegóły przy harmonogramie.</small></div></div>
+      <div class="set-row"><span class="ic">${ico("i-trash")}</span><div class="txt"><b>Wyczyść dane aplikacji</b><small>Usuwa adresy i ustawienia z tej przeglądarki</small></div><button class="btn btn-ghost" id="resetBtn" style="min-height:40px">Wyczyść</button></div>
+    </div></div></div>`;
 }
-function renderAddresses() { $("#view-addresses").innerHTML = addressesHTML(); }
-function renderSettings() { $("#view-settings").innerHTML = settingsHTML(); }
+const renderAddresses = () => $("#view-addresses").innerHTML = addressesHTML();
+const renderSettings = () => $("#view-settings").innerHTML = settingsHTML();
 
-/* ============ Powiadomienia (dzwonek) ============ */
-function notices() {
-  const a = active(); const s = streetData(); const out = [];
-  const g = byDate(upcoming(s));
-  const t = g.find(x => diffDays(TODAY, x.d) <= 1);
-  if (t) {
-    const n = diffDays(TODAY, t.d); const c = KATEGORIE[t.keys[0]];
-    out.push({ c, ic: c.ikona, b: `${n === 0 ? "Dziś" : "Jutro"}: ${joinPl(t.keys.map(k => KATEGORIE[k].krotko))}`, s: `${t.keys.map(k => KATEGORIE[k].pojemnik).join(" + ")} – wystaw ${n === 0 ? "jak najszybciej" : "dziś wieczorem"}.` });
+/* ---------- Szczegóły źródła ---------- */
+function openDetails() {
+  const s = sched(); if (!s) return;
+  const a = current.address;
+  const typ = { API: "Oficjalny system gminy (API)", HTML: "Oficjalna wyszukiwarka gminy", PDF: "Oficjalny dokument PDF gminy", REGISTRY: "Rejestr urzędowy" }[s.source.type] || s.source.type;
+  const lvl = a?.level === "BUILDING_VERIFIED" ? "Budynek potwierdzony" : a?.level === "STREET_VERIFIED" ? "Potwierdzona tylko ulica – numeru budynku nie udało się zweryfikować" : "Niepotwierdzony";
+  const st = { VERIFIED: "Harmonogram potwierdzony", UPDATED: "Zaktualizowany z oficjalnego źródła", STALE: "Może być nieaktualny" }[current.status] || current.status;
+  const changes = (s.changes || []).slice(0, 6).map(c => `<span>${esc(catDef(c.category).name)}: ${c.from ? fmtLong(parse(c.from)) : "—"} → ${c.to ? fmtLong(parse(c.to)) : "odwołany"} <span class="note">(wykryto ${verifiedAt(c.detectedAt)})</span></span>`).join("");
+  $("#detBody").innerHTML = `<dl class="kv">
+      <div><dt>Status</dt><dd>${esc(st)}</dd></div>
+      <div><dt>Źródło</dt><dd><a href="${safeUrl(s.source.url)}" target="_blank" rel="noopener">${esc(s.source.title)}</a></dd></div>
+      <div><dt>Typ źródła</dt><dd>${esc(typ)}</dd></div>
+      <div><dt>Ostatnia weryfikacja</dt><dd>${verifiedAt(s.lastSuccessAt)}</dd></div>
+      <div><dt>Wersja harmonogramu</dt><dd>${s.version}</dd></div>
+      <div><dt>Strefa / rejon</dt><dd>${esc(s.zoneLabel)}</dd></div>
+      ${active()?.buildingType ? `<div><dt>Typ zabudowy</dt><dd>${BT[active().buildingType]}</dd></div>` : ""}
+      <div><dt>Adres</dt><dd>${esc(addrText(active()))}<br><span class="note">${esc(lvl)}${a?.verifiedBy?.length ? " · " + esc(a.verifiedBy.join(", ")) : ""}</span></dd></div>
+      <div><dt>Zakres danych</dt><dd>${s.coverage === "NEXT_ONLY" ? "Najbliższy termin każdej frakcji" : s.periodEnd ? "Do " + fmtLong(parse(s.periodEnd)) + " " + s.periodEnd.slice(0, 4) : "Okres publikacji źródła"}</dd></div>
+      ${s.onDemand.length ? `<div><dt>Na zgłoszenie</dt><dd>${esc(s.onDemand.map(k => catDef(k).name).join(", "))}</dd></div>` : ""}
+      ${s.notes.length ? `<div><dt>Uwagi</dt><dd>${esc(s.notes.join(" "))}</dd></div>` : ""}
+      ${changes ? `<div><dt>Zmiany</dt><dd class="chg-list">${changes}</dd></div>` : ""}
+      ${s.lastError ? `<div><dt>Ostatni błąd</dt><dd>${esc(s.lastError)}</dd></div>` : ""}
+    </dl>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" data-refresh>${ico("i-refresh")}Sprawdź teraz</button><a class="btn btn-ghost" href="${safeUrl(s.source.url)}" target="_blank" rel="noopener">${ico("i-link")}Otwórz źródło</a></div>`;
+  $("#detailsModal").classList.add("show");
+}
+
+/* ---------- Powiadomienia (dzwonek) ---------- */
+function bellItems() {
+  const out = [];
+  const g = upcomingGroups().find(x => diffDays(TODAY, x.d) <= 1);
+  if (g && state.powiad.eveningBefore) {
+    const n = diffDays(TODAY, g.d);
+    out.push({ k: g.keys[0], ic: (LOOK[g.keys[0]] || LOOK.pszok).icon, b: `${n === 0 ? "Dziś" : "Jutro"}: ${joinPl(g.keys.map(k => catDef(k).name.toLowerCase()))}`, s: `${g.keys.map(k => catDef(k).container).join(" + ")}.` });
   }
-  if (state.powiad.zmiany && a) {
-    for (const z of ZMIANY) {
-      if (!z.ulice.includes(a.ulica)) continue;
-      const na = parse(z.na); const dd = diffDays(TODAY, na);
-      if (dd < 0 || dd > 45) continue;
-      const c = KATEGORIE[z.rodzaj];
-      out.push({ c: null, ic: "i-alert", b: `Zmiana terminu: ${c.krotko}`, s: `Odbiór z ${fmtLong(parse(z.z))} przeniesiony na ${DNI[na.getDay()]}, ${fmtLong(na)} (święto).` });
-    }
+  if (current?.status === "STALE") out.push({ ic: "i-alert", b: "Harmonogram może być nieaktualny", s: "Nie udało się go ostatnio potwierdzić w oficjalnym źródle." });
+  if (state.powiad.scheduleChanges) for (const n of notices.slice(0, 5)) {
+    const c = n.changes?.[0];
+    out.push({ ic: "i-refresh", b: n.title, s: c ? `${catDef(c.category).name}: ${c.from ? fmtLong(parse(c.from)) : "—"} → ${c.to ? fmtLong(parse(c.to)) : "odwołany"}. ${n.body}` : n.body });
   }
   return out;
 }
 function renderBell() {
-  const list = notices();
+  const list = bellItems();
   $("#bellDot").hidden = !list.length;
-  $("#bellPop").innerHTML = `<h3>Powiadomienia</h3>` + (list.length ? list.map(n => `
-    <div class="notice" ${n.c ? `style="${vars(n.c)}"` : ""}><span class="ic">${ico(n.ic)}</span><div><b>${n.b}</b><small>${n.s}</small></div></div>`).join("")
-    : `<div class="empty" style="padding:24px">${ico("i-bell")}<h3>Wszystko jasne</h3><p>Nic nowego. Przypomnimy Ci przed odbiorem.</p></div>`)
+  $("#bellPop").innerHTML = `<h3>Powiadomienia</h3>` + (list.length ? list.map(n => `<div class="notice" ${n.k ? `style="${vars(n.k)}"` : ""}><span class="ic">${ico(n.ic)}</span><div><b>${esc(n.b)}</b><small>${esc(n.s)}</small></div></div>`).join("")
+    : `<div class="empty" style="padding:24px">${ico("i-bell")}<h3>Wszystko jasne</h3><p>Nic nowego.</p></div>`)
     + `<div style="padding:8px"><button class="btn btn-ghost btn-block" data-go="settings" style="min-height:42px">Ustawienia powiadomień</button></div>`;
 }
+async function loadNotices() {
+  try { notices = (await api(`/notifications?deviceId=${encodeURIComponent(state.deviceId)}`)).notifications || []; } catch { notices = []; }
+  renderBell();
+}
 
-/* ============ Eksport .ics ============ */
-function openIcs() {
-  const s = streetData(); if (!s) return;
-  const keys = KOLEJNOSC.filter(k => (s.odbiory[k] || []).some(d => parse(d) >= TODAY));
-  $("#icsOpts").innerHTML = keys.map(k => {
-    const c = KATEGORIE[k]; const n = s.odbiory[k].filter(d => parse(d) >= TODAY).length;
-    return `<label class="opt"><input type="checkbox" value="${k}" checked><span class="txt"><b><i class="dotc" style="--c:${c.kolor}"></i>${c.nazwa}</b><small>${c.pojemnik} · ${n} ${n === 1 ? "termin" : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? "terminy" : "terminów"}</small></span></label>`;
-  }).join("");
-  updIcsSum();
-  $("#icsModal").classList.add("show");
-  setTimeout(() => $("#icsModal .modal input")?.focus(), 50);
-}
-function selectedKeys() { return $$("#icsOpts input:checked").map(i => i.value); }
-function updIcsSum() {
-  const p = state.powiad; const last = dataRange()[1];
-  const al = [p.wieczor ? `dzień wcześniej o ${p.godzWieczor}` : null, p.rano ? `w dniu odbioru o ${p.godzRano}` : null].filter(Boolean);
-  $("#icsSum").innerHTML = `${ico("i-bell")}<span>Terminy od dziś do ${fmtLong(last)} ${last.getFullYear()}. Przypomnienie: ${al.length ? al.join(" i ") : "brak (włącz w ustawieniach)"}.</span>`;
-  $("#icsGo").disabled = !selectedKeys().length;
-  $("#icsGo").style.opacity = selectedKeys().length ? 1 : .5;
-}
-// Escapowanie tekstu wg RFC 5545
-const icsEsc = s => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
-// Zawijanie linii do 75 bajtów (UTF-8)
-function fold(line) {
-  const enc = new TextEncoder(); const out = []; let cur = ""; let bytes = 0;
-  for (const ch of line) {
-    const b = enc.encode(ch).length;
-    if (bytes + b > (out.length ? 74 : 75)) { out.push(cur); cur = ""; bytes = 0; }
-    cur += ch; bytes += b;
+/* ---------- Pobieranie harmonogramu ---------- */
+async function loadSchedule({ refresh = false } = {}) {
+  const a = active(); if (!a) return;
+  loading = true;
+  const cached = state.cache[addrKey(a)];
+  if (!current && cached) { current = cached.resp; offlineData = true; }
+  if (!current) renderView();
+  try {
+    const body = { ...a, deviceId: state.deviceId, prefs: state.powiad };
+    const resp = await api(refresh ? "/refresh" : "/resolve", { body });
+    current = resp; offlineData = false;
+    state.cache[addrKey(a)] = { resp, at: new Date().toISOString() }; save();
+    if (refresh) toast(resp.status === "UNAVAILABLE" || /Nie udało się/.test(resp.message) ? "Nie udało się teraz pobrać aktualnych danych" : "Harmonogram sprawdzony w oficjalnym źródle");
+  } catch (e) {
+    if (e.status === 422) current = { status: "UNCONFIRMED", message: e.message, address: null, schedule: null, officialInfoUrl: cityOf(a.city)?.officialInfoUrl };
+    else if (cached) { current = cached.resp; offlineData = true; toast(navigator.onLine ? "Nie udało się połączyć z serwerem – pokazujemy ostatnie dane" : "Brak internetu – pokazujemy ostatnie dane"); }
+    else current = { status: "UNAVAILABLE", message: navigator.onLine ? e.message : "Brak połączenia z internetem.", address: null, schedule: null, officialInfoUrl: cityOf(a.city)?.officialInfoUrl };
+  } finally {
+    loading = false;
+    $("#offline").classList.toggle("show", offlineData);
+    renderView(); renderBell(); loadNotices();
   }
-  out.push(cur);
-  return out.join("\r\n ");
 }
-// Czas względem początku wydarzenia całodniowego (00:00): np. 19:00 dzień wcześniej → -PT5H
+
+/* ---------- Eksport .ics ---------- */
+function openIcs() {
+  const s = sched();
+  if (!s) return toast("Brak potwierdzonego harmonogramu do eksportu");
+  const keys = ORDER.filter(k => s.events.some(e => e.category === k && e.date >= iso(TODAY)));
+  $("#icsOpts").innerHTML = keys.map(k => {
+    const n = s.events.filter(e => e.category === k && e.date >= iso(TODAY)).length;
+    return `<label class="opt"><input type="checkbox" value="${k}" checked><span class="txt"><b><i class="dotc" style="--c:${colorOf(k)}"></i>${esc(catDef(k).name)}</b><small>${esc(catDef(k).container)} · ${n} ${n === 1 ? "termin" : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? "terminy" : "terminów"}</small></span></label>`;
+  }).join("");
+  updIcsSum(); $("#icsModal").classList.add("show");
+}
+const selectedKeys = () => $$("#icsOpts input:checked").map(i => i.value);
+function updIcsSum() {
+  const p = state.powiad, s = sched();
+  const al = [p.eveningBefore ? `dzień wcześniej o ${p.eveningTime}` : null, p.collectionDay ? `w dniu odbioru o ${p.morningTime}` : null].filter(Boolean);
+  $("#icsSum").innerHTML = `${ico("i-bell")}<span>Terminy potwierdzone w oficjalnym źródle (${verifiedAt(s.lastSuccessAt)}). Przypomnienie: ${al.length ? al.join(" i ") : "brak"}.${s.coverage === "NEXT_ONLY" ? " Źródło podaje tylko najbliższe terminy – pobierz plik ponownie później." : ""}</span>`;
+  $("#icsGo").disabled = !selectedKeys().length; $("#icsGo").style.opacity = selectedKeys().length ? 1 : .5;
+}
+const icsEsc = s => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+function fold(line) {
+  const enc = new TextEncoder(), out = []; let cur = "", bytes = 0;
+  for (const ch of line) { const b = enc.encode(ch).length; if (bytes + b > (out.length ? 74 : 75)) { out.push(cur); cur = ""; bytes = 0; } cur += ch; bytes += b; }
+  out.push(cur); return out.join("\r\n ");
+}
 function trigger(hhmm, dayBefore) {
-  const [h, m] = hhmm.split(":").map(Number);
-  let mins = h * 60 + m - (dayBefore ? 1440 : 0);
+  const [h, m] = hhmm.split(":").map(Number); let mins = h * 60 + m - (dayBefore ? 1440 : 0);
   const sign = mins < 0 ? "-" : ""; mins = Math.abs(mins);
   return `${sign}PT${Math.floor(mins / 60)}H${mins % 60 ? (mins % 60) + "M" : ""}`;
 }
-function buildIcs(keys) {
-  const s = streetData(); const a = active(); const p = state.powiad;
-  const groups = byDate(upcoming(s).filter(x => keys.includes(x.key)));
+function downloadIcs() {
+  const keys = selectedKeys(); if (!keys.length) return;
+  const s = sched(), a = active(), p = state.powiad, city = cityOf(a.city);
+  const groups = byDate(s.events.filter(e => e.date >= iso(TODAY) && keys.includes(e.category)));
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
-  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Trashly//Harmonogram odbioru odpadów//PL", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
-    `X-WR-CALNAME:${icsEsc("Wywóz odpadów – " + addrText(a))}`, "X-WR-TIMEZONE:Europe/Warsaw"];
+  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Trashly//Harmonogram odbioru odpadów//PL", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", `X-WR-CALNAME:${icsEsc("Wywóz odpadów – " + addrText(a))}`, "X-WR-TIMEZONE:Europe/Warsaw"];
   for (const g of groups) {
-    const names = g.keys.map(k => KATEGORIE[k].nazwa);
-    const start = g.iso.replace(/-/g, ""); const end = iso(addDays(g.d, 1)).replace(/-/g, "");
-    const desc = g.keys.map(k => `${KATEGORIE[k].emoji} ${KATEGORIE[k].nazwa}: ${KATEGORIE[k].pojemnik}`).join("\n") + "\nWystaw odpady przed posesję do 6:00.";
-    L.push("BEGIN:VEVENT",
-      `UID:${start}-${g.keys.join("-").normalize("NFD").replace(/[^\w-]/g, "")}-${norm(a.ulica).replace(/[^a-z0-9]/g, "")}@trashly`,
+    const names = g.keys.map(k => catDef(k).name);
+    const start = g.iso.replace(/-/g, ""), end = iso(addDays(g.d, 1)).replace(/-/g, "");
+    const desc = g.keys.map(k => `${catDef(k).name}: ${catDef(k).container}`).join("\n") + `\n\nŹródło: ${s.source.title} (${s.source.url})\nZweryfikowano: ${verifiedAt(s.lastSuccessAt)}`;
+    L.push("BEGIN:VEVENT", `UID:${start}-${g.keys.join("-")}-${norm(a.city + a.street + a.number).replace(/[^a-z0-9]/g, "")}@trashly`,
       `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${start}`, `DTEND;VALUE=DATE:${end}`,
-      `SUMMARY:${icsEsc(g.keys.map(k => KATEGORIE[k].emoji).join("") + " Odbiór: " + names.join(", ").toLowerCase().replace(/^./, c => c.toUpperCase()))}`,
-      `DESCRIPTION:${icsEsc(desc)}`, `LOCATION:${icsEsc(addrText(a) + ", " + MIASTO)}`, "TRANSP:TRANSPARENT");
-    if (p.wieczor) L.push("BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${icsEsc("Jutro odbiór: " + names.join(", ") + ". Wystaw " + g.keys.map(k => KATEGORIE[k].pojemnik.toLowerCase()).join(" i ") + ".")}`, `TRIGGER;RELATED=START:${trigger(p.godzWieczor, true)}`, "END:VALARM");
-    if (p.rano) L.push("BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${icsEsc("Dziś odbiór: " + names.join(", "))}`, `TRIGGER;RELATED=START:${trigger(p.godzRano, false)}`, "END:VALARM");
+      `SUMMARY:${icsEsc("Odbiór: " + names.join(", "))}`, `DESCRIPTION:${icsEsc(desc)}`, `LOCATION:${icsEsc(addrText(a) + ", " + (city?.name || ""))}`, "TRANSP:TRANSPARENT");
+    if (p.eveningBefore) L.push("BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${icsEsc("Jutro odbiór: " + names.join(", "))}`, `TRIGGER;RELATED=START:${trigger(p.eveningTime, true)}`, "END:VALARM");
+    if (p.collectionDay) L.push("BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${icsEsc("Dziś odbiór: " + names.join(", "))}`, `TRIGGER;RELATED=START:${trigger(p.morningTime, false)}`, "END:VALARM");
     L.push("END:VEVENT");
   }
   L.push("END:VCALENDAR");
-  return { text: L.map(fold).join("\r\n") + "\r\n", count: groups.length };
-}
-function downloadIcs() {
-  const keys = selectedKeys(); if (!keys.length) return;
-  const { text, count } = buildIcs(keys);
-  const blob = new Blob([text], { type: "text/calendar;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(new Blob([L.map(fold).join("\r\n") + "\r\n"], { type: "text/calendar;charset=utf-8" }));
   const link = document.createElement("a");
-  link.href = url; link.download = `trashly-${norm(active().ulica).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}.ics`;
-  document.body.appendChild(link); link.click(); link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
-  closeModal(); toast(`Pobrano plik z ${count} terminami`);
+  link.href = url; link.download = `trashly-${norm(a.street).replace(/[^a-z0-9]+/g, "-")}.ics`;
+  document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+  closeModals(); toast(`Pobrano plik z ${groups.length} terminami`);
 }
-function closeModal() { $("#icsModal").classList.remove("show"); }
+function closeModals() { $$(".scrim").forEach(m => m.classList.remove("show")); }
 
-/* ============ Nawigacja między widokami ============ */
+/* ---------- Nawigacja ---------- */
 let view = "home";
 function go(v, opts = {}) {
-  if (v === "profile") v = "addresses";            // „Profil” na telefonie = adresy + ustawienia
+  if (v === "profile") v = "addresses";
   view = v;
-  const mobileProfile = (v === "addresses" || v === "settings") && matchMedia("(max-width:959px)").matches;
   $$(".view").forEach(el => el.classList.toggle("active", el.id === "view-" + v));
   $$("#sideNav [data-go]").forEach(b => b.dataset.go === v ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current"));
   const bn = (v === "addresses" || v === "settings") ? "profile" : v;
   $$("#bottomNav [data-go]").forEach(b => b.dataset.go === bn ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current"));
-  if (v === "home") renderHome();
-  if (v === "calendar") renderCalendar();
-  if (v === "guide") { if (opts.q != null) $("#q").value = opts.q; renderGuide(); }
-  if (v === "addresses") { renderAddresses(); if (mobileProfile) $("#view-addresses").insertAdjacentHTML("beforeend", `<div style="margin-top:32px">${settingsHTML()}</div>`); }
-  if (v === "settings") renderSettings();
+  if (v === "guide" && opts.q != null) $("#q").value = opts.q;
+  renderView();
   $("#bellPop").classList.remove("show");
   if (!opts.keepScroll) window.scrollTo({ top: 0 });
 }
-function refresh() {
-  $("#addrLabel").textContent = addrText(active()) || "Wybierz adres";
-  renderBell();
-  go(view, { keepScroll: true });
+function renderView() {
+  const a = active();
+  $("#addrLabel").textContent = addrText(a) || "Wybierz adres";
+  $("#addrCity").textContent = cityOf(a?.city)?.name || "";
+  if (view === "home") { renderHome(); if (current?.status === "UNCONFIRMED") loadOfficialDocs(); }
+  if (view === "calendar") renderCalendar();
+  if (view === "guide") renderGuide();
+  if (view === "addresses") { renderAddresses(); if (matchMedia("(max-width:959px)").matches) $("#view-addresses").insertAdjacentHTML("beforeend", `<div style="margin-top:32px">${settingsHTML()}</div>`); }
+  if (view === "settings") renderSettings();
 }
 
-/* ============ Toast ============ */
 let toastT;
-function toast(msg) {
-  const t = $("#toast"); $("span", t).textContent = msg; t.classList.add("show");
-  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2600);
-}
+function toast(msg) { const t = $("#toast"); $("span", t).textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2800); }
 
-/* ============ Dodawanie adresu ============ */
-function addAddress(ulica, numer) {
-  numer = (numer || "").trim().toUpperCase();
-  const idx = state.adresy.findIndex(a => a.ulica === ulica && a.numer === numer);
-  if (idx >= 0) state.aktywny = idx;
-  else { state.adresy.push({ ulica, numer }); state.aktywny = state.adresy.length - 1; }
-  save();
+/* ---------- Formularz adresu z autouzupełnianiem ---------- */
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+function setupCity() {
+  const c = cityOf($("#sCity").value); const note = $("#cityNote");
+  if (!c) { note.hidden = true; return; }
+  const txt = c.capabilities.schedule === "LIVE" ? `Harmonogram z oficjalnego systemu miasta ${c.name}. Adres sprawdzamy na poziomie budynku.`
+    : c.capabilities.schedule === "PDF_INGEST" ? `Harmonogram z oficjalnego dokumentu PDF Urzędu Miasta, przetwarzany automatycznie i walidowany. Numer budynku sprawdzamy w rejestrze PRG.`
+    : `Dla miasta ${c.name} sprawdzimy adres w rejestrze PRG, ale harmonogramu jeszcze nie pokazujemy – integracja z oficjalnymi PDF-ami gminy jest w przygotowaniu. Wskażemy oficjalne dokumenty.`;
+  note.className = "city-note" + (c.capabilities.schedule === "NOT_INTEGRATED" ? " warn" : "");
+  note.innerHTML = `${ico(c.capabilities.schedule === "NOT_INTEGRATED" ? "i-info" : "i-shield")}<span>${esc(txt)}</span>`;
+  note.hidden = false;
+  $("#sStreet").placeholder = c.capabilities.streetAutocomplete ? "Zacznij pisać nazwę ulicy" : "Pełna nazwa ulicy";
+  $("#btField").hidden = !c.capabilities.buildingTypeRequired;
+  $$('input[name="bt"]').forEach(i => i.checked = false);
 }
+function acRender(box, input, items, onPick) {
+  if (!items) { box.classList.remove("show"); input.setAttribute("aria-expanded", "false"); return; }
+  box.innerHTML = items.length ? items.map((it, i) => `<button type="button" role="option" data-i="${i}">${esc(it.label)}${it.hint ? `<small>${esc(it.hint)}</small>` : ""}</button>`).join("") : `<div class="ac-empty">Brak wyników w oficjalnym wykazie</div>`;
+  box.classList.add("show"); input.setAttribute("aria-expanded", "true");
+  $$("button", box).forEach(b => b.addEventListener("mousedown", ev => { ev.preventDefault(); onPick(items[+b.dataset.i]); box.classList.remove("show"); }));
+}
+const acStreet = debounce(async () => {
+  const c = cityOf($("#sCity").value), q = $("#sStreet").value.trim();
+  if (!c?.capabilities.streetAutocomplete || q.length < 2) return acRender($("#acStreet"), $("#sStreet"), null);
+  try {
+    const { streets } = await api(`/streets?city=${c.id}&q=${encodeURIComponent(q)}`);
+    if ($("#sStreet").value.trim() !== q) return;
+    acRender($("#acStreet"), $("#sStreet"), streets.map(s => ({ label: s.name, hint: s.hint, value: s.name })), it => { $("#sStreet").value = it.value; $("#sNo").focus(); });
+  } catch { acRender($("#acStreet"), $("#sStreet"), null); }
+}, 220);
+const acNo = debounce(async () => {
+  const c = cityOf($("#sCity").value), street = $("#sStreet").value.trim(), q = $("#sNo").value.trim();
+  if (!c?.capabilities.streetAutocomplete || !street || !q) return acRender($("#acNo"), $("#sNo"), null);
+  try {
+    const { numbers } = await api(`/numbers?city=${c.id}&street=${encodeURIComponent(street)}&q=${encodeURIComponent(q)}`);
+    if (!numbers || $("#sNo").value.trim() !== q) return acRender($("#acNo"), $("#sNo"), null);
+    acRender($("#acNo"), $("#sNo"), numbers.slice(0, 30).map(n => ({ label: n, value: n })), it => { $("#sNo").value = it.value; });
+  } catch { acRender($("#acNo"), $("#sNo"), null); }
+}, 220);
 
-/* ============ Obsługa zdarzeń ============ */
+function showSetup(closable = false) {
+  const sel = $("#sCity");
+  sel.innerHTML = `<option value="" disabled ${active() ? "" : "selected"}>Wybierz miasto</option>` + META.cities.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join("");
+  if (active()) sel.value = active().city;
+  setupCity();
+  $("#sStreet").value = ""; $("#sNo").value = ""; $("#sApt").value = ""; $("#setupErr").hidden = true;
+  $("#setupClose").hidden = !closable;
+  $("#setupFormTitle").textContent = closable ? "Nowy adres" : "Twój adres";
+  $("#setup").classList.add("show"); document.body.style.overflow = "hidden";
+}
+function hideSetup() { $("#setup").classList.remove("show"); document.body.style.overflow = ""; }
+function setupError(msg) { const er = $("#setupErr"); er.innerHTML = `${ico("i-alert")}<span>${esc(msg)}</span>`; er.hidden = false; }
+
+$("#setupForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const addr = { city: $("#sCity").value, street: $("#sStreet").value.trim(), number: $("#sNo").value.trim().toUpperCase(), apartment: $("#sApt").value.trim() };
+  const bt = $('input[name="bt"]:checked')?.value;
+  if (bt && !$("#btField").hidden) addr.buildingType = bt;
+  if (!addr.city) return setupError("Wybierz miasto.");
+  if (!addr.street) return setupError("Wpisz ulicę.");
+  if (!addr.number) return setupError("Podaj numer budynku – harmonogram często zależy od konkretnego budynku.");
+  if (!$("#btField").hidden && !addr.buildingType) return setupError("Wybierz typ zabudowy – w tym mieście domy i bloki mają różne harmonogramy.");
+  const btn = $("#setupSubmit"); btn.disabled = true; btn.innerHTML = `<span class="spin"></span>Sprawdzamy adres…`;
+  try {
+    const resp = await api("/resolve", { body: { ...addr, deviceId: state.deviceId, prefs: state.powiad } });
+    // Zapisujemy oficjalną pisownię ulicy i numeru z rejestru
+    if (resp.address) { addr.street = resp.address.street; addr.number = resp.address.number; }
+    const idx = state.adresy.findIndex(x => addrKey(x) === addrKey(addr));
+    if (idx >= 0) state.aktywny = idx; else { state.adresy.push(addr); state.aktywny = state.adresy.length - 1; }
+    state.cache[addrKey(addr)] = { resp, at: new Date().toISOString() }; save();
+    current = resp; offlineData = false;
+    hideSetup(); view = "home"; go("home");
+    toast(resp.status === "UNCONFIRMED" ? "Adres rozpoznany – harmonogram niepotwierdzony" : resp.status === "UNAVAILABLE" ? "Adres zapisany – dane chwilowo niedostępne" : "Harmonogram potwierdzony w oficjalnym źródle");
+    loadNotices();
+  } catch (err) {
+    setupError(err.status === 422 || err.status === 400 ? err.message : navigator.onLine ? `Nie udało się sprawdzić adresu: ${err.message}` : "Brak połączenia z internetem. Spróbuj ponownie, gdy wróci zasięg.");
+  } finally { btn.disabled = false; btn.innerHTML = `Zobacz mój harmonogram ${ico("i-arrow")}`; }
+});
+$("#sCity").addEventListener("change", () => { setupCity(); $("#sStreet").value = ""; $("#sNo").value = ""; $("#sStreet").focus(); });
+$("#sStreet").addEventListener("input", acStreet);
+$("#sNo").addEventListener("input", acNo);
+["#sStreet", "#sNo"].forEach(s => $(s).addEventListener("blur", () => setTimeout(() => $$(".ac").forEach(b => b.classList.remove("show")), 120)));
+$("#setupClose").addEventListener("click", hideSetup);
+
+/* ---------- Zdarzenia ---------- */
 document.addEventListener("click", e => {
-  const t = e.target.closest("button, a, [data-day]"); if (!t) {
-    if (!e.target.closest("#bellPop")) $("#bellPop").classList.remove("show");
-    return;
-  }
+  const t = e.target.closest("button, a, [data-day]");
+  if (!t) { if (!e.target.closest("#bellPop")) $("#bellPop").classList.remove("show"); return; }
   if (t.matches("a[href='#']")) e.preventDefault();
   if (t.id === "bellBtn") { const p = $("#bellPop"); p.classList.toggle("show"); t.setAttribute("aria-expanded", p.classList.contains("show")); return; }
   if (!t.closest("#bellPop")) $("#bellPop").classList.remove("show");
   if (t.id === "addrBtn") return go("addresses");
+  if (t.hasAttribute("data-new-address")) return showSetup(true);
   if (t.dataset.go) return go(t.dataset.go, { q: t.dataset.q });
   if (t.hasAttribute("data-ics")) return openIcs();
-  if (t.hasAttribute("data-close")) return closeModal();
+  if (t.hasAttribute("data-details")) return openDetails();
+  if (t.hasAttribute("data-refresh")) { closeModals(); return loadSchedule({ refresh: true }); }
+  if (t.hasAttribute("data-close")) return closeModals();
   if (t.id === "icsGo") return downloadIcs();
-  if (t.dataset.cat) { const d = nextOf(streetData(), t.dataset.cat); if (d) { calMonth = new Date(d.getFullYear(), d.getMonth(), 1); calSel = iso(d); } return go("calendar"); }
-  if (t.dataset.done) { state.wystawione[t.dataset.done] = !state.wystawione[t.dataset.done]; save(); renderHome(); if (state.wystawione[t.dataset.done]) toast("Super! Odhaczone na dziś"); return; }
+  if (t.dataset.cat) { const e2 = sched()?.events.find(x => x.category === t.dataset.cat && x.date >= iso(TODAY)); if (e2) { const d = parse(e2.date); calMonth = new Date(d.getFullYear(), d.getMonth(), 1); calSel = e2.date; } return go("calendar"); }
+  if (t.dataset.done) { const k = addrKey(active()) + t.dataset.done; state.wystawione[k] = !state.wystawione[k]; save(); renderHome(); if (state.wystawione[k]) toast("Odhaczone na dziś"); return; }
   if (t.dataset.day) { calSel = t.dataset.day; const d = parse(calSel); if (d.getMonth() !== calMonth.getMonth()) calMonth = new Date(d.getFullYear(), d.getMonth(), 1); return renderCalendar(); }
-  if (t.dataset.cal) {
-    if (t.dataset.cal === "today") { calMonth = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1); calSel = iso(TODAY); }
-    else calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + Number(t.dataset.cal), 1);
-    return renderCalendar();
-  }
+  if (t.dataset.cal) { if (t.dataset.cal === "today") { calMonth = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1); calSel = iso(TODAY); } else calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + Number(t.dataset.cal), 1); return renderCalendar(); }
   if (t.dataset.chip) { $("#q").value = t.dataset.chip; return renderGuide(); }
   if (t.id === "qClear") { $("#q").value = ""; $("#q").focus(); return renderGuide(); }
-  if (t.dataset.use) { state.aktywny = +t.dataset.use; save(); toast("Zmieniono adres na " + addrText(active())); calMonth = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1); return refresh(); }
-  if (t.dataset.rm) { const i = +t.dataset.rm; state.adresy.splice(i, 1); if (state.aktywny >= state.adresy.length || state.aktywny === i) state.aktywny = 0; else if (state.aktywny > i) state.aktywny--; save(); return refresh(); }
-  if (t.id === "resetBtn") { if (confirm("Usunąć zapisane adresy i ustawienia z tej przeglądarki?")) { localStorage.removeItem(LS); state = load(); showSetup(); } return; }
+  if (t.dataset.use) { state.aktywny = +t.dataset.use; save(); current = null; calMonth = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1); go("home"); return loadSchedule(); }
+  if (t.dataset.rm) {
+    const i = +t.dataset.rm; const removed = state.adresy.splice(i, 1)[0]; delete state.cache[addrKey(removed)];
+    if (state.aktywny >= state.adresy.length || state.aktywny === i) { state.aktywny = 0; current = null; } else if (state.aktywny > i) state.aktywny--;
+    save(); if (!state.adresy.length) return showSetup(); renderView(); if (!current) loadSchedule(); return;
+  }
+  if (t.id === "resetBtn") { if (confirm("Usunąć zapisane adresy i ustawienia z tej przeglądarki?")) { localStorage.removeItem(LS); state = load(); current = null; showSetup(); } return; }
 });
-// Zamykanie modala kliknięciem w tło i klawiszem Esc
-$("#icsModal").addEventListener("click", e => { if (e.target.id === "icsModal") closeModal(); });
+$$(".scrim").forEach(m => m.addEventListener("click", e => { if (e.target === m) closeModals(); }));
 $("#icsOpts").addEventListener("change", updIcsSum);
-document.addEventListener("keydown", e => { if (e.key === "Escape") { closeModal(); $("#bellPop").classList.remove("show"); } });
-// Wyszukiwarka – na bieżąco
-$("#q").addEventListener("input", () => renderGuide());
-// Przełączniki i godziny w ustawieniach (działa też w widoku „Profil”)
+document.addEventListener("keydown", e => { if (e.key === "Escape") { closeModals(); $("#bellPop").classList.remove("show"); } });
+$("#q").addEventListener("input", debounce(() => renderGuide(), 120));
 document.addEventListener("change", e => {
   const el = e.target.closest("[data-set]"); if (!el) return;
   state.powiad[el.dataset.set] = el.type === "checkbox" ? el.checked : el.value;
   save(); renderBell(); toast("Zapisano ustawienia");
+  // Zapisujemy preferencje także na serwerze (subskrypcja zmian dla aktywnego adresu)
+  const a = active(); if (a) api("/resolve", { body: { ...a, deviceId: state.deviceId, prefs: state.powiad } }).catch(() => {});
 });
-// Formularz dodawania adresu
-document.addEventListener("submit", e => {
-  if (e.target.id === "addForm") {
-    e.preventDefault(); addAddress($("#aStreet").value, $("#aNo").value);
-    toast("Dodano adres " + addrText(active())); view = "home"; refresh();
+window.addEventListener("online", () => { $("#offline").classList.remove("show"); if (offlineData) loadSchedule(); });
+window.addEventListener("offline", () => { $("#offline").classList.add("show"); });
+
+/* ---------- Start ---------- */
+(async function start() {
+  try { META = await api("/cities"); state.meta = META; save(); }
+  catch { if (state.meta) META = state.meta; }
+  if (!META.cities.length) {
+    document.querySelector(".container").insertAdjacentHTML("afterbegin", `<div class="card state err" style="margin-top:16px"><div class="state-top"><span class="state-ic">${ico("i-wifi-off")}</span><div><h2>Nie można połączyć się z serwerem Trashly</h2><p>Aplikacja potrzebuje backendu z danymi z oficjalnych źródeł. Uruchom serwer (patrz README) i odśwież stronę.</p></div></div><div class="actions"><button class="btn btn-primary" onclick="location.reload()">${ico("i-refresh")}Spróbuj ponownie</button></div></div>`);
+    return;
   }
-});
-
-/* ============ Ekran startowy ============ */
-function showSetup() {
-  $("#sCity").innerHTML = `<option>${MIASTO}</option>`;
-  $("#sStreet").innerHTML = `<option value="" disabled selected>Wybierz ulicę</option>` + HARMONOGRAM.map(s => `<option>${esc(s.ulica)}</option>`).join("");
-  $("#setup").classList.add("show");
-  document.body.style.overflow = "hidden";
-}
-$("#setupForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const ul = $("#sStreet").value;
-  if (!ul) { const er = $("#setupErr"); er.hidden = false; er.textContent = "Wybierz ulicę z listy, żeby zobaczyć harmonogram."; $("#sStreet").focus(); return; }
-  addAddress(ul, $("#sNo").value);
-  $("#setup").classList.remove("show"); document.body.style.overflow = "";
-  view = "home"; refresh();
-});
-
-/* ============ Start ============ */
-$$("[data-logo]").forEach(el => el.innerHTML = LOGO);
-$$("[data-ic]").forEach(el => el.innerHTML = ico("i-" + el.dataset.ic));
-$$("[data-city-name]").forEach(el => el.textContent = MIASTO);
-$("[data-legend]").innerHTML = KOLEJNOSC.slice(0, 5).map(k => `<span><i class="dotc" style="--c:${KATEGORIE[k].kolor}"></i>${KATEGORIE[k].nazwa}</span>`).join("");
-// Usuń adresy ulic, których nie ma już w danych (np. po podmianie harmonogramu)
-state.adresy = state.adresy.filter(a => HARMONOGRAM.some(s => s.ulica === a.ulica));
-if (state.aktywny >= state.adresy.length) state.aktywny = 0;
-if (!state.adresy.length) showSetup(); else refresh();
-// Odśwież „dziś” po północy, gdy karta jest otwarta
-setInterval(() => { const t = getToday(); if (iso(t) !== iso(TODAY)) { TODAY = t; refresh(); } }, 60000);
+  state.adresy = state.adresy.filter(a => cityOf(a.city));
+  if (state.aktywny >= state.adresy.length) state.aktywny = 0;
+  if (!state.adresy.length) { showSetup(); go("home"); return; }
+  go("home");
+  loadSchedule();
+})();
+// Zmiana dnia po północy, gdy karta jest otwarta
+setInterval(() => { const t = getToday(); if (iso(t) !== iso(TODAY)) { TODAY = t; renderView(); } }, 60000);
 </script>
 </body>
 </html>

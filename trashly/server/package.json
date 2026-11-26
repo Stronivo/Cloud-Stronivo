@@ -1,0 +1,13 @@
+{
+  "name": "trashly-server",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Trashly – backend harmonogramów odbioru odpadów (walidacja adresów, providery gmin, aktualizacje).",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "start": "node src/http/server.ts",
+    "update": "node src/jobs/run-update.ts",
+    "test": "node --test \"test/**/*.test.ts\""
+  }
+}
