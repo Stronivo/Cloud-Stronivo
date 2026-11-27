@@ -528,3 +528,118 @@
   // kept for compatibility with older code paths
   AH.PROFILES = new Proxy({}, { get: (_, k) => { const s = DEF[k] && getStyle(k); return s ? { L: s.L, W: s.W, r: DEF[k].r } : undefined; } });
 })();
+
+// ======================================================================
+// Real glTF car models: load once, clone per car, keep the buildCar API.
+// ======================================================================
+(() => {
+  const V3 = THREE.Vector3;
+  const proceduralBuild = AH.buildCar;
+  AH.modelTemplates = {};
+  const atlasCache = {};
+
+  function prepare(style, def, root) {
+    const geos = {}; let paint = null, atlas = null;
+    root.traverse((o) => {
+      if (!o.isMesh) return;
+      geos[o.uuid] = o.geometry;
+      o.castShadow = true; o.receiveShadow = false;
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      for (const m of mats) {
+        if (m.name === 'AH_PAINT') paint = m;
+        if (m.name === 'AH_ATLAS') atlas = m;
+        // r128 has no real-time transmission: render glass as tinted, reflective transparent surfaces
+        const glassy = (m.transmission && m.transmission > 0) || (m.transparent && m.opacity < 0.9) || /glass|window|windshield/i.test(m.name);
+        if (glassy) {
+          m.transmission = 0; m.transparent = true; m.opacity = Math.min(m.opacity !== undefined ? m.opacity : 1, 0.42);
+          m.roughness = 0.04; m.metalness = 0.2; m.depthWrite = false; o.castShadow = false; o.renderOrder = 2;
+          if (m.color && m.color.getHSL({}).l > 0.6) m.color.multiplyScalar(0.25);
+        }
+        m.userData.reflect = true;
+        m.envMapIntensity = glassy ? 1.6 : 0.9;
+      }
+    });
+    const box = new THREE.Box3().setFromObject(root), size = box.getSize(new V3());
+    let r = 0.34; const w0 = root.getObjectByName('wheel_0');
+    if (w0) { const wb = new THREE.Box3().setFromObject(w0); r = (wb.max.y - wb.min.y) / 2; }
+    const wheels = []; root.traverse(o => { if (/^wheel_\d$/.test(o.name)) wheels.push(o.name); });
+    const ez = box.min.z + 0.12;
+    AH.modelTemplates[style] = { root, paint, atlas, wheels, def, P: { L: size.z, W: size.x, r }, exh: [[0.32, 0.33, ez], [-0.32, 0.33, ez]] };
+    AH.geoCache['model_' + style] = geos; // never disposed by races
+  }
+
+  AH.loadModels = (onProgress) => new Promise((resolve) => {
+    const list = Object.entries(AH.MODELS || {});
+    if (!THREE.GLTFLoader || !list.length) return resolve(false);
+    const loader = new THREE.GLTFLoader(), prog = {};
+    let done = 0;
+    const report = () => onProgress && onProgress(Object.values(prog).reduce((a, b) => a + b, 0) / list.length);
+    list.forEach(([style, def]) => {
+      prog[style] = 0;
+      loader.load(def.file, (gl) => {
+        try { prepare(style, def, gl.scene); } catch (e) { console.warn('model prepare failed', style, e); }
+        prog[style] = 1; report(); if (++done === list.length) resolve(true);
+      }, (e) => { if (e && e.total) { prog[style] = Math.min(0.99, e.loaded / e.total); report(); } },
+      (err) => { console.warn('model load failed', style, err); prog[style] = 1; report(); if (++done === list.length) resolve(false); });
+    });
+  });
+
+  // Recolour the paint in a texture atlas (Mustang): pixels close to the reference paint hue take the new colour,
+  // keeping their light/shade so reflections and panel gaps survive.
+  function recolorAtlas(tex, color, ref) {
+    const key = tex.uuid + ':' + color;
+    if (atlasCache[key]) return atlasCache[key];
+    const img = tex.image, w = img.width, h = img.height;
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+    const d = g.getImageData(0, 0, w, h), px = d.data;
+    const tc = new THREE.Color(color), tr = tc.r * 255, tg = tc.g * 255, tb = tc.b * 255;
+    const refV = Math.max(...ref) / 255;
+    for (let i = 0; i < px.length; i += 4) {
+      const r = px[i], gg = px[i + 1], b = px[i + 2];
+      const mx = Math.max(r, gg, b), mn = Math.min(r, gg, b);
+      if (b < 30 || b < r * 1.45 || b < gg * 1.25 || (mx - mn) / (mx || 1) < 0.3) continue;   // not the blue paint
+      const k = Math.min(1.8, (mx / 255) / refV);
+      px[i] = Math.min(255, tr * k); px[i + 1] = Math.min(255, tg * k); px[i + 2] = Math.min(255, tb * k);
+    }
+    g.putImageData(d, 0, 0);
+    const t = new THREE.CanvasTexture(c);
+    t.flipY = tex.flipY; t.encoding = tex.encoding; t.wrapS = tex.wrapS; t.wrapT = tex.wrapT; t.anisotropy = 8;
+    return (atlasCache[key] = t);
+  }
+
+  AH.buildCar = (style, color, opt = {}) => {
+    const T = AH.modelTemplates[style];
+    if (!T) { const def = (AH.MODELS || {})[style]; return proceduralBuild(def ? def.fallback : style, color, opt); }
+    const g = new THREE.Group();
+    const inst = T.root.clone(true);
+    g.add(inst);
+    let bodyMat = null;
+    const swap = (from, to) => inst.traverse(o => { if (!o.isMesh) return; if (Array.isArray(o.material)) o.material = o.material.map(m => m === from ? to : m); else if (o.material === from) o.material = to; });
+    if (T.paint) {
+      bodyMat = AH.paintMat(color, opt.finish || 'metallic');
+      swap(T.paint, bodyMat);
+    } else if (T.atlas) {
+      const car = AH.CARS.find(c => c.style === style);
+      if (car && color !== car.color && T.atlas.map) {
+        bodyMat = T.atlas.clone(); bodyMat.map = recolorAtlas(T.atlas.map, color, T.def.atlasRef); bodyMat.userData.reflect = true;
+        swap(T.atlas, bodyMat);
+      } else bodyMat = T.atlas;
+    }
+    const wheels = T.wheels.map(n => inst.getObjectByName(n)).filter(Boolean);
+    // soft contact shadow
+    const blob = new THREE.Mesh(new THREE.PlaneGeometry(T.P.W + 0.7, T.P.L + 0.9), AH.carMats.blob);
+    blob.rotation.x = -Math.PI / 2; blob.position.y = 0.02; blob.renderOrder = -1; g.add(blob);
+    const flames = [];
+    if (!opt.noFlames) for (const [x, y, z] of T.exh) {
+      const f = new THREE.Mesh(new THREE.ConeGeometry(0.08, 1.2, 10, 1, true), AH.carMats.flame);
+      f.rotation.x = -Math.PI / 2; f.position.set(x, y, z - 0.6); f.visible = false; g.add(f); flames.push(f);
+    }
+    let glow = null;
+    if (opt.neon || opt.glow) {
+      glow = new THREE.Mesh(new THREE.PlaneGeometry(T.P.W + 1.4, T.P.L + 1.2), new THREE.MeshBasicMaterial({ color: opt.neon || color, map: AH.tex.glow(), transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+      glow.rotation.x = -Math.PI / 2; glow.position.y = 0.04; g.add(glow);
+    }
+    return { group: g, wheels, flames, bodyMat, P: T.P, glow, model: true };
+  };
+})();

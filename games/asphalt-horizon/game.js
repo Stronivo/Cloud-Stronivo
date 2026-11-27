@@ -132,68 +132,29 @@
     },
   };
 
-  // ---------------- garage scene ----------------
-  const garage = { scene: new THREE.Scene(), car: null, id: null, ang: 0.6, mirror: null };
-  {
-    // Showroom: neutral studio softboxes for true paint colour, glossy turntable with a mirrored reflection.
-    const s = garage.scene;
-    s.background = new THREE.Color(0x06070b);
-    s.fog = new THREE.Fog(0x06070b, 16, 46);
-    s.environment = makeEnvMap('#121318', '#0b0c10', '#050608', [
-      { w: 40, h: 14, c: 0xffffff, pos: [0, 70, 0] }, { w: 70, h: 5, c: 0xe8ecff, pos: [-70, 20, 0] }, { w: 70, h: 5, c: 0xfff1e2, pos: [70, 20, 0] },
-      { w: 60, h: 4, c: 0xcfd8ff, pos: [0, 16, 70] }, { w: 40, h: 3, c: 0xffffff, pos: [0, 16, -70] }, { w: 14, h: 2, c: 0xff3a6a, pos: [-50, 4, -60] }, { w: 14, h: 2, c: 0xff9a2a, pos: [50, 4, -60] },
-    ]).texture;
-    const floor = new THREE.Mesh(new THREE.CircleGeometry(40, 64), new THREE.MeshStandardMaterial({ color: 0x0a0b10, metalness: 0.6, roughness: 0.38 }));
-    floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; s.add(floor);
-    const plat = new THREE.Mesh(new THREE.CylinderGeometry(4.4, 4.6, 0.2, 96, 1, true), new THREE.MeshStandardMaterial({ color: 0x18191f, metalness: 0.9, roughness: 0.25 }));
-    plat.position.y = 0.1; s.add(plat);
-    const top = new THREE.Mesh(new THREE.CircleGeometry(4.4, 96), new THREE.MeshPhysicalMaterial({ color: 0x0b0c10, metalness: 0.4, roughness: 0.18, clearcoat: 1, transparent: true, opacity: 0.84 }));
-    top.rotation.x = -Math.PI / 2; top.position.y = 0.2; top.receiveShadow = true; top.renderOrder = 2; s.add(top);
-    garage.plat = plat;
-    const ringM = (c) => new THREE.MeshBasicMaterial({ color: c, side: THREE.DoubleSide });
-    for (const [r0, r1, c] of [[4.62, 4.72, 0xff1f5a], [5.4, 5.45, 0xff7a1a], [6.4, 6.43, 0xffc21a]]) { const r = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 128), ringM(c)); r.rotation.x = -Math.PI / 2; r.position.y = r0 < 5 ? 0.21 : 0.01; s.add(r); }
-    for (let i = 0; i < 18; i++) {
-      const a = Math.PI * 0.15 + (i / 17) * Math.PI * 1.7;
-      const bar = new THREE.Mesh(new THREE.BoxGeometry(0.14, 7 + (i % 3) * 2, 0.14), ringM(i % 2 ? 0xff1f5a : 0xff7a1a));
-      bar.position.set(Math.sin(a) * 20, 4, -Math.cos(a) * 20 - 4); s.add(bar);
-    }
-    // overhead softbox panel (visible light source, reads in the paint)
-    const sb = new THREE.Mesh(new THREE.PlaneGeometry(9, 4), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }));
-    sb.position.set(0, 9, 0); sb.rotation.x = Math.PI / 2; s.add(sb);
-    const key = new THREE.SpotLight(0xffffff, 2.6, 40, 0.65, 0.7, 1); key.position.set(2, 11, 5); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0003; key.shadow.radius = 4; s.add(key);
-    const fill = new THREE.DirectionalLight(0xdfe6ff, 0.55); fill.position.set(-6, 4, 3); s.add(fill);
-    const rim = new THREE.SpotLight(0xfff0e0, 2.2, 30, 0.7, 0.8, 1); rim.position.set(-3, 5, -9); s.add(rim);
-    const l1 = new THREE.PointLight(0xff2a6a, 0.6, 14); l1.position.set(-6, 1.2, -5); s.add(l1);
-    const l2 = new THREE.PointLight(0xff9a2a, 0.5, 14); l2.position.set(6, 1.2, -4); s.add(l2);
-    s.add(new THREE.HemisphereLight(0xcfd6e6, 0x101014, 0.45));
-  }
+  // ---------------- festival world (menus) ----------------
+  const garage = { get scene() { return AH.Festival.scene; }, car: null, id: null };
   function setGarageCar(id, force) {
     if (!force && garage.id === id && garage.car) return;
-    if (garage.car) { garage.scene.remove(garage.car.group); garage.scene.remove(garage.mirror); }
     const c = AH.carById(id), cs = AH.cosm(id);
     garage.car = AH.buildCar(c.style, cs.color, { noFlames: true, finish: cs.finish, rim: cs.rim, neon: cs.neon });
-    garage.car.group.position.y = 0.2;
-    garage.car.group.traverse(o => { if (o.isMesh && o.material !== AH.carMats.blob) o.castShadow = true; });
-    // mirrored copy under the glossy turntable = floor reflection
-    const m = garage.car.group.clone();
-    m.scale.y = -1; m.position.y = 0.2;
-    m.traverse(o => { if (o.isMesh) { o.castShadow = false; if (o.material === AH.carMats.blob || (o.material && o.material.blending === THREE.AdditiveBlending)) o.visible = false; } });
-    garage.mirror = m;
-    garage.scene.add(m, garage.car.group);
+    AH.Festival.setCar(garage.car);
     garage.id = id;
   }
+  const SHOT = { menu: 'home', loading: 'home', garage: 'garage', map: 'map', cities: 'festival', shop: 'festival', party: 'festival', auth: 'festival', credits: 'festival' };
 
   // ---------------- UI ----------------
-  const screens = ['auth', 'party', 'menu', 'cities', 'garage', 'shop', 'hud', 'pause', 'results', 'loading'];
-  let mode = 'menu';
+  const screens = ['auth', 'party', 'menu', 'cities', 'map', 'garage', 'shop', 'credits', 'hud', 'pause', 'results', 'loading'];
+  let mode = 'loading';
   function show(name, keepHud) {
     for (const s of screens) { const el = $(s); if (el) el.hidden = !(s === name || (keepHud && s === 'hud')); }
     mode = name;
-    if (['menu', 'cities', 'garage', 'shop', 'party', 'auth'].includes(name)) {
-      const narrow = window.innerWidth < 760;
-      viewOffset = name === 'menu' ? (narrow ? [0, 0.12] : [-0.2, 0]) : name === 'garage' ? (narrow ? [0, 0.36] : [0, 0.1]) : [0, 0];
+    if (SHOT[name]) {
+      const narrow = window.innerWidth < 860;
+      viewOffset = name === 'menu' ? (narrow ? [0, 0.16] : [-0.1, 0.04]) : name === 'garage' ? (narrow ? [0, 0.3] : [0, 0.02]) : [0, 0];
       resize();
       renderTopbars();
+      if (name === 'menu') renderHome();
     }
   }
   function toast(msg) {
@@ -205,40 +166,76 @@
     if (online()) { try { await remote(); return true; } catch (e) { toast(e.message || 'Błąd serwera'); return false; } }
     local(); return true;
   }
+  const nextEvent = () => {
+    const cl = AH.save.cleared || {};
+    for (let i = 0; i < AH.CITIES.length; i++) if (AH.cityUnlocked(i) && !((cl[AH.CITIES[i].id] || 99) <= AH.PODIUM)) return i;
+    return AH.unlockedCount() - 1;
+  };
   function renderTopbars() {
     const S = AH.save, U = AH.unlockedCount(), T = AH.CITIES.length;
-    const cleared = AH.CITIES.filter(c => ((S.cleared || {})[c.id] || 99) <= AH.PODIUM).length;
-    const nextCity = AH.CITIES[Math.min(U, T) - 1];
-    const html = `<div class="profile"><div class="lvl">${U}</div><div class="xpwrap"><div class="xptext">Trasy: <span class="num">${U}/${T}</span> · ${cleared === T ? 'wszystkie podia zdobyte' : 'podium w: ' + nextCity.name}</div><div class="xpbar"><i style="width:${cleared / T * 100}%"></i></div></div></div>
-      <div class="wallet"><span class="chip pts num">${AH.ICONS.pts}${AH.fmt(S.pts)} pkt</span>${AH.BOOSTS.map(bb => `<span class="chip num" style="color:${bb.color}" title="${bb.name}">${AH.ICONS[bb.id]}<span style="color:var(--chrome)">${S.boosts[bb.id] || 0}</span></span>`).join('')}
-      <span class="acct">${online() ? `<span class="chip" title="Zalogowano">${AH.Net.nickname || 'Kierowca'}</span><button class="iconbtn" data-logout aria-label="Wyloguj" title="Wyloguj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg></button>` : `<button class="chip" data-login>Zaloguj się</button>`}</span>
-      <button class="iconbtn" data-mute aria-label="Dźwięk">${S.muted ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9h4l5-4v14l-5-4H4zM16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2"/></svg>' : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8a5 5 0 0 1 0 8M18.5 5.5a8.5 8.5 0 0 1 0 13" fill="none" stroke="currentColor" stroke-width="2"/></svg>'}</button></div>`;
-    document.querySelectorAll('[data-topbar]').forEach(el => { el.innerHTML = html; el.style.display = 'contents'; });
+    const name = online() ? (AH.Net.nickname || 'Kierowca') : 'Gość';
+    const html = `<span class="pp" title="Postęp festiwalu"><span class="avatar">${name.slice(0, 1).toUpperCase()}</span><span class="who"><b>${name}</b><small>Wydarzenia ${U}/${T}</small></span></span>
+      <span class="pp cr num" title="Punkty">${AH.ICONS.pts}${AH.fmt(S.pts)}</span>
+      ${AH.BOOSTS.map(bb => `<span class="pp num" title="${bb.name}" style="color:${bb.color}">${AH.ICONS[bb.id]}<span style="color:#fff">${S.boosts[bb.id] || 0}</span></span>`).join('')}
+      ${online() ? `<button class="iconbtn" data-logout aria-label="Wyloguj" title="Wyloguj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg></button>` : `<button class="pp" data-login>Zaloguj</button>`}
+      <button class="iconbtn" data-mute aria-label="Dźwięk">${S.muted ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9h4l5-4v14l-5-4H4zM16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2"/></svg>' : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8a5 5 0 0 1 0 8M18.5 5.5a8.5 8.5 0 0 1 0 13" fill="none" stroke="currentColor" stroke-width="2"/></svg>'}</button>`;
+    document.querySelectorAll('[data-topbar]').forEach(el => { el.innerHTML = html; });
     document.querySelectorAll('[data-mute]').forEach(b => b.onclick = () => { Snd.init(); Snd.setMuted(!AH.save.muted); renderTopbars(); });
     document.querySelectorAll('[data-login]').forEach(b => b.onclick = () => showAuth('login'));
     document.querySelectorAll('[data-logout]').forEach(b => b.onclick = logout);
-    $('menu-car').textContent = AH.carById(S.sel).name;
+    const car = AH.carById(S.sel);
+    $('menu-car').innerHTML = `<span class="cls">${car.cls}</span>${car.name}`;
   }
+  const pips = (n) => `<span class="pips">${Array.from({ length: 5 }, (_, k) => `<i class="${k < n ? 'on' : ''}"></i>`).join('')}</span>`;
+  const KIND = ['Sprint przez zatokę', 'Nocny wyścig uliczny', 'Rajd przez stolicę', 'Złota godzina', 'Finał festiwalu'];
 
-  const CITY_ART = {
-    sf: '<svg viewBox="0 0 90 90" fill="none" stroke="#fff" stroke-width="3"><path d="M24 88V14M66 88V14M18 30h12M60 30h12M18 46h12M60 46h12M2 60Q24 20 24 16Q45 62 66 16Q66 20 88 60M2 62h86"/></svg>',
-    ny: '<svg viewBox="0 0 90 90" fill="#fff"><path d="M40 88h16l-2-34 4-4-3-20 6-16 2 1-5 16 3 18-3 4zM42 26a5 5 0 1 0 8 0zM40 22l-4-6M44 19l-2-7M48 19l2-7M52 22l4-6"/><path d="M60 4l3 6-3 3-3-3z" fill="#ffc21a"/></svg>',
-    waw: '<svg viewBox="0 0 90 90" fill="#fff"><path d="M44 2h2v16h4v10h6v14h8v16h14v30H12V58h14V42h8V28h6V18h4z"/></svg>',
-    rome: '<svg viewBox="0 0 90 90" fill="#fff"><path d="M4 30h82v56H4z" opacity=".95"/><g fill="#0003"><path d="M10 40h8v12h-8zM24 40h8v12h-8zM38 40h8v12h-8zM52 40h8v12h-8zM66 40h8v12h-8zM10 62h8v20h-8zM24 62h8v20h-8zM38 62h8v20h-8zM52 62h8v20h-8zM66 62h8v20h-8z"/></g><path d="M60 30 86 20v10z"/></svg>',
-    paris: '<svg viewBox="0 0 90 90" fill="#fff"><path d="M44 2h2l1 22 4 26 6 14 12 24H57c-3-12-7-16-12-16s-9 4-12 16H21l12-24 6-14 4-26z"/></svg>',
-  };
+  function renderHome() {
+    const i = nextEvent(), c = AH.CITIES[i];
+    $('continue-sub').textContent = `Następny przystanek: ${c.name}`;
+    $('featured').innerHTML = `<span class="tag">Wydarzenie ${i + 1} / ${AH.CITIES.length}</span><span class="art">${AH.Art.city(c.id)}</span>
+      <span class="go">JEDŹ ›</span><span class="cap"><span>${KIND[i]}</span><h3>${c.name}</h3><span>${c.landmarksText}</span></span>`;
+    $('featured').setAttribute('aria-label', `Jedź: ${c.name}`);
+  }
+  $('featured').onclick = () => startRace(nextEvent());
+  $('btn-continue').onclick = () => startRace(nextEvent());
+  // keyboard navigation in the main menu
+  window.addEventListener('keydown', (e) => {
+    if (mode !== 'menu' || race) return;
+    const items = [...document.querySelectorAll('#menu .mi')];
+    const i = items.indexOf(document.activeElement);
+    if (e.code === 'ArrowDown' || e.code === 'KeyS') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+    if (e.code === 'ArrowUp' || e.code === 'KeyW') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+  });
+
   function renderCities() {
     $('citygrid').innerHTML = AH.CITIES.map((c, i) => {
       const best = AH.save.best[c.id], open = AH.cityUnlocked(i), place = (AH.save.cleared || {})[c.id];
       return `<button class="city ${open ? '' : 'locked'}" data-city="${i}" ${open ? '' : 'aria-disabled="true"'}>
-        <div class="city-art" style="background:linear-gradient(150deg, ${c.card[0]}, ${c.card[1]})">${CITY_ART[c.id]}<h3>${c.name}</h3><span>${c.landmarksText}</span></div>
-        <div class="city-info"><p>${c.blurb}</p>
-          <div class="city-row"><span>Trudność</span><span class="stars">${'★'.repeat(c.diff)}<span class="off">${'★'.repeat(5 - c.diff)}</span></span></div>
-          <div class="city-row"><span>Za 1. miejsce</span><b class="pts num">${AH.fmt(1000 * c.mult)} pkt</b></div>
-          <div class="city-row"><span>Rekord</span><span class="num">${best ? AH.fmtTime(best) : '—'}${place ? ' · ' + place + '. msc' : ''}</span></div>
-          ${open ? '<span class="go">START</span>' : `<span class="go lock">🔒 Podium w: ${AH.CITIES[i - 1].name}</span>`}</div></button>`;
+        <span class="art">${AH.Art.city(c.id)}
+          <span class="num-badge">${String(i + 1).padStart(2, '0')}</span>
+          <span class="play">${open ? 'START' : 'ZABLOKOWANE'}</span>
+          <span class="over"><span class="kicker">${KIND[i]}</span><h3>${c.name}</h3><p>${open ? c.blurb : `Zdobądź podium w mieście ${AH.CITIES[i - 1].name}, żeby tu wjechać.`}</p></span></span>
+        <span class="meta"><span>Trudność${pips(c.diff)}</span><span>Nagroda<b class="pts num">${AH.fmt(1000 * c.mult)}</b></span><span>Rekord<b class="num">${best ? AH.fmtTime(best) : '—'}${place ? ' · ' + place + '.' : ''}</b></span></span></button>`;
     }).join('');
     $('citygrid').querySelectorAll('[data-city]').forEach(b => b.onclick = () => { const i = +b.dataset.city; if (AH.cityUnlocked(i)) startRace(i); else toast(`Zajmij miejsce 1–3 w mieście ${AH.CITIES[i - 1].name}, żeby odblokować ${AH.CITIES[i].name}.`); });
+    const cur = $('citygrid').children[nextEvent()]; if (cur) setTimeout(() => cur.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }), 60);
+  }
+
+  let mapSel = null;
+  function renderMap() {
+    if (mapSel === null) mapSel = nextEvent();
+    const P = AH.Art.PINS, cl = AH.save.cleared || {};
+    $('mapbox').innerHTML = AH.Art.map() + AH.CITIES.map((c, i) => {
+      const [x, y] = P[c.id], open = AH.cityUnlocked(i), done = (cl[c.id] || 99) <= AH.PODIUM;
+      return `<button class="pin ${open ? '' : 'locked'} ${done ? 'done' : ''} ${i === mapSel ? 'on' : ''}" data-pin="${i}" style="left:${x / 10}%;top:${y / 10}%">${i === nextEvent() ? '<span class="pulse"></span>' : ''}<span class="dot"><span>${i + 1}</span></span><b>${c.name}</b></button>`;
+    }).join('');
+    const i = mapSel, c = AH.CITIES[i], open = AH.cityUnlocked(i), best = AH.save.best[c.id], place = cl[c.id];
+    $('mapinfo').innerHTML = `<div class="art">${AH.Art.city(c.id)}</div><span class="kicker">Wydarzenie ${i + 1} · ${KIND[i]}</span><h3>${c.name}</h3><p>${c.blurb}</p>
+      <div class="legend"><span>Trudność ${pips(c.diff)}</span><span>Nagroda <b class="pts num">${AH.fmt(1000 * c.mult)}</b></span><span>Rekord <b class="num">${best ? AH.fmtTime(best) : '—'}${place ? ' · ' + place + '. msc' : ''}</b></span></div>
+      <div class="btns">${open ? `<button class="solid" id="map-go">Jedź na wydarzenie</button>` : `<button class="ghost" disabled>Podium w: ${AH.CITIES[i - 1].name}</button>`}</div>
+      <div class="legend"><span><i style="background:linear-gradient(135deg,#ff2d87,#ff8a00)"></i>Otwarte</span><span><i style="background:linear-gradient(135deg,#ffd23f,#ff8a00)"></i>Podium zdobyte</span><span><i style="background:#7c8794"></i>Zablokowane</span></div>`;
+    $('mapbox').querySelectorAll('[data-pin]').forEach(b => b.onclick = () => { mapSel = +b.dataset.pin; renderMap(); });
+    if ($('map-go')) $('map-go').onclick = () => startRace(i);
   }
 
   let viewCar = AH.save.sel;
@@ -257,27 +254,33 @@
     const owned = !!S.owned[car.id];
     setGarageCar(car.id);
     let action;
-    if (owned) action = S.sel === car.id ? `<button class="buy wide" disabled>Wybrane auto</button>` : `<button class="buy wide" id="g-select">Wybierz to auto</button>`;
-    else action = `<button class="buy wide" id="g-buy" ${S.pts < car.price ? 'disabled' : ''}>Kup za ${AH.fmt(car.price)} pkt</button>`;
+    if (owned) action = S.sel === car.id ? `<button class="solid wide" disabled>Twoje auto</button>` : `<button class="solid wide" id="g-select">Wybierz to auto</button>`;
+    else action = `<button class="solid wide" id="g-buy" ${S.pts < car.price ? 'disabled' : ''}>Kup za ${AH.fmt(car.price)} pkt</button>`;
     $('carpanel').innerHTML = `
-      <div><span class="rank">KLASA ${car.cls} · RANGA ${AH.rating(AH.stats(car))}</span><h3><span class="cls">${car.cls}</span>${car.name}</h3></div>
+      <span class="rank">KLASA ${car.cls} · RANGA ${AH.rating(AH.stats(car))}${car.model ? ' · MODEL 3D' : ''}</span>
+      <h2><span class="cls">${car.cls}</span>${car.name}</h2>
+      <p class="desc">${car.desc}</p>
       <div class="stats">${statRows(car)}</div>
-      <div class="carlist">${AH.CARS.map(c => `<button class="carchip ${c.id === viewCar ? 'sel' : ''} ${!S.owned[c.id] && S.pts < c.price ? 'locked' : ''}" data-car="${c.id}"><b>${c.name}</b><span>${S.owned[c.id] ? (S.sel === c.id ? 'W użyciu' : 'W garażu') : AH.fmt(c.price) + ' pkt'}</span></button>`).join('')}</div>
       ${action}`;
+    $('carlist').innerHTML = AH.CARS.map(c => `<button class="carchip ${c.id === viewCar ? 'sel' : ''} ${!S.owned[c.id] && S.pts < c.price ? 'locked' : ''}" data-car="${c.id}"><b>${c.name}</b><span>${S.owned[c.id] ? (S.sel === c.id ? 'W użyciu' : 'W garażu') : AH.fmt(c.price) + ' pkt'}</span></button>`).join('')
+      + `<span class="drag-hint" style="align-self:center;padding:0 14px">Przeciągnij, by obrócić auto</span>`;
     const u = AH.ups(car.id);
-    $('uppanel').innerHTML = `<div><span class="eyebrow">${owned ? 'Ulepszenia: ' + car.name : 'Kup auto, by je ulepszać'}</span></div><div class="ups">${AH.UPGRADES.map(up => {
+    $('uppanel').innerHTML = `<span class="kicker">${owned ? 'Tuning' : 'Kup auto, by je ulepszać'}</span><div class="ups">${AH.UPGRADES.map(up => {
       const lv = u[up.id], max = lv >= AH.UP_MAX, cost = AH.upCost(car, up.id, lv);
-      return `<div class="up"><div><b>${up.name}</b><p>${up.desc}</p><div class="pips">${Array.from({ length: AH.UP_MAX }, (_, k) => `<i class="${k < lv ? 'on' : ''}"></i>`).join('')}</div></div>
+      return `<div class="up"><div><b>${up.name}</b><p>${up.desc}</p><div class="ticks">${Array.from({ length: AH.UP_MAX }, (_, k) => `<i class="${k < lv ? 'on' : ''}"></i>`).join('')}</div></div>
         <button class="buy" data-up="${up.id}" ${!owned || max || S.pts < cost ? 'disabled' : ''}>${max ? 'MAX' : AH.fmt(cost) + ' pkt'}</button></div>`;
     }).join('')}</div>`;
     if (owned) {
-      const cs = AH.cosm(car.id), def = AH.CAR_DEF[car.style];
+      const cs = AH.cosm(car.id), def = AH.CAR_DEF[car.style] || { finish: 'metallic', rimColor: 'silver' };
+      const tpl = (AH.modelTemplates || {})[car.style];
+      const canFinish = !tpl || !!tpl.paint, canRim = !tpl;
       const curFinish = cs.finish || def.finish, curRim = cs.rim || def.rimColor, curNeon = cs.neon !== undefined ? cs.neon : (def.neon ? cs.color : null);
       const hex = (c) => '#' + new THREE.Color(c).getHexString();
-      $('uppanel').insertAdjacentHTML('beforeend', `<div class="cosm"><span class="eyebrow">Lakier i wygląd</span>
-        <div class="swatches">${AH.PAINTS.map(c => `<button class="sw ${c === cs.color ? 'on' : ''}" data-paint="${c}" style="background:${hex(c)}" aria-label="Kolor ${hex(c)}"></button>`).join('')}</div>
-        <div class="chips">${Object.entries(AH.FINISHES).map(([k, n]) => `<button class="cchip ${k === curFinish ? 'on' : ''}" data-finish="${k}">${n}</button>`).join('')}</div>
-        <div class="chips"><span class="clabel">Felgi</span>${Object.entries({ silver: 'Srebrne', gunmetal: 'Grafit', black: 'Czarne', bronze: 'Brąz', gold: 'Złote' }).map(([k, n]) => `<button class="cchip ${k === curRim ? 'on' : ''}" data-rim="${k}"><i style="background:${hex(AH.RIM_COLORS[k])}"></i>${n}</button>`).join('')}</div>
+      const paints = car.model && !AH.PAINTS.includes(car.color) ? [car.color, ...AH.PAINTS] : AH.PAINTS;
+      $('uppanel').insertAdjacentHTML('beforeend', `<div class="cosm"><span class="kicker">Lakier i wygląd</span>
+        <div class="swatches">${paints.map(c => `<button class="sw ${c === cs.color ? 'on' : ''}" data-paint="${c}" style="background:${hex(c)}" aria-label="Kolor ${hex(c)}"></button>`).join('')}</div>
+        ${canFinish ? `<div class="chips">${Object.entries(AH.FINISHES).map(([k, n]) => `<button class="cchip ${k === curFinish ? 'on' : ''}" data-finish="${k}">${n}</button>`).join('')}</div>` : ''}
+        ${canRim ? `<div class="chips"><span class="clabel">Felgi</span>${Object.entries({ silver: 'Srebrne', gunmetal: 'Grafit', black: 'Czarne', bronze: 'Brąz', gold: 'Złote' }).map(([k, n]) => `<button class="cchip ${k === curRim ? 'on' : ''}" data-rim="${k}"><i style="background:${hex(AH.RIM_COLORS[k])}"></i>${n}</button>`).join('')}</div>` : ''}
         <div class="chips"><span class="clabel">Neon</span>${AH.NEONS.map(c => `<button class="cchip ${c === curNeon || (c === null && !curNeon) ? 'on' : ''}" data-neon="${c === null ? 'off' : c}">${c === null ? 'Wył.' : `<i style="background:${hex(c)};box-shadow:0 0 8px ${hex(c)}"></i>`}</button>`).join('')}</div></div>`);
       const apply = (patch) => {
         AH.setCosm(car.id, patch); setGarageCar(car.id, true); renderGarage(); AH.Net.retrack();
@@ -288,7 +291,7 @@
       $('uppanel').querySelectorAll('[data-rim]').forEach(b => b.onclick = () => apply({ rim: b.dataset.rim }));
       $('uppanel').querySelectorAll('[data-neon]').forEach(b => b.onclick = () => apply({ neon: b.dataset.neon === 'off' ? null : +b.dataset.neon }));
     }
-    $('carpanel').querySelectorAll('[data-car]').forEach(b => b.onclick = () => { viewCar = b.dataset.car; renderGarage(); });
+    $('carlist').querySelectorAll('[data-car]').forEach(b => b.onclick = () => { viewCar = b.dataset.car; renderGarage(); });
     const sel = $('g-select'); if (sel) sel.onclick = async () => { if (await act(() => AH.Net.selectCar(car.id), () => { S.sel = car.id; AH.persist(); })) { Snd.sfx('buy'); AH.Net.retrack(); renderGarage(); renderTopbars(); } };
     const buy = $('g-buy'); if (buy) buy.onclick = async () => {
       if (S.pts < car.price) return;
@@ -303,12 +306,19 @@
       toast(AH.UPGRADES.find(x => x.id === id).name + ' → poziom ' + (lv + 1)); renderGarage(); renderTopbars();
     });
   }
+  // drag to orbit the car in the garage
+  {
+    let px = null;
+    canvas.addEventListener('pointerdown', (e) => { if (mode === 'garage') { px = e.clientX; AH.Festival.dragging = true; } });
+    window.addEventListener('pointermove', (e) => { if (px !== null) { AH.Festival.orbit -= (e.clientX - px) * 0.008; px = e.clientX; } });
+    window.addEventListener('pointerup', () => { px = null; AH.Festival.dragging = false; });
+  }
   function renderShop() {
     const S = AH.save;
     $('shopgrid').innerHTML = AH.BOOSTS.map(b => `<div class="boostcard">
-      <div class="row"><div class="ico" style="background:${b.color}22;color:${b.color}">${AH.ICONS[b.id]}</div><span class="chip num">Masz: ${S.boosts[b.id] || 0}</span></div>
+      <div class="row"><div class="ico" style="background:${b.color}">${AH.ICONS[b.id]}</div><span class="have num">MASZ: ${S.boosts[b.id] || 0}</span></div>
       <h3>${b.name}</h3><p>${b.desc}</p><p>Klawisz w wyścigu: <kbd>${b.key}</kbd></p>
-      <div class="row"><button class="buy" data-buy="${b.id}" data-n="1" ${S.pts < b.price ? 'disabled' : ''}>+1 za ${AH.fmt(b.price)} pkt</button><button class="buy" data-buy="${b.id}" data-n="5" ${S.pts < b.price * 4 ? 'disabled' : ''}>+5 za ${AH.fmt(b.price * 4)} pkt</button></div></div>`).join('');
+      <div class="row"><button class="buy" data-buy="${b.id}" data-n="1" ${S.pts < b.price ? 'disabled' : ''}>+1 · ${AH.fmt(b.price)} pkt</button><button class="buy" data-buy="${b.id}" data-n="5" ${S.pts < b.price * 4 ? 'disabled' : ''}>+5 · ${AH.fmt(b.price * 4)} pkt</button></div></div>`).join('');
     $('shopgrid').querySelectorAll('[data-buy]').forEach(btn => btn.onclick = async () => {
       const b = AH.BOOSTS.find(x => x.id === btn.dataset.buy), n = +btn.dataset.n, cost = n === 5 ? b.price * 4 : b.price;
       if (S.pts < cost) return;
@@ -318,6 +328,9 @@
   }
 
   $('btn-race').onclick = () => { Snd.init(); renderCities(); show('cities'); };
+  $('credits-btn').onclick = () => show('credits');
+  $('credits-close').onclick = () => show('menu');
+  $('btn-map').onclick = () => { Snd.init(); mapSel = null; renderMap(); show('map'); };
   $('btn-garage').onclick = () => { Snd.init(); viewCar = AH.save.sel; renderGarage(); show('garage'); };
   $('btn-shop').onclick = () => { Snd.init(); renderShop(); show('shop'); };
   $('btn-party').onclick = () => { Snd.init(); renderParty(); show('party'); };
@@ -967,6 +980,8 @@
       $('hlap').textContent = `OKR. ${clamp(Math.floor(p.dist / this.L) + 1, 1, this.laps)}/${this.laps}`;
       $('htime').textContent = AH.fmtTime(p.finished ? p.finishTime : this.t);
       $('hspeed').textContent = Math.round(p.v * 3.6);
+      $('hgauge').style.strokeDashoffset = 414.7 * (1 - clamp(p.v * 3.6 / 360, 0, 1));
+      $('hngauge').setAttribute('stroke-dasharray', `${(p.nitro / 100) * 358} 477.5`);
       const nb = $('hnitro'); nb.firstChild.style.width = p.nitro + '%'; nb.classList.toggle('on', p.nitroOn);
       $('vnitro').style.opacity = p.nitroOn ? 1 : 0;
       $('vfly').style.opacity = p.flyT > 0 ? 1 : 0;
@@ -1105,14 +1120,10 @@
       if (mode === 'pause' && race.online) race.update(dt);
       if (mode === 'pause') renderer.render(race.scene, camera);
     } else {
-      garage.ang += dt * 0.25;
-      if (garage.car) { garage.car.group.rotation.y = 0; }
-      const narrow = window.innerWidth < 760;
-      const R = narrow ? 9.5 : 8.2;
-      camera.position.set(Math.sin(garage.ang) * R, 2.3, Math.cos(garage.ang) * R);
-      camera.lookAt(0, 0.7, 0);
-      if (camera.fov !== 45) { camera.fov = 45; camera.updateProjectionMatrix(); }
-      renderer.render(garage.scene, camera);
+      if (AH.Festival.ready) {
+        AH.Festival.update(dt, SHOT[mode] || 'festival', camera);
+        renderer.render(AH.Festival.scene, camera);
+      }
     }
   }
 
@@ -1253,14 +1264,22 @@
   }
 
   // ---------------- boot ----------------
-  setGarageCar(AH.save.sel);
-  renderTopbars();
   requestAnimationFrame(frame);
   (async () => {
+    const bar = $('loadbar'), txt = $('loadtext');
+    txt.textContent = 'Budujemy festiwal…'; bar.style.width = '8%';
+    await new Promise(r => setTimeout(r, 30));
+    AH.Festival.init(makeEnvMap);
+    bar.style.width = '30%'; txt.textContent = 'Ładujemy auta…';
+    await AH.loadModels((f) => { bar.style.width = (30 + f * 65) + '%'; });
+    bar.style.width = '100%';
+    setGarageCar(AH.save.sel, true);
+    AH.Festival.snap('home');
+    renderTopbars();
     if (AH.Net.init()) {
       try { if (await AH.Net.restore()) { await enterOnline(); return; } } catch (e) { console.warn(e); }
     }
     if (AH.save.guest) show('menu'); else showAuth('login');
   })();
-  window.AH_DEBUG = { get race() { return race; }, startRace, show, garage, renderer, camera, setMode: (m) => { mode = m; } };
+  window.AH_DEBUG = { get race() { return race; }, startRace, show, garage, renderer, camera, setMode: (m) => { mode = m; }, snap: (m) => AH.Festival.snap(SHOT[m || mode] || 'festival') };
 })();
