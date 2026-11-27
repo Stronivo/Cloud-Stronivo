@@ -273,7 +273,7 @@
     if (owned) {
       const cs = AH.cosm(car.id), def = AH.CAR_DEF[car.style] || { finish: 'metallic', rimColor: 'silver' };
       const tpl = (AH.modelTemplates || {})[car.style];
-      const canFinish = !tpl || !!tpl.paint, canRim = !tpl;
+      const canFinish = !tpl, canRim = !tpl;
       const curFinish = cs.finish || def.finish, curRim = cs.rim || def.rimColor, curNeon = cs.neon !== undefined ? cs.neon : (def.neon ? cs.color : null);
       const hex = (c) => '#' + new THREE.Color(c).getHexString();
       const paints = car.model && !AH.PAINTS.includes(car.color) ? [car.color, ...AH.PAINTS] : AH.PAINTS;
@@ -462,8 +462,9 @@
       const grid = [[-8, -8], [0, -8], [8, -8], [-8, -18], [8, -18]];
       if (!net) grid.forEach(([x, d], k) => {
         const c = pool[Math.floor(this.rnd() * pool.length)];
-        const col = AI_COLORS[Math.floor(this.rnd() * AI_COLORS.length)];
-        const a = this.makeRacer(c, col, names[k], false, d, x, { finish: ['metallic', 'gloss', 'pearl', 'matte'][Math.floor(this.rnd() * 4)] });
+        // real models drive in their original paint; procedural cars get random colours
+        const col = c.model ? c.color : AI_COLORS[Math.floor(this.rnd() * AI_COLORS.length)];
+        const a = this.makeRacer(c, col, names[k], false, d, x, c.model ? {} : { finish: ['metallic', 'gloss', 'pearl', 'matte'][Math.floor(this.rnd() * 4)] });
         a.skill = D.skill[0] + this.rnd() * (D.skill[1] - D.skill[0]) - (k >= 3 ? 0.02 : 0);
         a.accel = D.accel;
         a.grip = 1 + cityIdx * 0.08;

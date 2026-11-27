@@ -8,13 +8,13 @@ AH.CARS = [
   { id: 'nebula',  name: 'Nebula R',     cls: 'C', price: 4000,  color: 0x1f6bff, top: 64, accel: 18,   grip: 1.10, nitro: 1.08, style: 'coupe',  desc: 'Coupé, które trzyma się zakrętów jak przyklejone.' },
   { id: 'falco',   name: 'Falco X',      cls: 'B', price: 8000,  color: 0x16c96a, top: 68, accel: 19.5, grip: 1.15, nitro: 1.12, style: 'wedge',  desc: 'Klinowy supersamochód z centralnym silnikiem.' },
   { id: 'tempest', name: 'Tempest V12',  cls: 'A', price: 15000, color: 0xff6a00, top: 72, accel: 21.5, grip: 1.20, nitro: 1.18, style: 'hyper',  desc: 'Hypercar V12 z aktywnym spojlerem.' },
-  { id: 'phantom', name: 'LaFerrari',    cls: 'S', price: 26000, color: 0xa30d12, top: 77, accel: 24,   grip: 1.30, nitro: 1.25, style: 'laferrari', desc: 'Hybrydowy hypercar V12. Szczyt festiwalowej hierarchii.', model: true },
+  { id: 'phantom', name: 'LaFerrari',    cls: 'S', price: 26000, color: 0xbd0000, top: 77, accel: 24,   grip: 1.30, nitro: 1.25, style: 'laferrari', desc: 'Hybrydowy hypercar V12. Szczyt festiwalowej hierarchii.', model: true },
 ];
 
 // Real 3D models (glTF) — loaded at start; if loading fails the procedural style is used instead.
 AH.MODELS = {
   mustang: { file: 'cars/mustang.json', fallback: 'muscle', atlasRef: [27, 42, 107] },
-  laferrari: { file: 'cars/laferrari.json', fallback: 'proto' },
+  laferrari: { file: 'cars/laferrari.json', lod: 'cars/laferrari_lod.json', lodDistance: 25, fallback: 'proto' },
 };
 
 AH.UPGRADES = [
