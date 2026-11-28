@@ -25,14 +25,15 @@ create table if not exists public.ah_boosts (id text primary key, price integer 
 create table if not exists public.ah_cities (id text primary key, mult numeric not null);
 
 insert into public.ah_cars (id, min_level, price, tier) values
-  ('vento', 1, 0, 1.00), ('raptor', 2, 1500, 1.45), ('nebula', 4, 4000, 1.90),
-  ('falco', 6, 8000, 2.35), ('tempest', 9, 15000, 2.80), ('phantom', 12, 26000, 3.25)
+  ('samand', 1, 0, 1.00), ('vento', 1, 1500, 1.45), ('m4csl', 1, 5000, 1.90),
+  ('mc720', 1, 10000, 2.35), ('phantom', 1, 18000, 2.80), ('amgone', 1, 30000, 3.25)
 on conflict (id) do update set min_level = excluded.min_level, price = excluded.price, tier = excluded.tier;
 insert into public.ah_upgrades (id, base) values ('engine', 320), ('tires', 260), ('nitro', 290), ('boost', 240)
 on conflict (id) do update set base = excluded.base;
 insert into public.ah_boosts (id, price) values ('freeze', 250), ('fly', 300), ('nitro', 200)
 on conflict (id) do update set price = excluded.price;
-insert into public.ah_cities (id, mult) values ('sf', 1.0), ('ny', 1.25), ('waw', 1.5), ('rome', 1.8), ('paris', 2.2)
+insert into public.ah_cities (id, mult) values ('sf', 1.0), ('rio', 1.15), ('bcn', 1.3), ('ny', 1.5), ('waw', 1.7),
+  ('milan', 1.9), ('rome', 2.1), ('msk', 2.4), ('cairo', 2.7), ('paris', 3.0)
 on conflict (id) do update set mult = excluded.mult;
 
 alter table public.ah_cars enable row level security;
@@ -54,8 +55,8 @@ create table if not exists public.ah_profiles (
   nickname text not null check (char_length(nickname) between 3 and 20),
   pts integer not null default 1000 check (pts >= 0),
   xp integer not null default 0 check (xp >= 0),
-  owned text[] not null default array['vento'],
-  sel text not null default 'vento',
+  owned text[] not null default array['samand'],
+  sel text not null default 'samand',
   ups jsonb not null default '{}'::jsonb,
   boosts jsonb not null default '{"freeze": 2, "fly": 2, "nitro": 2}'::jsonb,
   best jsonb not null default '{}'::jsonb,
@@ -68,6 +69,27 @@ create table if not exists public.ah_profiles (
   updated_at timestamptz not null default now()
 );
 alter table public.ah_profiles add column if not exists cleared jsonb not null default '{}'::jsonb;  -- best place per city (podium unlocks the next map)
+-- car line-up v2: the starter is the Samand; cars that left the game are refunded at their old price
+alter table public.ah_profiles alter column owned set default array['samand'];
+alter table public.ah_profiles alter column sel set default 'samand';
+do $$
+declare r record; refund integer; k text; old_price jsonb := '{"raptor": 1500, "nebula": 4000, "falco": 8000, "tempest": 15000}';
+begin
+  for r in select id, owned, ups, sel from public.ah_profiles where owned && array['raptor', 'nebula', 'falco', 'tempest'] or not ('samand' = any (owned)) loop
+    refund := 0;
+    foreach k in array array['raptor', 'nebula', 'falco', 'tempest'] loop
+      if k = any (r.owned) then refund := refund + (old_price ->> k)::integer; end if;
+    end loop;
+    update public.ah_profiles set
+      pts = pts + refund,
+      owned = array(select distinct unnest(array_append(array_remove(array_remove(array_remove(array_remove(owned, 'raptor'), 'nebula'), 'falco'), 'tempest'), 'samand'))),
+      ups = ups - 'raptor' - 'nebula' - 'falco' - 'tempest',
+      sel = case when sel in ('raptor', 'nebula', 'falco', 'tempest') then 'samand' else sel end,
+      updated_at = now()
+    where id = r.id;
+  end loop;
+end $$;
+delete from public.ah_cars where id in ('raptor', 'nebula', 'falco', 'tempest');
 alter table public.ah_profiles enable row level security;
 drop policy if exists "read own profile" on public.ah_profiles;
 create policy "read own profile" on public.ah_profiles for select to authenticated using ((select auth.uid()) = id);
@@ -236,8 +258,10 @@ begin
 end $$;
 
 -- race results: inputs are capped and the reward is recomputed on the server
+drop function if exists public.ah_submit_race(text, integer, integer, integer, integer, numeric, jsonb, jsonb);
+-- p_quest: points for tasks finished in this race (reported by the client, capped)
 create or replace function public.ah_submit_race(p_city text, p_place integer, p_coins integer, p_takedowns integer, p_near integer,
-                                                p_time numeric, p_used jsonb, p_picked jsonb)
+                                                p_time numeric, p_used jsonb, p_picked jsonb, p_quest integer default 0)
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare prof public.ah_profiles; mult numeric; reward integer; gain_xp integer; coin_mult numeric; b jsonb; k text;
         used integer; picked integer; picked_total integer := 0; v_best numeric;
@@ -247,11 +271,11 @@ begin
   select c.mult into mult from public.ah_cities c where c.id = p_city;
   if mult is null then raise exception 'unknown_city'; end if;
   if p_place not between 1 and 6 or p_coins not between 0 and 150 or p_takedowns not between 0 and 40
-     or p_near not between 0 and 80 or p_time not between 45 and 1200 then raise exception 'invalid_result'; end if;
+     or p_near not between 0 and 80 or p_time not between 45 and 1800 or coalesce(p_quest, 0) not between 0 and 12000 then raise exception 'invalid_result'; end if;
   if prof.last_race_at is not null and now() - prof.last_race_at < interval '40 seconds' then raise exception 'too_fast'; end if;
 
   coin_mult := 1 + 0.1 * coalesce((prof.ups -> prof.sel ->> 'boost')::integer, 0);
-  reward := round((array[1000, 700, 500, 350, 250, 150])[p_place] * mult + p_coins * 15 * coin_mult + p_takedowns * 150 + p_near * 25);
+  reward := round((array[1000, 700, 500, 350, 250, 150])[p_place] * mult + p_coins * 15 * coin_mult + p_takedowns * 150 + p_near * 25) + coalesce(p_quest, 0);
   gain_xp := round((array[300, 220, 170, 130, 100, 80])[p_place] * (1 + (mult - 1) * 0.5));
 
   b := prof.boosts;
@@ -334,7 +358,7 @@ end $$;
 revoke execute on all functions in schema public from public, anon;
 grant execute on function public.ah_get_profile(), public.ah_set_nickname(text), public.ah_select_car(text),
   public.ah_set_cosmetics(text, jsonb), public.ah_purchase(text, text, text, integer),
-  public.ah_submit_race(text, integer, integer, integer, integer, numeric, jsonb, jsonb),
+  public.ah_submit_race(text, integer, integer, integer, integer, numeric, jsonb, jsonb, integer),
   public.ah_create_party(), public.ah_join_party(text), public.ah_leave_party(), public.ah_is_member(text)
   to authenticated;
 

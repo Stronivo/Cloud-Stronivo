@@ -2,20 +2,26 @@
 // Asphalt Horizon — game data: cars, cities, upgrades, boosts, save/progression.
 window.AH = window.AH || {};
 
+// Every car is one of the delivered 3D models, ordered from weakest (cheapest) to strongest (most expensive).
 AH.CARS = [
-  { id: 'vento',   name: 'Mustang ’65 Cabrio', cls: 'D', price: 0,     color: 0x1b2a6b, top: 58, accel: 15.5, grip: 1.00, nitro: 1.00, style: 'mustang', desc: 'Klasyczny kabriolet z V8. Idealny na pierwszy festiwal.', model: true },
-  { id: 'raptor',  name: 'Raptor S',     cls: 'C', price: 1500,  color: 0xffc400, top: 61, accel: 16.5, grip: 0.96, nitro: 1.05, style: 'muscle', desc: 'Ciężki muscle car z potężnym V8.' },
-  { id: 'nebula',  name: 'Nebula R',     cls: 'C', price: 4000,  color: 0x1f6bff, top: 64, accel: 18,   grip: 1.10, nitro: 1.08, style: 'coupe',  desc: 'Coupé, które trzyma się zakrętów jak przyklejone.' },
-  { id: 'falco',   name: 'Falco X',      cls: 'B', price: 8000,  color: 0x16c96a, top: 68, accel: 19.5, grip: 1.15, nitro: 1.12, style: 'wedge',  desc: 'Klinowy supersamochód z centralnym silnikiem.' },
-  { id: 'tempest', name: 'Tempest V12',  cls: 'A', price: 15000, color: 0xff6a00, top: 72, accel: 21.5, grip: 1.20, nitro: 1.18, style: 'hyper',  desc: 'Hypercar V12 z aktywnym spojlerem.' },
-  { id: 'phantom', name: 'LaFerrari',    cls: 'S', price: 26000, color: 0xbd0000, top: 77, accel: 24,   grip: 1.30, nitro: 1.25, style: 'laferrari', desc: 'Hybrydowy hypercar V12. Szczyt festiwalowej hierarchii.', model: true },
+  { id: 'samand',  name: 'IKCO Samand X7',      cls: 'E', price: 0,     color: 0xffffff, top: 54, accel: 14.5, grip: 0.95, nitro: 0.95, style: 'samand',    desc: 'Rodzinny sedan z Iranu. Skromny start, ale każda kariera od czegoś się zaczyna.', model: true },
+  { id: 'vento',   name: 'Mustang ’65 Cabrio',  cls: 'D', price: 1500,  color: 0x1b2a6b, top: 59, accel: 16,   grip: 1.00, nitro: 1.00, style: 'mustang',   desc: 'Klasyczny kabriolet z V8 i otwartym dachem.', model: true },
+  { id: 'm4csl',   name: 'BMW M4 CSL',          cls: 'C', price: 5000,  color: 0x272727, top: 64, accel: 18.5, grip: 1.12, nitro: 1.08, style: 'm4csl',     desc: 'Lżejsze, mocniejsze M4 z pomarańczowymi akcentami. Pewne w zakrętach.', model: true },
+  { id: 'mc720',   name: 'McLaren 720S Spider', cls: 'B', price: 10000, color: 0x303030, top: 69, accel: 21,   grip: 1.18, nitro: 1.14, style: 'mc720',     desc: 'Brytyjski supersamochód z centralnym V8 i składanym dachem.', model: true },
+  { id: 'phantom', name: 'LaFerrari',           cls: 'A', price: 18000, color: 0xbd0000, top: 74, accel: 23,   grip: 1.25, nitro: 1.20, style: 'laferrari', desc: 'Hybrydowy hypercar V12.', model: true },
+  { id: 'amgone',  name: 'Mercedes-AMG ONE',    cls: 'S', price: 30000, color: 0xffffff, top: 79, accel: 25,   grip: 1.32, nitro: 1.27, style: 'amgone',    desc: 'Silnik prosto z Formuły 1. Szczyt festiwalowej hierarchii.', model: true },
 ];
 
-// Real 3D models (glTF) — loaded at start; if loading fails the procedural style is used instead.
+// Real 3D models (glTF). lod = lighter copy used only far from the camera; paint = material that takes the garage colour.
 AH.MODELS = {
-  mustang: { file: 'cars/mustang.json', fallback: 'muscle', atlasRef: [27, 42, 107] },
+  samand:    { file: 'cars/samand.json', lod: 'cars/samand_lod.json', far: 'cars/samand_far.json', lodDistance: 22, paint: 'wire_006134113', fallback: 'sedan' },
+  mustang:   { file: 'cars/mustang.json', fallback: 'muscle', atlasRef: [27, 42, 107] },
+  m4csl:     { file: 'cars/m4csl.json', lod: 'cars/m4csl_lod.json', lodDistance: 25, paint: 'Car_Paint', fallback: 'coupe' },
+  mc720:     { file: 'cars/mc720.json', lod: 'cars/mc720_lod.json', lodDistance: 25, paint: 'Car_Paint', fallback: 'wedge' },
   laferrari: { file: 'cars/laferrari.json', lod: 'cars/laferrari_lod.json', lodDistance: 25, fallback: 'proto' },
+  amgone:    { file: 'cars/amgone.json', noPaint: true, fallback: 'hyper' },
 };
+AH.TRAFFIC_STYLE = 'samand';
 
 AH.UPGRADES = [
   { id: 'engine', name: 'Silnik',      desc: 'Prędkość maks. +3,5% i przyspieszenie +6% na poziom', base: 320 },
@@ -126,11 +132,120 @@ AH.CITIES = [
   },
 ];
 
+// ---- new festival cities (track shapes follow the real road layouts)
+AH.CITIES.push(
+  {
+    id: 'rio', name: 'Rio de Janeiro', country: 'Brazylia',
+    blurb: 'Avenida Atlântica wzdłuż Copacabany: falujący chodnik, Głowa Cukru w zatoce i Chrystus na Corcovado.',
+    landmarksText: 'Copacabana · Głowa Cukru · Chrystus Odkupiciel · fawele',
+    card: ['#1fd1f9', '#1a6b3a'],
+    // crescent beach on the south side, back through Copacabana's inner streets
+    points: [[0,0],[350,-35],[700,-55],[1000,-25],[1180,80],[1220,260],[1080,380],[800,385],[500,345],[220,365],[-60,330],[-240,220],[-230,70]],
+    style: 'rio', beach: true,
+    water: [{ cx: 500, cz: -420, len: 3200, wid: 560, ang: 0 }],
+    sand: [{ cx: 500, cz: -108, len: 2600, wid: 64, ang: 0 }],
+    landmarks: [
+      { type: 'sugarloaf', pos: [1520, -430] },
+      { type: 'christ', pos: [420, 1080] },
+      { type: 'favela', pos: [-380, 720] },
+    ],
+    ramps: [1.5, 6.5, 10.4],
+    env: { skyTop: '#1f7fe0', skyMid: '#7cc8f5', skyBot: '#e6f7ff', fog: '#cfe9f6', fogNear: 240, fogFar: 2200, sun: '#fff1d0', sunInt: 2.5, sunDir: [0.35, 0.72, -0.6], hemiSky: '#d4efff', hemiGround: '#6b8a4a', hemiInt: 0.9, night: 0, lamps: false, ground: '#7fa35a', traffic: [0xffd200, 0xffd200, 0xffffff, 0x1d6fd6, 0x2b2b2b, 0xc8c8c8] },
+  },
+  {
+    id: 'bcn', name: 'Barcelona', country: 'Hiszpania',
+    blurb: 'Kwartały Eixample ze ściętymi narożnikami, przejazd Avinguda Diagonal i Sagrada Família tuż obok.',
+    landmarksText: 'Sagrada Família · Avinguda Diagonal · Torre Glòries · Hotel W',
+    card: ['#ffb347', '#c0392b'],
+    // Eixample block grid with 40 m chamfered corners; the Diagonal cuts one corner of the loop
+    points: [[0,0],[620,0],[675,54],[675,405],[405,675],[54,675],[0,620],[0,54]],
+    style: 'bcn',
+    water: [{ cx: 600, cz: -560, len: 3000, wid: 700, ang: 0 }],
+    sand: [{ cx: 600, cz: -190, len: 2400, wid: 50, ang: 0 }],
+    landmarks: [
+      { type: 'sagrada', pos: [340, 330] },
+      { type: 'glories', pos: [900, 820] },
+      { type: 'whotel', pos: [1150, -150] },
+    ],
+    ramps: [0.5, 3.5, 6.5],
+    env: { skyTop: '#3a86d8', skyMid: '#9fd0f4', skyBot: '#ffe6c2', fog: '#f0dcc0', fogNear: 220, fogFar: 2000, sun: '#ffe0b0', sunInt: 2.35, sunDir: [-0.45, 0.45, -0.75], hemiSky: '#ffe8c8', hemiGround: '#7a6a4a', hemiInt: 0.85, night: 0.05, lamps: false, ground: '#b9a77c', traffic: [0xf2f2f2, 0x1c1c1c, 0xffd400, 0xb3202a, 0x2a5aa8, 0x8a8f99] },
+  },
+  {
+    id: 'milan', name: 'Mediolan', country: 'Włochy',
+    blurb: 'Obwodnica wokół Duomo: marmurowe iglice, Galeria Wiktora Emanuela, Castello i wieżowce Porta Nuova.',
+    landmarksText: 'Duomo · Galeria · Castello Sforzesco · Porta Nuova',
+    card: ['#f3d27a', '#5a4a8a'],
+    // the inner ring road (Cerchia dei Navigli) around the cathedral square
+    points: [[440,0],[410,240],[220,400],[0,450],[-230,410],[-420,230],[-450,0],[-400,-230],[-230,-430],[0,-470],[240,-400],[420,-230]],
+    style: 'milan',
+    water: [{ cx: -560, cz: 620, len: 900, wid: 34, ang: -0.6 }],
+    landmarks: [
+      { type: 'duomo', pos: [0, -40] },
+      { type: 'galleria', pos: [0, 170] },
+      { type: 'castello', pos: [-760, -520] },
+      { type: 'unicredit', pos: [320, -820] },
+      { type: 'bosco', pos: [-120, -860] },
+    ],
+    ramps: [1.6, 5.5, 9.5],
+    env: { skyTop: '#5f8fd0', skyMid: '#c4d8ec', skyBot: '#f6e4c6', fog: '#e8dccb', fogNear: 220, fogFar: 1900, sun: '#ffe6c0', sunInt: 2.1, sunDir: [-0.5, 0.38, 0.75], hemiSky: '#e8e0d0', hemiGround: '#6a5a44', hemiInt: 0.85, night: 0.1, lamps: false, ground: '#8f9a6a', traffic: [0xf2f2f2, 0x1c1c1c, 0x9e1b1b, 0x2d4a7a, 0xc8c8c8, 0xe8c34a] },
+  },
+  {
+    id: 'msk', name: 'Moskwa', country: 'Rosja',
+    blurb: 'Zimowa pętla wokół Kremla: czerwone mury, cebulaste kopuły Soboru Wasyla Błogosławionego i Moskwa City.',
+    landmarksText: 'Kreml · Sobór Wasyla Błogosławionego · Moskwa City · rzeka Moskwa',
+    card: ['#e8f1fa', '#a3222a'],
+    // around the Kremlin triangle, along the Moskva embankment and past Red Square
+    points: [[0,0],[520,-60],[900,40],[1020,300],[820,560],[480,660],[140,560],[-80,360],[-120,140]],
+    style: 'msk', winter: true,
+    water: [{ cx: 450, cz: -300, len: 2600, wid: 170, ang: 0, ice: true }],
+    landmarks: [
+      { type: 'kremlin', pos: [470, 300] },
+      { type: 'stbasil', pos: [880, 330] },
+      { type: 'moscity', pos: [-760, 260] },
+      { type: 'sister', pos: [1300, 980] },
+    ],
+    ramps: [1.4, 4.4, 7.6],
+    env: { skyTop: '#5f88c4', skyMid: '#bcd2ea', skyBot: '#eef3fa', fog: '#e1e9f2', fogNear: 200, fogFar: 1800, sun: '#fff2e0', sunInt: 1.9, sunDir: [0.55, 0.28, -0.75], hemiSky: '#dfe9f6', hemiGround: '#cfd8e2', hemiInt: 1.0, night: 0.15, lamps: false, ground: '#eef2f6', traffic: [0x1c1c1c, 0xf2f2f2, 0x8a8f99, 0x2d4a7a, 0x5a1a1a, 0x3d5a3d] },
+  },
+  {
+    id: 'cairo', name: 'Egipt', country: 'Kair i Giza',
+    blurb: 'Bulwar nad Nilem z palmami, Wieża Kairu, meczet z minaretami i piramidy w Gizie nad pustynią.',
+    landmarksText: 'Piramidy w Gizie · Sfinks · Nil · Wieża Kairu · Cytadela',
+    card: ['#ffcf7a', '#b3541e'],
+    // Nile corniche on the west, desert road towards the Giza plateau on the east
+    points: [[0,0],[500,-40],[950,0],[1250,160],[1300,450],[1050,650],[650,700],[250,640],[-50,480],[-150,240]],
+    style: 'cairo',
+    water: [{ cx: -430, cz: 300, len: 1800, wid: 230, ang: 1.5708 }],
+    landmarks: [
+      { type: 'pyramids', pos: [1950, 760] },
+      { type: 'sphinx', pos: [1560, 430] },
+      { type: 'cairotower', pos: [-430, -330] },
+      { type: 'mosque', pos: [620, 1060] },
+    ],
+    ramps: [1.5, 4.6, 8.2],
+    env: { skyTop: '#3f7fd0', skyMid: '#f0c98a', skyBot: '#ffe2b0', fog: '#f2d6a6', fogNear: 260, fogFar: 2400, sun: '#ffd8a0', sunInt: 2.6, sunDir: [-0.6, 0.3, -0.72], hemiSky: '#ffe6c0', hemiGround: '#a98a5a', hemiInt: 0.85, night: 0.05, lamps: false, ground: '#d9b77a', traffic: [0xf2f2f2, 0x1c1c1c, 0xc8a050, 0x2d4a7a, 0x9e9e9e, 0x7a2a1a] },
+  },
+);
+// progression order (easiest → hardest), AI pace, laps and traffic grow with every city
+{
+  const ORDER = ['sf', 'rio', 'bcn', 'ny', 'waw', 'milan', 'rome', 'msk', 'cairo', 'paris'];
+  const AI = [49, 53, 57, 61, 64, 67, 70, 73, 76, 80], LAPS = [2, 2, 2, 3, 3, 3, 4, 4, 5, 5], TRAF = [8, 10, 12, 13, 14, 15, 16, 17, 18, 20];
+  const MULT = [1.0, 1.15, 1.3, 1.5, 1.7, 1.9, 2.1, 2.4, 2.7, 3.0];
+  AH.CITIES = ORDER.map((id, i) => {
+    const c = AH.CITIES.find(x => x.id === id);
+    const f = i / (ORDER.length - 1);
+    return Object.assign(c, {
+      diff: Math.ceil((i + 1) / 2), mult: MULT[i], laps: LAPS[i], aiSpeed: AI[i], traffic: TRAF[i],
+      ai: { accel: 12.5 + f * 12, nitro: 0.02 + f * 0.11, catchUp: 1.05 + f * 0.13, skill: [0.92 + f * 0.06, 1.0 + f * 0.06] },
+    });
+  });
+}
+
 AH.NAMES = ['Vortex', 'Nocna Mara', 'Kobra', 'Blaze', 'Glacier', 'Rekin', 'Neon', 'Wiedźma', 'Tytan', 'Szerszeń'];
 
 // ---- save / progression
 AH.SAVE_KEY = 'asphaltHorizon.v1';
-AH.defaultSave = () => ({ pts: 1000, xp: 0, cleared: {}, owned: { vento: true }, sel: 'vento', ups: {}, boosts: { freeze: 2, fly: 2, nitro: 2 }, best: {}, races: 0, wins: 0, muted: false });
+AH.defaultSave = () => ({ pts: 1000, xp: 0, cleared: {}, owned: { samand: true }, sel: 'samand', quest: null, ups: {}, boosts: { freeze: 2, fly: 2, nitro: 2 }, best: {}, races: 0, wins: 0, muted: false });
 AH.saveKey = () => AH.SAVE_KEY + (AH.Net && AH.Net.user ? '.' + AH.Net.user.id : '');
 AH.load = () => {
   try {
@@ -139,7 +254,14 @@ AH.load = () => {
   } catch (e) { /* storage blocked */ }
   return AH.defaultSave();
 };
-AH.save = AH.load();
+AH.migrate = (S) => {
+  const removed = { raptor: 1500, nebula: 4000, falco: 8000, tempest: 15000 };
+  for (const id in removed) if (S.owned && S.owned[id]) { S.pts += removed[id]; delete S.owned[id]; if (S.ups) delete S.ups[id]; }
+  S.owned = Object.assign({ samand: true }, S.owned || {});
+  if (!AH.CARS.some(c => c.id === S.sel)) S.sel = 'samand';
+  return S;
+};
+AH.save = AH.migrate(AH.load());
 AH.persist = () => { try { localStorage.setItem(AH.saveKey(), JSON.stringify(AH.save)); } catch (e) { /* ignore */ } };
 
 // Progression by maps: city 1 is open, each next city unlocks after a podium (top 3) in the previous one.

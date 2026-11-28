@@ -5,7 +5,7 @@ Gra działa od razu w trybie gościa (offline). Logowanie (Google, e-mail i has�
 ## 1. Projekt Supabase
 
 1. Utwórz nowy projekt (np. `AsphaltHorizon`, region `eu-central-1`). Najlepiej osobny, żeby gracze nie mieszali się z użytkownikami innych aplikacji.
-2. **SQL Editor** → wklej i uruchom `supabase/migrations/20261125_asphalt_horizon.sql`. Skrypt można bezpiecznie uruchomić ponownie.
+2. **SQL Editor** → wklej i uruchom `supabase/migrations/20261125_asphalt_horizon.sql`. Skrypt można bezpiecznie uruchomić ponownie. Po aktualizacji gry (nowe auta, miasta, punkty za zadania) uruchom go jeszcze raz: gracze, którzy mieli usunięte auta, dostaną zwrot punktów, a każdy dostanie Samanda jako auto startowe w nowej wersji.
 3. **Project Settings → API**: skopiuj `Project URL` i klucz **publishable/anon** do `config.js`.
    Nigdy nie wklejaj klucza `service_role` / `secret` do plików gry.
 

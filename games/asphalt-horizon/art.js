@@ -144,13 +144,104 @@ AH.Art = (() => {
         <rect width="1600" height="900" fill="url(#${gr})"/>`,
         sky(s, [[0, '#141a46'], [0.45, '#6b4a8e'], [0.72, '#ff9c7c']]) + sky(et, [[0, '#d99a4a'], [1, '#6b4a2a']]) + grade(gr, '#ff9c7c', '#24205a'));
     },
+    rio() {
+      const r = R(19), s = uid('s'), sea = uid('sea'), gr = uid('gr'), g = uid('g');
+      const towers = Array.from({ length: 22 }, (_, i) => { const x = 380 + i * 52, h = 90 + r() * 120; return `<rect x="${x}" y="${620 - h}" width="46" height="${h}" fill="${['#f4f1ea', '#e2ecf0', '#f2e6c8'][i % 3]}"/>${Array.from({ length: Math.floor(h / 22) }, (_, k) => `<rect x="${x + 4}" y="${620 - h + 6 + k * 22}" width="38" height="5" fill="#9ab8c8" opacity=".7"/>`).join('')}`; }).join('');
+      const palm = (x, y, h) => `<path d="M${x} ${y} Q${x + 10} ${y - h / 2} ${x + 4} ${y - h}" stroke="#7a5a3a" stroke-width="8" fill="none"/>${[-60, -20, 20, 60, 100, 140].map(a => `<path d="M${x + 4} ${y - h} q${Math.cos(a * Math.PI / 180) * 60} ${-Math.sin(a * Math.PI / 180) * 30 - 10} ${Math.cos(a * Math.PI / 180) * 90} ${Math.abs(Math.cos(a * Math.PI / 180)) * 30}" stroke="#2f7a3a" stroke-width="10" fill="none" stroke-linecap="round"/>`).join('')}`;
+      return wrap(`<rect width="1600" height="900" fill="url(#${s})"/>
+        <circle cx="1250" cy="230" r="300" fill="url(#${g})"/>
+        ${clouds(r, 6, 90, 260, 0.6)}
+        <path d="M0 520 C120 520 170 240 260 230 C330 225 360 470 420 520Z" fill="#4f6a4a"/>
+        <path d="M1080 520 C1130 520 1170 260 1240 250 C1300 245 1330 470 1400 520Z" fill="#5f7466"/>
+        <path d="M1380 520 C1420 380 1470 330 1530 330 C1580 340 1600 430 1620 520Z" fill="#6a7a6a"/>
+        <path d="M600 520 C660 300 720 170 800 160 C880 170 940 300 1000 520Z" fill="#3f6a3a"/>
+        <g fill="#f4f1ea" transform="translate(800 120)"><rect x="-6" y="0" width="12" height="44"/><rect x="-46" y="10" width="92" height="9"/><circle cx="0" cy="-6" r="7"/><rect x="-10" y="44" width="20" height="8"/></g>
+        <path d="M0 520 L1600 520 L1600 610 L0 610Z" fill="url(#${sea})"/>
+        ${Array.from({ length: 14 }, () => `<path d="M${r() * 1600} ${540 + r() * 60} q20 -6 40 0" stroke="#fff" stroke-width="3" fill="none" opacity=".6"/>`).join('')}
+        <path d="M0 610 Q800 570 1600 610 L1600 660 L0 660Z" fill="#f2dfae"/>
+        ${towers}
+        ${palm(140, 700, 260)}${palm(1450, 700, 280)}${palm(1300, 690, 200)}
+        <path d="M0 660 L1600 660 L1600 700 L0 700Z" fill="#f2efe8"/>
+        ${Array.from({ length: 20 }, (_, i) => `<path d="M${i * 80} 680 q20 -14 40 0 t40 0" stroke="#1c1c1c" stroke-width="6" fill="none"/>`).join('')}
+        ${road(800, 660, '#33363e', '#f8f6ef', 120)}
+        ${car(800, 770, 0.62, '#ffd23f')}
+        <rect width="1600" height="900" fill="url(#${gr})"/>`,
+        sky(s, [[0, '#1f7fe0'], [0.5, '#7cc8f5'], [0.58, '#e6f7ff']]) + sky(sea, [[0, '#2ab0d0'], [1, '#1f8fb0']]) + sunGlow(g, '#fff4c8') + grade(gr, '#ffd23f', '#0a6b3a'));
+    },
+    bcn() {
+      const r = R(23), s = uid('s'), gr = uid('gr'), g = uid('g');
+      const spire = (x, b, h, w) => `<path d="M${x - w} ${b} L${x - w * 0.3} ${b - h} Q${x} ${b - h - w * 1.4} ${x + w * 0.3} ${b - h} L${x + w} ${b}Z" fill="#c9b48a"/>${Array.from({ length: Math.floor(h / 26) }, (_, k) => `<circle cx="${x}" cy="${b - 14 - k * 26}" r="${w * 0.25}" fill="#8a7454"/>`).join('')}<circle cx="${x}" cy="${b - h - w * 0.9}" r="${w * 0.5}" fill="#d94f3a"/>`;
+      const blocks = Array.from({ length: 14 }, (_, i) => { const x = i * 120 - 20, h = 150 + r() * 40; return `<path d="M${x} 640 L${x} ${640 - h} L${x + 20} ${620 - h} L${x + 92} ${620 - h} L${x + 112} ${640 - h} L${x + 112} 640Z" fill="${['#e8d2a8', '#dcc49a', '#f0e0c0'][i % 3]}"/>${Array.from({ length: 10 }, (_, k) => `<rect x="${x + 10 + (k % 5) * 20}" y="${650 - h + Math.floor(k / 5) * 50}" width="10" height="26" fill="#6a5040" opacity=".7"/><rect x="${x + 6 + (k % 5) * 20}" y="${676 - h + Math.floor(k / 5) * 50}" width="18" height="4" fill="#3a3a3a"/>`).join('')}`; }).join('');
+      return wrap(`<rect width="1600" height="900" fill="url(#${s})"/>
+        <circle cx="300" cy="300" r="320" fill="url(#${g})"/>
+        ${clouds(r, 6, 80, 280, 0.5, '#fff0d8')}
+        ${mountains(r, 520, 90, '#9a8a6a', 8, 0.55)}
+        <g>${spire(640, 520, 230, 18)}${spire(700, 520, 250, 18)}${spire(900, 520, 250, 18)}${spire(960, 520, 230, 18)}${spire(800, 520, 380, 30)}${spire(740, 520, 300, 20)}${spire(860, 520, 300, 20)}
+        <rect x="600" y="440" width="400" height="90" fill="#b8a27a"/><path d="M1040 200 L1046 520 M1040 200 L1180 200" stroke="#f2c230" stroke-width="7"/></g>
+        <path d="M1280 520 C1280 380 1300 300 1330 300 C1360 300 1380 380 1380 520Z" fill="#4a8ad0" opacity=".9"/>
+        ${blocks}
+        ${road(800, 650, '#3a3a40', '#f8f6ef', -100)}
+        ${car(800, 770, 0.62, '#c0392b')}
+        <rect width="1600" height="900" fill="url(#${gr})"/>`,
+        sky(s, [[0, '#3a86d8'], [0.5, '#9fd0f4'], [0.7, '#ffe6c2']]) + sunGlow(g, '#ffd890') + grade(gr, '#ffb347', '#c0392b'));
+    },
+    milan() {
+      const r = R(29), s = uid('s'), gr = uid('gr');
+      const spires = Array.from({ length: 40 }, (_, i) => { const x = 420 + i * 19, b = i % 5 ? 420 : 380; return `<path d="M${x - 4} ${b} L${x} ${b - 40 - (i % 3) * 10} L${x + 4} ${b}Z" fill="#f4efe4"/>`; }).join('');
+      return wrap(`<rect width="1600" height="900" fill="url(#${s})"/>
+        ${clouds(r, 7, 90, 280, 0.5)}
+        <g fill="#a7b4c2" opacity=".7"><rect x="1200" y="230" width="70" height="300"/><path d="M1300 530 L1300 260 Q1360 220 1400 280 L1400 530Z"/><rect x="1440" y="300" width="60" height="230"/></g>
+        <path d="M400 640 L400 420 L1200 420 L1200 640Z" fill="#f1ece2"/>
+        <path d="M600 420 L800 300 L1000 420Z" fill="#e8ded0"/>
+        ${spires}
+        <rect x="790" y="180" width="20" height="120" fill="#f1ece2"/><path d="M790 180 L800 110 L810 180Z" fill="#f1ece2"/><circle cx="800" cy="104" r="8" fill="#e8b84a"/>
+        ${Array.from({ length: 5 }, (_, i) => `<path d="M${470 + i * 150} 640 L${470 + i * 150} 520 Q${510 + i * 150} 470 ${550 + i * 150} 520 L${550 + i * 150} 640Z" fill="#6a5a4a"/>`).join('')}
+        <path d="M0 640 L0 560 L300 560 L300 640Z" fill="#e8c47a"/><path d="M1300 640 L1300 570 L1600 570 L1600 640Z" fill="#d8a86a"/>
+        ${road(800, 660, '#5a5550', '#f8f6ef', 60)}
+        ${car(800, 770, 0.62, '#f3d27a')}
+        <rect width="1600" height="900" fill="url(#${gr})"/>`,
+        sky(s, [[0, '#5f8fd0'], [0.5, '#c4d8ec'], [0.7, '#f6e4c6']]) + grade(gr, '#f3d27a', '#5a4a8a'));
+    },
+    msk() {
+      const r = R(37), s = uid('s'), gr = uid('gr');
+      const onion = (x, b, h, w, c1, c2) => `<rect x="${x - w * 0.6}" y="${b - h}" width="${w * 1.2}" height="${h}" fill="#c8584a"/><path d="M${x - w} ${b - h} C${x - w * 1.3} ${b - h - w * 1.2} ${x - w * 0.2} ${b - h - w * 1.6} ${x} ${b - h - w * 2.4} C${x + w * 0.2} ${b - h - w * 1.6} ${x + w * 1.3} ${b - h - w * 1.2} ${x + w} ${b - h}Z" fill="${c1}"/><path d="M${x - w * 0.5} ${b - h - w * 0.3} L${x} ${b - h - w * 2.2} M${x + w * 0.5} ${b - h - w * 0.3} L${x} ${b - h - w * 2.2}" stroke="${c2}" stroke-width="7"/><rect x="${x - 2}" y="${b - h - w * 2.4 - 24}" width="4" height="24" fill="#e8b84a"/>`;
+      return wrap(`<rect width="1600" height="900" fill="url(#${s})"/>
+        ${clouds(r, 9, 80, 300, 0.7)}
+        <g fill="#8fa8c8" opacity=".7"><path d="M1260 520 L1270 160 L1300 140 L1310 520Z"/><path d="M1330 520 L1340 200 L1380 190 L1390 520Z"/><path d="M1410 520 L1420 260 L1450 250 L1460 520Z"/></g>
+        <rect x="0" y="520" width="1600" height="120" fill="#a83226"/>
+        ${Array.from({ length: 80 }, (_, i) => `<path d="M${i * 20} 520 l0 -14 l6 -6 l6 6 l0 14Z" fill="#a83226"/>`).join('')}
+        <rect x="150" y="300" width="70" height="230" fill="#a83226"/><path d="M140 300 L185 200 L230 300Z" fill="#2f5a3a"/><path d="M185 170 l8 14 l16 2 l-12 10 l4 16 l-16 -8 l-16 8 l4 -16 l-12 -10 l16 -2Z" fill="#ff2020"/>
+        ${onion(800, 520, 140, 34, '#d9433a', '#3a8a4a')}${onion(700, 520, 70, 26, '#2f6ab8', '#f2efe6')}${onion(900, 520, 70, 26, '#f2c230', '#2f8a6a')}${onion(620, 520, 40, 20, '#3a8a4a', '#d9433a')}${onion(980, 520, 40, 20, '#e86a3a', '#f2c230')}
+        <path d="M0 640 L1600 640 L1600 680 L0 680Z" fill="#eef2f6"/>
+        ${Array.from({ length: 120 }, () => `<circle cx="${r() * 1600}" cy="${r() * 900}" r="${(1 + r() * 2.5).toFixed(1)}" fill="#fff" opacity=".8"/>`).join('')}
+        ${road(800, 660, '#4a4e58', '#ffffff', -60)}
+        ${car(800, 770, 0.62, '#a3222a')}
+        <rect width="1600" height="900" fill="url(#${gr})"/>`,
+        sky(s, [[0, '#5f88c4'], [0.5, '#bcd2ea'], [0.7, '#eef3fa']]) + grade(gr, '#e8f1fa', '#a3222a'));
+    },
+    cairo() {
+      const r = R(41), s = uid('s'), gr = uid('gr'), g = uid('g'), sd = uid('sd');
+      const pyr = (x, b, w, c1, c2) => `<path d="M${x - w} ${b} L${x} ${b - w * 0.64} L${x + w * 0.3} ${b}Z" fill="${c1}"/><path d="M${x} ${b - w * 0.64} L${x + w} ${b} L${x + w * 0.3} ${b}Z" fill="${c2}"/>`;
+      const palm = (x, y, h) => `<path d="M${x} ${y} Q${x - 8} ${y - h / 2} ${x} ${y - h}" stroke="#7a5a3a" stroke-width="7" fill="none"/>${[-40, 0, 40, 140, 180, 220].map(a => `<path d="M${x} ${y - h} q${Math.cos(a * Math.PI / 180) * 50} ${-Math.sin(a * Math.PI / 180) * 20 - 14} ${Math.cos(a * Math.PI / 180) * 80} 24" stroke="#4a7a2a" stroke-width="9" fill="none" stroke-linecap="round"/>`).join('')}`;
+      return wrap(`<rect width="1600" height="900" fill="url(#${s})"/>
+        <circle cx="1100" cy="380" r="360" fill="url(#${g})"/><circle cx="1100" cy="380" r="64" fill="#fff0c8"/>
+        <path d="M0 560 Q400 520 800 545 T1600 540 L1600 900 L0 900Z" fill="url(#${sd})"/>
+        ${pyr(420, 560, 300, '#e0bd80', '#b8925a')}${pyr(900, 560, 260, '#d9b57a', '#ae8850')}${pyr(1240, 560, 140, '#d2ac70', '#a8824a')}
+        <path d="M580 600 L580 570 L640 560 L660 540 L690 540 L700 570 L760 575 L760 600Z" fill="#c8a060"/>
+        <rect x="0" y="600" width="1600" height="40" fill="#2f6f7a"/>
+        ${palm(140, 690, 220)}${palm(260, 680, 180)}${palm(1400, 690, 240)}${palm(1500, 680, 170)}
+        ${road(800, 650, '#5a4a3a', '#fbf0de', 140)}
+        ${car(800, 770, 0.62, '#ffcf7a')}
+        <rect width="1600" height="900" fill="url(#${gr})"/>`,
+        sky(s, [[0, '#3f7fd0'], [0.45, '#f0c98a'], [0.62, '#ffe2b0']]) + sky(sd, [[0, '#e8c48a'], [1, '#c89a5a']]) + sunGlow(g, '#ffd890') + grade(gr, '#ffcf7a', '#b3541e'));
+    },
   };
   const cache = {};
   const city = (id) => cache[id] || (cache[id] = scenes[id] ? scenes[id]() : '');
 
   // ---- festival region map ----------------------------------------------
   // Pins (0-1000 x 0-1000) for the five festival zones; HQ in the middle.
-  const PINS = { sf: [215, 470], ny: [800, 330], waw: [520, 250], rome: [470, 760], paris: [790, 640], hq: [520, 500] };
+  const PINS = { sf: [215, 470], rio: [290, 650], bcn: [380, 830], ny: [820, 330], waw: [540, 250], milan: [640, 400], rome: [480, 740], msk: [700, 170], cairo: [760, 760], paris: [880, 560], hq: [520, 500] };
   function map() {
     const r = R(97), oc = uid('oc'), ld = uid('ld'), mt = uid('mt');
     const land = 'M150 330 C120 220 260 120 420 140 C520 90 690 80 820 150 C930 170 980 270 930 360 C990 450 960 560 900 640 C930 740 820 860 680 840 C580 900 420 880 360 800 C250 790 140 700 160 600 C90 520 100 420 150 330Z';
@@ -158,9 +249,10 @@ AH.Art = (() => {
       + Array.from({ length: 90 }, () => { const x = 300 + r() * 160, y = 600 + r() * 140; return `<circle cx="${x}" cy="${y}" r="${(4 + r() * 5).toFixed(1)}" fill="${r() < 0.5 ? '#5a9a3a' : '#3e7a2e'}"/>`; }).join('');
     const peaks = Array.from({ length: 16 }, (_, i) => { const x = 300 + (i % 8) * 34 + r() * 20, y = 210 + Math.floor(i / 8) * 46 + r() * 20, h = 50 + r() * 40; return `<path d="M${x - h * 0.6} ${y + h * 0.5} L${x} ${y - h * 0.5} L${x + h * 0.6} ${y + h * 0.5}Z" fill="url(#${mt})"/><path d="M${x - h * 0.18} ${y - h * 0.2} L${x} ${y - h * 0.5} L${x + h * 0.18} ${y - h * 0.2} L${x + 6} ${y - h * 0.14} L${x} ${y - h * 0.22}Z" fill="#fff"/>`; }).join('');
     const dunes = Array.from({ length: 14 }, (_, i) => `<path d="M${660 + (i % 4) * 60} ${700 + Math.floor(i / 4) * 34} q30 -18 60 0" stroke="#d58a3a" stroke-width="5" fill="none" opacity=".6"/>`).join('');
-    const roads = [['hq', 'sf'], ['hq', 'ny'], ['hq', 'waw'], ['hq', 'rome'], ['hq', 'paris'], ['sf', 'waw'], ['waw', 'ny'], ['ny', 'paris'], ['paris', 'rome'], ['rome', 'sf']].map(([a, b], i) => {
+    const MAIN = ['sf', 'rio', 'bcn', 'ny', 'waw', 'milan', 'rome', 'msk', 'cairo', 'paris'];
+    const roads = [...MAIN.map(id => ['hq', id]), ...MAIN.slice(1).map((id, k) => [MAIN[k], id])].map(([a, b], i) => {
       const [x1, y1] = PINS[a], [x2, y2] = PINS[b], mx = (x1 + x2) / 2 + (i % 2 ? 40 : -40), my = (y1 + y2) / 2 + (i % 3 ? -30 : 30);
-      return `<path d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}" stroke="#fff" stroke-width="${i < 5 ? 9 : 6}" fill="none" stroke-linecap="round" opacity=".95"/><path d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}" stroke="#f2b23a" stroke-width="${i < 5 ? 3 : 2}" fill="none" stroke-dasharray="${i < 5 ? '0' : '10 10'}" opacity=".9"/>`;
+      return `<path d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}" stroke="#fff" stroke-width="${i < 10 ? 9 : 6}" fill="none" stroke-linecap="round" opacity=".95"/><path d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}" stroke="#f2b23a" stroke-width="${i < 10 ? 3 : 2}" fill="none" stroke-dasharray="${i < 10 ? '0' : '10 10'}" opacity=".9"/>`;
     }).join('');
     const waves = Array.from({ length: 60 }, () => { const x = r() * 1000, y = r() * 1000; return `<path d="M${x} ${y} q8 -6 16 0 t16 0" stroke="#fff" stroke-width="2" fill="none" opacity=".25"/>`; }).join('');
     return `<svg viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg" class="worldmap" aria-label="Mapa regionu festiwalu">
@@ -171,6 +263,8 @@ AH.Art = (() => {
       <path d="${land}" fill="url(#${ld})"/>
       <path d="M640 660 C700 640 820 660 860 720 C840 790 740 810 680 790 C640 760 620 700 640 660Z" fill="#f0c27a"/>${dunes}
       <ellipse cx="640" cy="470" rx="48" ry="30" fill="#3fa6d0"/><path d="M640 440 C600 380 560 330 520 260" stroke="#3fa6d0" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M560 150 C600 90 760 80 820 150 C840 200 790 240 720 235 C640 240 570 215 560 150Z" fill="#f4f8fc" opacity=".95"/>
+      ${Array.from({ length: 30 }, () => `<circle cx="${590 + r() * 200}" cy="${120 + r() * 100}" r="${(3 + r() * 4).toFixed(1)}" fill="#2f5a40"/><circle cx="${590 + r() * 200}" cy="${120 + r() * 100}" r="2" fill="#fff"/>`).join('')}
       ${trees}${peaks}
       <path d="M215 470 C180 470 140 470 110 480" stroke="#c8442c" stroke-width="6"/><rect x="150" y="456" width="6" height="22" fill="#c8442c"/><rect x="128" y="458" width="6" height="22" fill="#c8442c"/>
       ${roads}

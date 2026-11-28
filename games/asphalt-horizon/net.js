@@ -105,7 +105,7 @@ AH.Net = (() => {
   N.submitRace = async (r) => {
     const out = await rpc('ah_submit_race', {
       p_city: r.city, p_place: r.place, p_coins: r.coins, p_takedowns: r.takedowns, p_near: r.near,
-      p_time: Math.round(r.time * 100) / 100, p_used: r.used, p_picked: r.picked,
+      p_time: Math.round(r.time * 100) / 100, p_used: r.used, p_picked: r.picked, p_quest: Math.max(0, Math.round(r.quest || 0)),
     });
     N.applyProfile(out.profile);
     return out;

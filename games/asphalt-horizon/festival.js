@@ -216,12 +216,18 @@ AH.Festival = (() => {
       const beamWrap = new THREE.Group(); beamWrap.add(beam); beamWrap.rotation.y = -Math.PI / 2; arch.add(beamWrap);
       S.add(arch);
       // parked festival cars
-      const styles = ['coupe', 'wedge', 'hyper', 'muscle', 'hatch', 'proto', 'coupe', 'wedge'];
-      styles.forEach((st, i) => {
-        const m = AH.buildCar(st, parseInt(PAL[i % PAL.length].slice(1), 16), { noFlames: true });
-        m.group.position.set(fx + 10 + (i % 4) * 7, 1.42, fz - 30 + Math.floor(i / 4) * 12); m.group.rotation.y = Math.PI * (i < 4 ? 1 : 0) + 0.15;
-        m.group.traverse(o => { if (o.isMesh) o.castShadow = true; }); S.add(m.group);
-      });
+      // (the player's own models, in their original paint; placed once the models have loaded)
+      let parked = [];
+      F.parkCars = () => {
+        parked.forEach(g => S.remove(g)); parked = [];
+        const list = AH.CARS.concat(AH.CARS).slice(0, 8);
+        list.forEach((c, i) => {
+          const m = AH.buildCar(c.style, c.color, { noFlames: true, traffic: true });
+          m.group.position.set(fx + 10 + (i % 4) * 7, 1.42, fz - 30 + Math.floor(i / 4) * 12); m.group.rotation.y = Math.PI * (i < 4 ? 1 : 0) + 0.15;
+          S.add(m.group); parked.push(m.group);
+        });
+      };
+      F.parkCars();
       // light towers with soft beams
       const beamM = new THREE.MeshBasicMaterial({ color: lin('#ffe3b0'), transparent: true, opacity: 0.06, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
       for (let i = 0; i < 4; i++) { const x = fx - 60 + i * 40, z = fz + 52; const tw = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 22, 6), steel); tw.position.set(x, 12, z); S.add(tw); const cone = new THREE.Mesh(new THREE.ConeGeometry(10, 80, 16, 1, true), beamM); cone.position.set(x, 62, z); cone.rotation.z = (i - 1.5) * 0.18; S.add(cone); F.anim.push((t) => { cone.rotation.z = Math.sin(t * 0.3 + i) * 0.35; }); }

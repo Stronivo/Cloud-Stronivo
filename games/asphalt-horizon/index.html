@@ -269,6 +269,27 @@ body.touch .keys p { display: none; }
 #hud .tr { position: absolute; right: max(22px, env(safe-area-inset-right, 0px)); top: calc(16px + env(safe-area-inset-top, 0px)); display: flex; gap: 10px; align-items: flex-start; }
 #minimap { position: absolute; left: max(22px, env(safe-area-inset-left, 0px)); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); width: 170px; height: 170px; border-radius: 50%; background: rgba(9, 24, 44, .45); box-shadow: 0 0 0 3px rgba(255,255,255,.65), 0 10px 30px rgba(0,0,0,.35); }
 #pausebtn { pointer-events: auto; }
+.qpanel { position: absolute; right: max(22px, env(safe-area-inset-right, 0px)); top: calc(70px + env(safe-area-inset-top, 0px)); width: 236px; pointer-events: auto; font-family: var(--body, inherit); background: rgba(9, 14, 28, .55); backdrop-filter: blur(6px); border-left: 3px solid var(--yellow); border-radius: 4px; overflow: hidden; }
+.qpanel .qh { all: unset; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; padding: 6px 10px; font-family: var(--display); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+.qpanel .qh span { color: var(--soft); font-size: 11px; letter-spacing: .04em; }
+.qpanel .qh::after { content: "▾"; font-size: 12px; transition: transform .2s; }
+.qpanel.min .qh::after { transform: rotate(-90deg); }
+.qpanel ol { list-style: none; margin: 0; padding: 0 10px 8px; display: grid; gap: 6px; }
+.qpanel.min ol { display: none; }
+.qpanel li { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; font-size: 11.5px; line-height: 1.25; font-weight: 600; }
+.qpanel li i { grid-column: 1 / -1; height: 3px; background: rgba(255,255,255,.2); border-radius: 2px; overflow: hidden; }
+.qpanel li i b { display: block; height: 100%; background: linear-gradient(90deg, var(--yellow), var(--orange)); transition: width .3s; }
+.qpanel li em { font-style: normal; color: var(--soft); font-size: 11px; }
+.qpanel li.ok span { color: #9ff0c0; } .qpanel li.ok em { color: #9ff0c0; } .qpanel li.ok i b { background: #37c06a; }
+body.touch .qpanel { top: calc(184px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); width: 200px; }
+.hometasks { position: absolute; right: max(28px, env(safe-area-inset-right, 0px)); bottom: calc(76px + env(safe-area-inset-bottom, 0px)); width: min(380px, 100%); background: rgba(9, 14, 28, .6); backdrop-filter: blur(6px); border-left: 3px solid var(--yellow); padding: 10px 14px; display: grid; gap: 8px; animation: rise .6s .3s cubic-bezier(.2, .8, .2, 1) both; }
+.hometasks .hh { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--display); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; font-size: 13px; }
+.hometasks .hh span { color: var(--soft); font-size: 12px; letter-spacing: .02em; }
+.hometasks .lvbar { height: 5px; background: rgba(255,255,255,.18); } .hometasks .lvbar b { display: block; height: 100%; background: linear-gradient(90deg, var(--pink), var(--orange)); }
+.hometasks ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 13px; }
+.hometasks li { display: flex; justify-content: space-between; gap: 10px; } .hometasks li em { font-style: normal; color: var(--soft); white-space: nowrap; }
+@media (max-width: 900px) { .hometasks { position: relative; right: auto; top: auto; width: 100%; } }
+.rewards .qdone { color: #ffe27a; font-size: 14px; } .rewards .qdone.lv { color: var(--pink); font-weight: 800; }
 #speedo { position: absolute; right: max(26px, env(safe-area-inset-right, 0px)); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); width: 200px; height: 200px; display: grid; place-items: center; text-shadow: 0 2px 12px rgba(0,0,0,.6); }
 #speedo svg.gauge { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(135deg); }
 #speedo .ring { fill: none; stroke: rgba(255,255,255,.25); stroke-width: 7; }
@@ -394,13 +415,14 @@ body.touch #hpos { font-size: 44px; }
     <div class="home-main">
       <nav class="menu-list" aria-label="Menu główne">
         <button class="mi primary" id="btn-continue"><b>Kontynuuj</b><small id="continue-sub">Następny przystanek</small></button>
-        <button class="mi" id="btn-race"><b>Festiwal</b><small>5 wydarzeń na Wybrzeżu Horizon</small></button>
+        <button class="mi" id="btn-race"><b>Festiwal</b><small>10 wydarzeń na Wybrzeżu Horizon</small></button>
         <button class="mi" id="btn-map"><b>Mapa</b><small>Odkryj region i jego trasy</small></button>
         <button class="mi" id="btn-garage"><b>Garaż</b><small>Auta, lakier i ulepszenia</small></button>
         <button class="mi" id="btn-party"><b>Ze znajomymi</b><small>Party online z kodem</small></button>
         <button class="mi" id="btn-shop"><b>Sklep</b><small>Zamrożenie · Lot · Nitro Max</small></button>
       </nav>
       <button class="featured" id="featured"></button>
+      <div class="hometasks" id="hometasks"></div>
     </div>
     <div class="home-foot">
       <div class="mycar"><span class="kicker">Twoje auto</span><b id="menu-car">Mustang</b></div>
@@ -445,6 +467,7 @@ body.touch #hpos { font-size: 44px; }
   <section id="hud" hidden>
     <div class="tl"><div id="hpos">1<small>/6</small></div><div id="hlap">OKR. 1/2</div><div id="htime" class="num">0:00.00</div></div>
     <div class="tr"><button class="iconbtn" id="pausebtn" aria-label="Pauza"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button></div>
+    <div id="hquests" class="qpanel"><button class="qh" type="button" aria-label="Zadania: zwiń lub rozwiń"><b>Zadania</b></button><ol></ol></div>
     <canvas id="minimap" width="300" height="300"></canvas>
     <div id="speedo">
       <svg class="gauge" viewBox="0 0 200 200" aria-hidden="true"><defs><linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd23f"/><stop offset=".5" stop-color="#ff8a00"/><stop offset="1" stop-color="#ff2d87"/></linearGradient></defs>
@@ -487,10 +510,14 @@ body.touch #hpos { font-size: 44px; }
       <span class="kicker">Podziękowania</span>
       <h2>Autorzy modeli</h2>
       <div class="standings">
+        <div class="srow"><b>E</b><span>„IKCO SAMAND X7 (FREE IRANIAN CAR)” · Mpgs.studio3DModels (sketchfab.com/mpgs.studio)</span><em>CC BY 4.0</em><em></em></div>
         <div class="srow"><b>D</b><span>„1965 Ford Mustang Convertible” · Kristian LaGrange (sketchfab.com/kristian123)</span><em>CC BY 4.0</em><em></em></div>
-        <div class="srow"><b>S</b><span>„Ferrari laferrari” · SC (sketchfab.com/srineshchethiya)</span><em>CC BY 4.0</em><em></em></div>
+        <div class="srow"><b>C</b><span>„BMW M4csl” · Mpgs Studios (sketchfab.com/mpgs.studio)</span><em>CC BY 4.0</em><em></em></div>
+        <div class="srow"><b>B</b><span>„McLaren 720s Spider” · Mpgs Studios (sketchfab.com/mpgs.studio)</span><em>CC BY 4.0</em><em></em></div>
+        <div class="srow"><b>A</b><span>„Ferrari laferrari” · SC (sketchfab.com/srineshchethiya)</span><em>CC BY 4.0</em><em></em></div>
+        <div class="srow"><b>S</b><span>„Mercedes-Benz AMG ONE” · DRIVER-FIRE (sketchfab.com/DRIVER-FIRE)</span><em>CC BY 4.0</em><em></em></div>
       </div>
-      <p class="xptext" style="font-size:14px;line-height:1.5">Modele uproszczone i dostosowane do gry w przeglądarce (koła wydzielone, mniej wielokątów, tekstury WebP). Licencja: creativecommons.org/licenses/by/4.0. Nazwy i marki aut należą do ich właścicieli; gra jest niekomercyjnym projektem fanowskim.</p>
+      <p class="xptext" style="font-size:14px;line-height:1.5">Modele przygotowane do gry w przeglądarce: koła wydzielone, dodatkowe uproszczone kopie do jazdy z daleka; materiały i tekstury autorów bez zmian. Licencja: creativecommons.org/licenses/by/4.0. Nazwy i marki aut należą do ich właścicieli; gra jest niekomercyjnym projektem fanowskim.</p>
       <div class="btns"><button class="solid" id="credits-close">Wróć</button></div>
     </div>
   </section>
@@ -504,6 +531,7 @@ body.touch #hpos { font-size: 44px; }
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
 <script src="data.js"></script>
+<script src="quests.js"></script>
 <script src="models.js"></script>
 <script src="cars.js"></script>
 <script src="world.js"></script>

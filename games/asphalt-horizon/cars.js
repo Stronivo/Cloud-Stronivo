@@ -539,27 +539,27 @@
   const atlasCache = {};
 
   // Keep the author's materials exactly as delivered: only shadows and scene reflections are switched on.
-  function prepare(style, def, root, lodRoot) {
+  const isPaint = (def, m) => !def.noPaint && (m.name === 'AH_PAINT' || (def.paint && (m.name === def.paint || m.name.startsWith(def.paint + '_') || m.name.startsWith(def.paint + '.'))));
+  function prepare(style, def, root, lodRoot, farRoot) {
     const geos = {}; let paint = null, atlas = null;
-    const scan = (r, isLod) => r.traverse((o) => {
+    const scan = (r, isMain) => r && r.traverse((o) => {
       if (!o.isMesh) return;
       geos[o.uuid] = o.geometry;
       const mats = Array.isArray(o.material) ? o.material : [o.material];
       o.castShadow = !mats.some(m => m.transparent); o.receiveShadow = false;
       for (const m of mats) {
-        if (!isLod && m.name === 'AH_PAINT') paint = m;
-        if (!isLod && m.name === 'AH_ATLAS') atlas = m;
+        if (isMain && !paint && isPaint(def, m)) paint = m;
+        if (isMain && m.name === 'AH_ATLAS') atlas = m;
         m.userData.reflect = true;
       }
     });
-    scan(root, false); if (lodRoot) scan(lodRoot, true);
+    scan(root, true); scan(lodRoot, false); scan(farRoot, false);
     const box = new THREE.Box3().setFromObject(root), size = box.getSize(new V3());
     let r = 0.34; const w0 = root.getObjectByName('wheel_0');
     if (w0) { const wb = new THREE.Box3().setFromObject(w0); r = (wb.max.y - wb.min.y) / 2; }
     const wheels = []; root.traverse(o => { if (/^wheel_\d$/.test(o.name)) wheels.push(o.name); });
-    let lodPaint = null; if (lodRoot) lodRoot.traverse(o => { if (o.isMesh) [].concat(o.material).forEach(m => { if (m.name === 'AH_PAINT') lodPaint = m; }); });
     const ez = box.min.z + 0.12;
-    AH.modelTemplates[style] = { root, lodRoot, paint, lodPaint, atlas, wheels, def, P: { L: size.z, W: size.x, r }, exh: [[0.32, 0.33, ez], [-0.32, 0.33, ez]] };
+    AH.modelTemplates[style] = { root, lodRoot, farRoot, paint, atlas, wheels, def, P: { L: size.z, W: size.x, r }, exh: [[0.32, 0.33, ez], [-0.32, 0.33, ez]] };
     AH.geoCache['model_' + style] = geos; // never disposed by races
   }
 
@@ -569,13 +569,13 @@
     const loader = new THREE.GLTFLoader();
     if (window.MeshoptDecoder) loader.setMeshoptDecoder(window.MeshoptDecoder);
     const load = (file) => new Promise((res) => loader.load(file, (gl) => res(gl.scene), (e) => { if (e && e.total) { prog[file] = Math.min(0.99, e.loaded / e.total); report(); } }, (err) => { console.warn('model load failed', file, err); res(null); }));
-    const files = list.flatMap(([, d]) => [d.file].concat(d.lod ? [d.lod] : []));
+    const files = list.flatMap(([, d]) => [d.file].concat(d.lod ? [d.lod] : [], d.far ? [d.far] : []));
     const prog = {}; files.forEach(f => (prog[f] = 0));
     const report = () => onProgress && onProgress(Object.values(prog).reduce((a, b) => a + b, 0) / files.length);
     Promise.all(list.map(async ([style, def]) => {
-      const [root, lodRoot] = await Promise.all([load(def.file), def.lod ? load(def.lod) : Promise.resolve(null)]);
-      prog[def.file] = 1; if (def.lod) prog[def.lod] = 1; report();
-      if (root) { try { prepare(style, def, root, lodRoot); } catch (e) { console.warn('model prepare failed', style, e); } }
+      const [root, lodRoot, farRoot] = await Promise.all([load(def.file), def.lod ? load(def.lod) : null, def.far ? load(def.far) : null]);
+      prog[def.file] = 1; if (def.lod) prog[def.lod] = 1; if (def.far) prog[def.far] = 1; report();
+      if (root) { try { prepare(style, def, root, lodRoot, farRoot); } catch (e) { console.warn('model prepare failed', style, e); } }
       return !!root;
     })).then(r => resolve(r.every(Boolean)));
   });
@@ -608,28 +608,34 @@
     const T = AH.modelTemplates[style];
     if (!T) { const def = (AH.MODELS || {})[style]; return proceduralBuild(def ? def.fallback : style, color, opt); }
     const g = new THREE.Group();
-    const inst = T.root.clone(true);
-    let lodInst = null, holder = inst;
-    if (T.lodRoot) {
-      lodInst = T.lodRoot.clone(true);
-      holder = new THREE.LOD(); holder.addLevel(inst, 0); holder.addLevel(lodInst, T.def.lodDistance || 25);
-    }
+    // detail levels: traffic skips the full-detail mesh
+    const levels = [];
+    if (!opt.traffic || !(T.lodRoot || T.farRoot)) levels.push([T.root, 0]);
+    if (T.lodRoot) levels.push([T.lodRoot, opt.traffic ? 0 : T.def.lodDistance || 25]);
+    if (T.farRoot) levels.push([T.farRoot, opt.traffic ? (T.lodRoot ? 28 : 0) : T.def.farDistance || 60]);
+    const insts = levels.map(([r]) => r.clone(true));
+    let holder = insts[0];
+    if (insts.length > 1) { holder = new THREE.LOD(); insts.forEach((o, k) => holder.addLevel(o, levels[k][1])); }
     g.add(holder);
     const car = AH.CARS.find(c => c.style === style);
     const custom = car && color !== car.color;
     let bodyMat = T.paint || T.atlas || null;
-    const swapIn = (root, from, to) => root && from && root.traverse(o => { if (!o.isMesh) return; if (Array.isArray(o.material)) o.material = o.material.map(m => m === from ? to : m); else if (o.material === from) o.material = to; });
     if (custom && T.paint) {
-      // same material the author made, only the colour changes (and the finish, if the player picked one)
-      bodyMat = T.paint.clone(); bodyMat.color = new THREE.Color(color).convertSRGBToLinear();
-      if (opt.finish) { const f = AH.paintMat(color, opt.finish); bodyMat.roughness = f.roughness; bodyMat.metalness = f.metalness; if ('clearcoat' in bodyMat) { bodyMat.clearcoat = f.clearcoat; bodyMat.clearcoatRoughness = f.clearcoatRoughness; } }
-      swapIn(inst, T.paint, bodyMat);
-      if (T.lodPaint) { const lp = T.lodPaint.clone(); lp.color = bodyMat.color.clone(); lp.roughness = bodyMat.roughness; lp.metalness = bodyMat.metalness; swapIn(lodInst, T.lodPaint, lp); }
+      // same materials the author made, only the colour changes (and the finish, if the player picked one)
+      const col = new THREE.Color(color).convertSRGBToLinear(), f = opt.finish ? AH.paintMat(color, opt.finish) : null, made = new Map();
+      const recolor = (m) => {
+        if (!isPaint(T.def, m)) return m;
+        if (made.has(m)) return made.get(m);
+        const c = m.clone(); c.color = col.clone();
+        if (f) { c.roughness = f.roughness; c.metalness = f.metalness; if ('clearcoat' in c) { c.clearcoat = f.clearcoat; c.clearcoatRoughness = f.clearcoatRoughness; } }
+        made.set(m, c); if (m === T.paint) bodyMat = c; return c;
+      };
+      for (const o of insts) o.traverse(x => { if (x.isMesh) x.material = Array.isArray(x.material) ? x.material.map(recolor) : recolor(x.material); });
     } else if (custom && T.atlas && T.atlas.map) {
       bodyMat = T.atlas.clone(); bodyMat.map = recolorAtlas(T.atlas.map, color, T.def.atlasRef); bodyMat.userData.reflect = true;
-      swapIn(inst, T.atlas, bodyMat);
+      insts[0].traverse(o => { if (!o.isMesh) return; if (Array.isArray(o.material)) o.material = o.material.map(m => m === T.atlas ? bodyMat : m); else if (o.material === T.atlas) o.material = bodyMat; });
     }
-    const wheels = T.wheels.map(n => inst.getObjectByName(n)).concat(lodInst ? T.wheels.map(n => lodInst.getObjectByName(n)) : []).filter(Boolean);
+    const wheels = insts.flatMap(o => T.wheels.map(n => o.getObjectByName(n))).filter(Boolean);
     // soft contact shadow
     const blob = new THREE.Mesh(new THREE.PlaneGeometry(T.P.W + 0.7, T.P.L + 0.9), AH.carMats.blob);
     blob.rotation.x = -Math.PI / 2; blob.position.y = 0.02; blob.renderOrder = -1; g.add(blob);

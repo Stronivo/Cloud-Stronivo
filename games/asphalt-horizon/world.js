@@ -382,6 +382,211 @@ AH.LM = {
     for (const [x, z] of [[-18, 24], [18, 24], [-18, -20], [18, -20]]) { g.add(mesh(new THREE.CylinderGeometry(5, 5, 8, 14), w, x, top + 30, z)); const s = mesh(new THREE.SphereGeometry(5, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), w, x, top + 34, z); s.scale.y = 1.5; g.add(s); }
     return { group: g, r: 95 };
   },
+  // ======== Rio de Janeiro ========
+  sugarloaf() {
+    const g = new THREE.Group(), rock = std(0x6f7468, { flatShading: true, roughness: 0.95 }), green = std(0x3f6e34, { flatShading: true });
+    const dome = (r, h, x, z) => { const m = mesh(new THREE.SphereGeometry(r, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2), rock, x, -4, z); m.scale.set(0.72, h / r, 1); g.add(m); const v = mesh(new THREE.SphereGeometry(r * 1.01, 14, 6, 0, Math.PI * 2, Math.PI * 0.32, Math.PI * 0.18), green, x, -4, z); v.scale.set(0.73, h / r, 1.01); g.add(v); };
+    dome(120, 395, 0, 0); dome(80, 220, -380, 120);
+    const base = mesh(new THREE.CylinderGeometry(200, 260, 30, 16), green, -150, 6, 60); g.add(base);
+    // cable car between Urca and Sugarloaf
+    const pts = [new THREE.Vector3(-380, 216, 120), new THREE.Vector3(-190, 300, 60), new THREE.Vector3(0, 390, 0)];
+    g.add(mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 30, 0.6, 4, false), std(0x333333)));
+    const cab = mesh(new THREE.BoxGeometry(8, 6, 6), std(0xd8dde2, { metalness: 0.5 }), -200, 290, 64); g.add(cab);
+    return { group: g, r: 320, noRotate: true };
+  },
+  christ() {
+    const g = new THREE.Group(), w = std(0xe9e6dc, { roughness: 0.7 }), green = std(0x356a30, { flatShading: true });
+    const hp = []; for (let i = 0; i <= 14; i++) { const t = i / 14; hp.push(new THREE.Vector2(420 * Math.pow(1 - t, 1.6) + 12, t * 690)); }
+    const hill = mesh(new THREE.LatheGeometry(hp, 14), std(0x3a6a32, { flatShading: true, roughness: 0.95 }), 0, 0, 0); hill.scale.z = 0.75; g.add(hill);
+    const top = 690;
+    g.add(mesh(new THREE.BoxGeometry(14, 10, 14), std(0xc8c2b4), 0, top + 5, 0));
+    g.add(mesh(new THREE.CylinderGeometry(4.2, 7.5, 32, 10), w, 0, top + 26, 0));        // robe
+    g.add(mesh(new THREE.BoxGeometry(56, 4.5, 4.5), w, 0, top + 38, 0));               // outstretched arms (28 m span scaled up for visibility)
+    g.add(mesh(new THREE.CylinderGeometry(3.6, 4.2, 8, 10), w, 0, top + 41, 0));
+    g.add(mesh(new THREE.SphereGeometry(3, 12, 10), w, 0, top + 47.5, 0));
+    return { group: g, r: 420, noRotate: true };
+  },
+  favela(ctx) {
+    const g = new THREE.Group(), r = AH.rng(77), pal = [0xf2a65a, 0xf27a7a, 0x7ac4f2, 0xf2e27a, 0x9ad48a, 0xe8e2d8, 0xc89a7a, 0xb8a0e8];
+    const hill = mesh(new THREE.ConeGeometry(260, 220, 12, 2), std(0x4f7a3a, { flatShading: true }), 0, 100, 0); g.add(hill);
+    const box = new THREE.BoxGeometry(1, 1, 1), list = [];
+    for (let i = 0; i < 520; i++) { const a = r() * Math.PI * 2, d = 40 + r() * 200, h = 210 * (1 - d / 260) - 8; list.push([Math.cos(a) * d, h, Math.sin(a) * d, 5 + r() * 5, 4 + r() * 6, 5 + r() * 4, pal[Math.floor(r() * pal.length)], a]); }
+    const im = new THREE.InstancedMesh(box, std(0xffffff), list.length), o = new THREE.Object3D(), c = new THREE.Color();
+    list.forEach(([x, y, z, w, h, d, col, a], k) => { o.position.set(x, y + h / 2, z); o.rotation.set(0, a, 0); o.scale.set(w, h, d); o.updateMatrix(); im.setMatrixAt(k, o.matrix); im.setColorAt(k, c.set(col).convertSRGBToLinear()); });
+    im.castShadow = true; g.add(im);
+    return { group: g, r: 260, noRotate: true };
+  },
+  // ======== Barcelona ========
+  sagrada(ctx) {
+    const g = new THREE.Group(), stone = std(0xc9b48a, { roughness: 0.9 }), dark = std(0x9a8566, { roughness: 0.95 });
+    g.add(mesh(new THREE.BoxGeometry(90, 45, 60), stone, 0, 22.5, 0));
+    g.add(mesh(new THREE.BoxGeometry(60, 30, 90), dark, 0, 15, 0));
+    const spire = (x, z, h, r) => { g.add(mesh(new THREE.CylinderGeometry(r * 0.25, r, h, 10), stone, x, h / 2, z)); g.add(mesh(new THREE.SphereGeometry(r * 0.45, 8, 6), std(0xd94f3a, { roughness: 0.6 }), x, h + r * 0.3, z)); };
+    for (const s of [-1, 1]) for (const k of [0, 1]) { spire(s * (12 + k * 13), 34, 98 + k * 9, 5.5); spire(s * (12 + k * 13), -34, 100 + k * 7, 5.5); }
+    spire(0, 0, 172, 11); spire(-22, 0, 135, 7); spire(22, 0, 135, 7); spire(0, 22, 138, 7); spire(0, -22, 138, 7);
+    g.add(mesh(new THREE.BoxGeometry(1.2, 10, 1.2), std(0xffffff, { emissive: 0xffffff, emissiveIntensity: 0.4 }), 0, 186, 0));
+    g.add(mesh(new THREE.BoxGeometry(7, 1.2, 1.2), std(0xffffff, { emissive: 0xffffff, emissiveIntensity: 0.4 }), 0, 188, 0));
+    // construction cranes, as on the real site
+    for (const [x, z, a] of [[48, 10, 0.4], [-44, -18, 2.2]]) { const c = new THREE.Group(); c.position.set(x, 0, z); c.rotation.y = a; const y = std(0xf2c230, { metalness: 0.4 }); c.add(mesh(new THREE.BoxGeometry(2, 150, 2), y, 0, 75, 0)); c.add(mesh(new THREE.BoxGeometry(70, 2, 2), y, 20, 150, 0)); g.add(c); }
+    return { group: g, r: 70 };
+  },
+  glories() {
+    const g = new THREE.Group();
+    const prof = []; for (let i = 0; i <= 20; i++) { const t = i / 20; prof.push(new THREE.Vector2(19 * Math.sqrt(Math.max(0, 1 - Math.pow(Math.max(0, t - 0.55) / 0.45, 2))) + 0.01, t * 145)); }
+    const c = document.createElement('canvas'); c.width = 64; c.height = 128; const x = c.getContext('2d');
+    for (let j = 0; j < 32; j++) for (let i = 0; i < 16; i++) { const h = (0.55 + (j / 32) * 0.4 + Math.random() * 0.06) % 1; x.fillStyle = `hsl(${h * 360},80%,${40 + Math.random() * 25}%)`; x.fillRect(i * 4, j * 4, 3, 3); }
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.wrapS = THREE.RepeatWrapping; t.repeat.set(6, 1);
+    g.add(mesh(new THREE.LatheGeometry(prof, 32), new THREE.MeshStandardMaterial({ map: t, emissiveMap: t, emissive: new THREE.Color(0xffffff), emissiveIntensity: 0.35, roughness: 0.4 })));
+    return { group: g, r: 30 };
+  },
+  whotel() {
+    const g = new THREE.Group(), sh = new THREE.Shape();
+    sh.moveTo(-40, 0); sh.quadraticCurveTo(0, 22, 40, 0); sh.quadraticCurveTo(0, -6, -40, 0);
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: 100, bevelEnabled: false, curveSegments: 20 }); geo.rotateX(-Math.PI / 2);
+    const m = mesh(geo, std(0x7fa8c8, { metalness: 0.85, roughness: 0.08 })); m.scale.set(1, 1, 1); g.add(m);
+    g.add(mesh(new THREE.BoxGeometry(90, 12, 40), std(0xd8dde2), 0, 6, 0));
+    return { group: g, r: 60 };
+  },
+  // ======== Milan ========
+  duomo(ctx) {
+    const g = new THREE.Group(), marble = std(0xf1ece2, { roughness: 0.55 }), pink = std(0xe8d8cc, { roughness: 0.6 });
+    g.add(mesh(new THREE.BoxGeometry(92, 45, 158), marble, 0, 22.5, 0));
+    g.add(mesh(new THREE.BoxGeometry(60, 14, 150), pink, 0, 52, 0));
+    const facade = mesh(new THREE.BoxGeometry(92, 56, 6), marble, 0, 28, 80); g.add(facade);
+    // forest of thin spires along the roof edges
+    const sp = new THREE.ConeGeometry(1.1, 14, 6), list = [];
+    for (let z = -72; z <= 72; z += 9) for (const x of [-44, -30, -16, 16, 30, 44]) list.push([x, 45 + (Math.abs(x) < 20 ? 12 : 0), z]);
+    for (let x = -42; x <= 42; x += 7) list.push([x, 56, 80]);
+    const im = new THREE.InstancedMesh(sp, marble, list.length), o = new THREE.Object3D();
+    list.forEach(([x, y, z], k) => { o.position.set(x, y + 7, z); o.updateMatrix(); im.setMatrixAt(k, o.matrix); }); im.castShadow = true; g.add(im);
+    g.add(mesh(new THREE.CylinderGeometry(3, 7, 40, 8), marble, 0, 86, 0));
+    g.add(mesh(new THREE.ConeGeometry(3, 18, 8), marble, 0, 115, 0));
+    g.add(mesh(new THREE.SphereGeometry(1.8, 8, 6), std(0xe8b84a, { metalness: 1, roughness: 0.2 }), 0, 126, 0));
+    return { group: g, r: 95 };
+  },
+  galleria() {
+    const g = new THREE.Group(), w = std(0xe6d6b8), glass = new THREE.MeshStandardMaterial({ color: 0xbcd6e6, metalness: 0.7, roughness: 0.1, transparent: true, opacity: 0.55, side: THREE.DoubleSide });
+    for (const rot of [0, Math.PI / 2]) { const arm = new THREE.Group(); arm.rotation.y = rot; for (const s of [-1, 1]) arm.add(mesh(new THREE.BoxGeometry(10, 26, 120), w, s * 13, 13, 0)); const roof = mesh(new THREE.CylinderGeometry(8, 8, 120, 16, 1, true, 0, Math.PI), glass, 0, 26, 0, false); roof.rotation.x = Math.PI / 2; roof.rotation.z = Math.PI / 2; arm.add(roof); g.add(arm); }
+    g.add(mesh(new THREE.SphereGeometry(16, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), glass, 0, 26, 0, false));
+    return { group: g, r: 70 };
+  },
+  castello(ctx) {
+    const g = new THREE.Group(), brick = std(0xa8553a, { roughness: 0.9 });
+    for (const [x, z, w, d] of [[0, -90, 200, 10], [0, 90, 200, 10], [-100, 0, 10, 190], [100, 0, 10, 190]]) g.add(mesh(new THREE.BoxGeometry(w, 22, d), brick, x, 11, z));
+    for (const s of [-1, 1]) { g.add(mesh(new THREE.CylinderGeometry(14, 15, 32, 16), std(0xb8a890), s * 100, 16, 90)); g.add(mesh(new THREE.BoxGeometry(22, 30, 22), brick, s * 100, 15, -90)); }
+    g.add(mesh(new THREE.BoxGeometry(18, 52, 14), brick, 0, 26, 92));
+    g.add(mesh(new THREE.BoxGeometry(12, 14, 10), brick, 0, 59, 92));
+    g.add(mesh(new THREE.ConeGeometry(6, 10, 8), std(0x6b6b6b), 0, 71, 92));
+    return { group: g, r: 150 };
+  },
+  unicredit() {
+    const g = new THREE.Group(), glass = std(0x8fb4d6, { metalness: 0.85, roughness: 0.08 });
+    const sh = new THREE.Shape(); sh.absarc(0, 0, 26, -0.3, Math.PI + 0.3, false); sh.lineTo(-22, -12); sh.lineTo(22, -12); sh.closePath();
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: 160, bevelEnabled: false, curveSegments: 24 }); geo.rotateX(-Math.PI / 2);
+    g.add(mesh(geo, glass));
+    g.add(mesh(new THREE.CylinderGeometry(9, 18, 40, 16, 1, false, 0, Math.PI), glass, 0, 180, 0));
+    g.add(mesh(new THREE.CylinderGeometry(0.6, 1.6, 75, 6), std(0xd8dde2, { metalness: 0.8 }), 6, 235, 0));
+    for (const [x, h] of [[70, 100], [-60, 90]]) g.add(mesh(new THREE.BoxGeometry(30, h, 30), glass, x, h / 2, 30));
+    return { group: g, r: 90 };
+  },
+  bosco() {
+    const g = new THREE.Group(), con = std(0x8a8580), r = AH.rng(5);
+    for (const [x, h] of [[-26, 110], [26, 80]]) {
+      g.add(mesh(new THREE.BoxGeometry(32, h, 32), con, x, h / 2, 0));
+      const leaf = new THREE.IcosahedronGeometry(2.2, 0), n = Math.floor(h / 3.5) * 14, im = new THREE.InstancedMesh(leaf, std(0x3f7a34, { flatShading: true }), n), o = new THREE.Object3D(), c = new THREE.Color();
+      for (let k = 0; k < n; k++) { const fl = Math.floor(k / 14), side = k % 4, u = (r() - 0.5) * 30; const p = [[u, 17.5], [u, -17.5], [17.5, u], [-17.5, u]][side]; o.position.set(x + p[0], 3 + fl * 3.5 + r(), p[1]); o.scale.setScalar(0.7 + r() * 0.8); o.updateMatrix(); im.setMatrixAt(k, o.matrix); im.setColorAt(k, c.setHSL(0.27 + r() * 0.06, 0.5, 0.22 + r() * 0.1)); }
+      g.add(im);
+    }
+    return { group: g, r: 60 };
+  },
+  // ======== Moscow ========
+  kremlin(ctx) {
+    const g = new THREE.Group(), brick = std(0xa83226, { roughness: 0.9 }), roofG = std(0x2f5a3a, { roughness: 0.6 }), star = new THREE.MeshStandardMaterial({ color: 0xff2020, emissive: 0xff1010, emissiveIntensity: 1.5 });
+    const P = [[-230, 160], [230, 160], [40, -200]];
+    for (let i = 0; i < 3; i++) {
+      const [x1, z1] = P[i], [x2, z2] = P[(i + 1) % 3], len = Math.hypot(x2 - x1, z2 - z1), a = Math.atan2(z2 - z1, x2 - x1);
+      const wall = mesh(new THREE.BoxGeometry(len, 16, 6), brick, (x1 + x2) / 2, 8, (z1 + z2) / 2); wall.rotation.y = -a; g.add(wall);
+      const n = Math.floor(len / 4), merlon = new THREE.InstancedMesh(new THREE.BoxGeometry(2, 3, 6.2), brick, n), o = new THREE.Object3D();
+      for (let k = 0; k < n; k++) { const f = (k + 0.5) / n; o.position.set(x1 + (x2 - x1) * f, 17.5, z1 + (z2 - z1) * f); o.rotation.set(0, -a, 0); o.updateMatrix(); merlon.setMatrixAt(k, o.matrix); } g.add(merlon);
+      for (const f of [0, 0.5]) { const tx = x1 + (x2 - x1) * f, tz = z1 + (z2 - z1) * f, h = f === 0 ? 50 : 62; g.add(mesh(new THREE.BoxGeometry(16, h, 16), brick, tx, h / 2, tz)); const rf = mesh(new THREE.ConeGeometry(9, 22, 4), roofG, tx, h + 11, tz); rf.rotation.y = Math.PI / 4; g.add(rf); g.add(mesh(new THREE.OctahedronGeometry(2.6), star, tx, h + 25, tz, false)); }
+    }
+    // palace + cathedrals with golden domes inside
+    g.add(mesh(new THREE.BoxGeometry(120, 28, 40), std(0xe8dcc0), -30, 14, 60));
+    for (const [x, z] of [[40, 20], [70, -10], [10, -20]]) { g.add(mesh(new THREE.BoxGeometry(24, 22, 24), std(0xf2efe6), x, 11, z)); g.add(mesh(new THREE.SphereGeometry(7, 12, 10), std(0xe8b84a, { metalness: 1, roughness: 0.2 }), x, 28, z)); }
+    g.add(mesh(new THREE.CylinderGeometry(6, 7, 81, 8), std(0xf2efe6), 110, 40, -40)); g.add(mesh(new THREE.SphereGeometry(6, 12, 10), std(0xe8b84a, { metalness: 1, roughness: 0.2 }), 110, 84, -40));
+    return { group: g, r: 260, noRotate: true };
+  },
+  stbasil() {
+    const g = new THREE.Group(), r = AH.rng(31);
+    g.add(mesh(new THREE.BoxGeometry(46, 16, 46), std(0xb0453a, { roughness: 0.85 }), 0, 8, 0));
+    const cols = [[0xd9433a, 0x3a8a4a], [0x2f6ab8, 0xf2efe6], [0xf2c230, 0x2f8a6a], [0x3a8a4a, 0xd9433a], [0xe86a3a, 0xf2c230]];
+    const onion = (x, z, h, rr, k) => {
+      g.add(mesh(new THREE.CylinderGeometry(rr * 0.8, rr * 0.9, h, 12), std(0xc8584a), x, 16 + h / 2, z));
+      const prof = []; for (let i = 0; i <= 16; i++) { const t = i / 16; prof.push(new THREE.Vector2(rr * (1.25 * Math.sin(Math.PI * Math.min(1, t * 1.25)) * (1 - t * 0.4) + (t > 0.85 ? 0 : 0.01)), t * rr * 2.6)); }
+      const c = document.createElement('canvas'); c.width = 64; c.height = 16; const cx = c.getContext('2d'); const [a, b] = cols[k % cols.length];
+      for (let i = 0; i < 8; i++) { cx.fillStyle = '#' + new THREE.Color(i % 2 ? a : b).getHexString(); cx.beginPath(); cx.moveTo(i * 8, 0); cx.lineTo(i * 8 + 8, 0); cx.lineTo(i * 8 + 14, 16); cx.lineTo(i * 8 + 6, 16); cx.fill(); }
+      const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.wrapS = THREE.RepeatWrapping;
+      g.add(mesh(new THREE.LatheGeometry(prof, 16), new THREE.MeshStandardMaterial({ map: t, roughness: 0.4 }), x, 16 + h, z));
+      g.add(mesh(new THREE.ConeGeometry(0.5, 6, 6), std(0xe8b84a, { metalness: 1 }), x, 16 + h + rr * 2.6 + 2, z));
+    };
+    onion(0, 0, 30, 7, 0);
+    g.add(mesh(new THREE.ConeGeometry(7, 22, 8), std(0xd9b07a), 0, 16 + 30 + 11, 0));
+    [[16, 16], [-16, 16], [16, -16], [-16, -16], [0, 22], [0, -22], [22, 0], [-22, 0]].forEach(([x, z], k) => onion(x, z, 14 + r() * 8, 4.5, k + 1));
+    return { group: g, r: 40 };
+  },
+  moscity() {
+    const g = new THREE.Group(), glass = [0x5d7fa8, 0x7aa0c0, 0x3f5f80, 0x8fb0d0, 0xb8a070];
+    [[0, 0, 370, 22], [60, 30, 330, 20], [-60, 20, 300, 24], [30, -60, 260, 26], [-40, -70, 240, 20], [110, -20, 200, 22], [-110, -30, 180, 26]].forEach(([x, z, h, w], i) => {
+      const m = mesh(new THREE.CylinderGeometry(w * 0.6, w, h, i % 2 ? 6 : 4), std(glass[i % glass.length], { metalness: 0.85, roughness: 0.1 }), x, h / 2, z); m.rotation.y = i * 0.5; g.add(m);
+    });
+    g.add(mesh(new THREE.CylinderGeometry(0.6, 1.2, 60, 6), std(0xcccccc), 0, 400, 0));
+    return { group: g, r: 150, noRotate: true };
+  },
+  sister(ctx) {
+    const g = new THREE.Group(), c = 0xe6dcc6;
+    ctx.addBox(140, 50, 50, 0, c); ctx.addBox(60, 60, 70, 50, c); ctx.addBox(44, 44, 40, 120, c); ctx.addBox(30, 30, 30, 160, c);
+    for (const s of [-1, 1]) ctx.addBox(34, 40, 80, 0, c, s * 70, 0);
+    g.add(mesh(new THREE.ConeGeometry(10, 40, 4), std(c), 0, 210, 0));
+    g.add(mesh(new THREE.CylinderGeometry(0.6, 1, 30, 6), std(0xe8b84a, { metalness: 1 }), 0, 245, 0));
+    g.add(mesh(new THREE.OctahedronGeometry(3), new THREE.MeshStandardMaterial({ color: 0xff2020, emissive: 0xff1010, emissiveIntensity: 1.2 }), 0, 262, 0, false));
+    return { group: g, r: 90 };
+  },
+  // ======== Egypt ========
+  pyramids() {
+    const g = new THREE.Group(), stone = std(0xd9b57a, { flatShading: true, roughness: 1 });
+    const pyr = (x, z, base, h) => { const p = mesh(new THREE.ConeGeometry(base * 0.707, h, 4, 1), stone, x, h / 2, z); p.rotation.y = Math.PI / 4; g.add(p); };
+    pyr(0, 0, 230, 139); pyr(-260, 330, 215, 136); pyr(-460, 620, 105, 65);
+    for (let i = 0; i < 3; i++) pyr(120 + i * 50, -150, 40, 26);
+    return { group: g, r: 420, noRotate: true };
+  },
+  sphinx() {
+    const g = new THREE.Group(), s = std(0xcfa868, { flatShading: true, roughness: 1 });
+    g.add(mesh(new THREE.BoxGeometry(14, 14, 57), s, 0, 7, -6));
+    for (const x of [-4.5, 4.5]) g.add(mesh(new THREE.BoxGeometry(4.5, 4, 18), s, x, 2, 28));
+    g.add(mesh(new THREE.BoxGeometry(10, 12, 9), s, 0, 20, 16));
+    g.add(mesh(new THREE.BoxGeometry(14, 10, 3), s, 0, 20, 12));
+    g.add(mesh(new THREE.BoxGeometry(6, 4, 3), s, 0, 15, 21));
+    return { group: g, r: 40 };
+  },
+  cairotower() {
+    const g = new THREE.Group(), lat = AH.tex.lattice(), m = new THREE.MeshStandardMaterial({ color: 0xd8c8a8, map: lat, alphaTest: 0.4, side: THREE.DoubleSide, roughness: 0.8 });
+    const t = mesh(new THREE.CylinderGeometry(7, 10, 160, 16, 1, true), m, 0, 80, 0); t.material.map = lat.clone(); t.material.map.needsUpdate = true; t.material.map.repeat.set(12, 20); g.add(t);
+    g.add(mesh(new THREE.CylinderGeometry(6.5, 9.5, 158, 16), std(0xc8b48a), 0, 80, 0));
+    g.add(mesh(new THREE.CylinderGeometry(70, 80, 0.6, 24), std(0x5f8a3a, { roughness: 1 }), 0, 0.2, 0)); // Gezira island
+    const prof = []; for (let i = 0; i <= 10; i++) { const k = i / 10; prof.push(new THREE.Vector2(9 + Math.sin(k * Math.PI) * 6 + k * 4, k * 22)); }
+    g.add(mesh(new THREE.LatheGeometry(prof, 20), std(0xe8dcc0), 0, 160, 0));
+    g.add(mesh(new THREE.CylinderGeometry(0.5, 1, 14, 6), std(0xcccccc), 0, 190, 0));
+    return { group: g, r: 25 };
+  },
+  mosque(ctx) {
+    const g = new THREE.Group(), w = std(0xe8e2d2, { roughness: 0.7 }), dome = std(0x8a9aa8, { metalness: 0.5, roughness: 0.4 });
+    g.add(mesh(new THREE.BoxGeometry(80, 30, 80), w, 0, 15, 0));
+    g.add(mesh(new THREE.CylinderGeometry(22, 22, 14, 24), w, 0, 37, 0));
+    const d = mesh(new THREE.SphereGeometry(22, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), dome, 0, 44, 0); d.scale.y = 1.15; g.add(d);
+    for (const [x, z] of [[30, 0], [-30, 0], [0, 30], [0, -30]]) { const sd = mesh(new THREE.SphereGeometry(11, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), dome, x, 30, z); g.add(sd); }
+    for (const x of [-40, 40]) { g.add(mesh(new THREE.CylinderGeometry(2.2, 2.6, 84, 10), w, x, 42, 40)); g.add(mesh(new THREE.CylinderGeometry(3.6, 3.6, 2, 10), w, x, 70, 40)); g.add(mesh(new THREE.ConeGeometry(2.4, 12, 10), dome, x, 90, 40)); }
+    return { group: g, r: 70 };
+  },
   // drive-through arches (centred on the road, local x = across road)
   arc() {
     const g = new THREE.Group(), c = std(0xe8dec8, { roughness: 0.85 });
@@ -419,7 +624,8 @@ AH.buildCity = (city, scene) => {
 
   // ---- ground
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(9000, 9000), std(new THREE.Color(env.ground), { roughness: 1, envMapIntensity: 0.3 }));
-  ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; root.add(ground);
+  ground.rotation.x = -Math.PI / 2; ground.position.y = -0.3; ground.receiveShadow = true; root.add(ground);
+  ground.material.polygonOffset = true; ground.material.polygonOffsetFactor = 4; ground.material.polygonOffsetUnits = 4;
 
   // ---- bridge / water definitions
   const isBridge = (i) => city.bridgeSeg !== undefined && Math.floor(tr.SEG[i]) === city.bridgeSeg;
@@ -439,10 +645,24 @@ AH.buildCity = (city, scene) => {
     const u = dx * c + dz * s, v = -dx * s + dz * c;
     return Math.abs(u) < w.len / 2 + pad && Math.abs(v) < w.wid / 2 + pad;
   });
-  const waterMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(night > 0.5 ? 0x0b1a30 : 0x1d5a86).convertSRGBToLinear(), metalness: 0.6, roughness: 0.12 });
+  const seaCol = night > 0.5 ? 0x0b1a30 : city.beach ? 0x1f8fb0 : city.style === 'bcn' ? 0x1f78a8 : city.style === 'cairo' ? 0x2f6f7a : 0x1d5a86;
+  const waterMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(seaCol).convertSRGBToLinear(), metalness: 0.6, roughness: 0.12 });
+  const iceMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(0xdbe8f2).convertSRGBToLinear(), metalness: 0.1, roughness: 0.35 });
   for (const w of waters) {
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(w.len, w.wid), waterMat);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w.len, w.wid), w.ice ? iceMat : waterMat);
     m.rotation.x = -Math.PI / 2; m.rotation.z = -w.ang; m.position.set(w.cx, 0.08, w.cz); m.receiveShadow = true; root.add(m);
+  }
+  // beaches
+  const sands = (city.sand || []).map(w => Object.assign({}, w));
+  const inSand = (x, z, pad = 0) => sands.some(w => { const dx = x - w.cx, dz = z - w.cz, c = Math.cos(w.ang), s = Math.sin(w.ang), u = dx * c + dz * s, v = -dx * s + dz * c; return Math.abs(u) < w.len / 2 + pad && Math.abs(v) < w.wid / 2 + pad; });
+  if (sands.length) {
+    const sm = std(0xe9d3a2, { roughness: 1, envMapIntensity: 0.2 });
+    for (const w of sands) { const m = new THREE.Mesh(new THREE.PlaneGeometry(w.len, w.wid), sm); m.rotation.x = -Math.PI / 2; m.rotation.z = -w.ang; m.position.set(w.cx, 0.1, w.cz); m.receiveShadow = true; root.add(m); }
+    if (city.beach) { // umbrellas on Copacabana
+      const n = 160, pole = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05, 0.05, 2.4, 4).translate(0, 1.2, 0), std(0xdddddd), n), top = new THREE.InstancedMesh(new THREE.ConeGeometry(1.4, 0.6, 8).translate(0, 2.5, 0), std(0xffffff), n), o = new THREE.Object3D(), c = new THREE.Color(), pc = [0xff5a3a, 0xffd23f, 0x1fd1f9, 0x37c06a, 0xff2d87];
+      for (let k = 0; k < n; k++) { const w = sands[0]; o.position.set(w.cx + (Math.random() - 0.5) * w.len * 0.9, 0.1, w.cz + (Math.random() - 0.5) * w.wid * 0.7); o.updateMatrix(); pole.setMatrixAt(k, o.matrix); top.setMatrixAt(k, o.matrix); top.setColorAt(k, c.set(pc[k % pc.length]).convertSRGBToLinear()); }
+      root.add(pole, top);
+    }
   }
 
   // ---- cross streets (positions along the track)
@@ -479,12 +699,18 @@ AH.buildCity = (city, scene) => {
     const b = isBridge(i), cc = b ? bridgeC : gray, sk = b ? bridgeC : skirtC;
     return [[-W - SW, -3, 0, sk], [-W - SW, 0.2, 0, cc], [-W - 0.4, 0.2, 0.4, cc], [-W - 0.4, 0.04, 0.45, cc], [W + 0.4, 0.04, 0.55, cc], [W + 0.4, 0.2, 0.6, cc], [W + SW, 0.2, 1, cc], [W + SW, -3, 1, sk]];
   }, { colors: true, vScale: 6, skip: (i, j) => j === 3, flip: true });
-  const swTex = AH.tex.sidewalk(); swTex.repeat.set(6, 1);
-  const sw = new THREE.Mesh(swGeo, new THREE.MeshStandardMaterial({ map: swTex, vertexColors: true, roughness: 0.9, side: THREE.DoubleSide, envMapIntensity: 0.3 }));
+  let swTex = AH.tex.sidewalk(); swTex.repeat.set(6, 1);
+  if (city.style === 'rio') { // Copacabana's black-and-white wave pavement
+    const c = document.createElement('canvas'); c.width = 256; c.height = 128; const x = c.getContext('2d');
+    x.fillStyle = '#f2efe8'; x.fillRect(0, 0, 256, 128); x.fillStyle = '#1c1c1c';
+    for (let row = -1; row < 3; row++) { x.beginPath(); for (let i = 0; i <= 256; i += 4) { const y = row * 48 + 24 + Math.sin(i / 256 * Math.PI * 4) * 18; i ? x.lineTo(i, y) : x.moveTo(i, y); } for (let i = 256; i >= 0; i -= 4) x.lineTo(i, row * 48 + 44 + Math.sin(i / 256 * Math.PI * 4) * 18); x.fill(); }
+    swTex = new THREE.CanvasTexture(c); swTex.encoding = THREE.sRGBEncoding; swTex.wrapS = swTex.wrapT = THREE.RepeatWrapping; swTex.anisotropy = 4; swTex.repeat.set(2, 1);
+  }
+  const sw = new THREE.Mesh(swGeo, new THREE.MeshStandardMaterial({ map: swTex, vertexColors: city.style !== 'rio', roughness: 0.9, side: THREE.DoubleSide, envMapIntensity: 0.3 }));
   sw.receiveShadow = true; root.add(sw);
 
   // barriers with gaps at cross streets
-  const stripeCol = { sf: '#d4202f', ny: '#ff1f5a', waw: '#d4202f', rome: '#c27a2a', paris: '#2f5bd4' }[city.id] || '#d4202f';
+  const stripeCol = { sf: '#d4202f', ny: '#ff1f5a', waw: '#d4202f', rome: '#c27a2a', paris: '#2f5bd4', rio: '#1aa34a', bcn: '#d4202f', milan: '#1a1a1a', msk: '#c41e2a', cairo: '#c8902a' }[city.id] || '#d4202f';
   const barTex = AH.tex.concrete(stripeCol);
   const barMat = new THREE.MeshStandardMaterial({ map: barTex, roughness: 0.7, emissive: night > 0.5 ? new THREE.Color(stripeCol) : new THREE.Color(0), emissiveMap: night > 0.5 ? AH.tex.glowStrip() : null, emissiveIntensity: 1.2 });
   for (const side of [-1, 1]) {
@@ -707,10 +933,15 @@ AH.buildCity = (city, scene) => {
     oldtown: [0xe8b04a, 0xd2604a, 0x7fae8a, 0xe6d27a, 0x9bb6d6, 0xf0a878, 0xc8746a],
     rome: [0xe8a45a, 0xd88a4a, 0xf0c27a, 0xc96a3a, 0xe8c99a, 0xd4a06a],
     paris: [0xece2cc, 0xe8dcc0, 0xf2e8d4, 0xe0d2b6],
+    rio: [0xf4f1ea, 0xe8e4da, 0xd9e6ec, 0xf2e6c8, 0xc9d6dc, 0xeadcc8],
+    bcn: [0xe8d2a8, 0xdcc49a, 0xf0e0c0, 0xd2b48a, 0xe6cfa6, 0xc8a87a],
+    milan: [0xe8c47a, 0xd8a86a, 0xe6d2aa, 0xc8b49a, 0xb9c2c8, 0xe0b88a],
+    msk: [0xe8d6b8, 0xd8c0a0, 0xc9cfd6, 0xb8a89a, 0xe2dccf, 0xa8b0b8],
+    cairo: [0xd9be8a, 0xcfae78, 0xe2cc9e, 0xc49a68, 0xb8956a, 0xe8d6b0],
   };
   const pick = (a) => a[Math.floor(rnd() * a.length)];
   const nearOther = (x, z, minD) => AH.minDistToTrack(tr, x, z, 4) < minD;
-  const excluded = (x, z, rad) => exclusions.some(e => (e.x - x) ** 2 + (e.z - z) ** 2 < (e.r + rad) ** 2) || inWater(x, z, rad * 0.6);
+  const excluded = (x, z, rad) => exclusions.some(e => (e.x - x) ** 2 + (e.z - z) ** 2 < (e.r + rad) ** 2) || inWater(x, z, rad * 0.6) || inSand(x, z, rad * 0.6);
   const rows = style === 'sky' ? 3 : 2;
   for (const side of [-1, 1]) for (let row = 0; row < rows; row++) {
     let s = rnd() * 10;
@@ -724,6 +955,11 @@ AH.buildCity = (city, scene) => {
       else if (o) { w = 7 + rnd() * 4; d = 12; h = 14 + rnd() * 6; c = pick(pal.oldtown); roofC = 0x9a3a28; roofH = 5; gap = 0.2; }
       else if (style === 'waw') { const block = rnd() < 0.45; w = block ? 40 + rnd() * 20 : 16 + rnd() * 10; d = block ? 14 : 16 + rnd() * 8; h = block ? 25 + rnd() * 15 : 18 + rnd() * (row ? 70 : 30); c = pick(pal.waw); }
       else if (style === 'rome') { w = 14 + rnd() * 10; d = 14 + rnd() * 8; h = 12 + rnd() * 10; c = pick(pal.rome); roofC = 0xa8482c; roofH = 3; gap = 0.5; }
+      else if (style === 'rio') { w = 16 + rnd() * 10; d = 16 + rnd() * 6; h = row === 0 ? 30 + rnd() * 30 : 40 + rnd() * 40; c = pick(pal.rio); gap = 1 + rnd() * 2; }
+      else if (style === 'bcn') { w = 18 + rnd() * 8; d = 18; h = 20 + rnd() * 6; c = pick(pal.bcn); gap = 0.2; }
+      else if (style === 'milan') { w = 14 + rnd() * 10; d = 16 + rnd() * 6; h = 18 + rnd() * 10; c = pick(pal.milan); roofC = 0xa8553a; roofH = 2.5; gap = 0.3; }
+      else if (style === 'msk') { const big = rnd() < 0.35; w = big ? 36 + rnd() * 20 : 16 + rnd() * 10; d = 16 + rnd() * 6; h = big ? 30 + rnd() * 25 : 18 + rnd() * 14; c = pick(pal.msk); roofC = 0xf4f7fa; roofH = 2.5; gap = 0.6; }
+      else if (style === 'cairo') { w = 10 + rnd() * 10; d = 12 + rnd() * 6; h = 9 + rnd() * (row ? 26 : 14); c = pick(pal.cairo); gap = 0.4 + rnd(); }
       else { w = 16 + rnd() * 8; d = 16 + rnd() * 4; h = 20 + rnd() * 5; c = pick(pal.paris); roofC = 0x5a6478; roofH = 5; gap = 0.2; }
       const p = AH.sample(tr, s + w / 2, sampleTmp);
       const back = W + SW + 2 + d / 2 + row * (style === 'sky' ? 30 : 26) + (row ? rnd() * 6 : rnd() * 2);
@@ -747,10 +983,10 @@ AH.buildCity = (city, scene) => {
       const x = minX - 500 + rnd() * (maxX - minX + 1000), z = minZ - 500 + rnd() * (maxZ - minZ + 1000);
       const w = 20 + rnd() * 25;
       if (AH.minDistToTrack(tr, x, z, 6) < 80 || excluded(x, z, w)) continue;
-      const hgt = style === 'sky' ? 60 + rnd() * 200 : style === 'sf' ? 20 + rnd() * 80 : style === 'waw' ? 20 + rnd() * 60 : 15 + rnd() * 20;
-      const c = pick(style === 'sky' ? pal.sky : style === 'rome' ? pal.rome : style === 'paris' ? pal.paris : style === 'waw' ? pal.waw : pal.sf);
+      const hgt = style === 'sky' ? 60 + rnd() * 200 : style === 'sf' ? 20 + rnd() * 80 : style === 'waw' || style === 'msk' ? 20 + rnd() * 60 : style === 'rio' ? 25 + rnd() * 50 : style === 'cairo' ? 10 + rnd() * 25 : 15 + rnd() * 20;
+      const c = pick(pal[style] || pal.sf);
       boxes.push({ x, y: -2, z, w, d: w * (0.7 + rnd() * 0.6), h: hgt, y0: 0, ry: rnd() * 3, c });
-      if (style === 'rome' || style === 'paris') roofs.push({ x, z, y: -2 + hgt, w: w, d: w, h: 4, ry: 0, c: style === 'rome' ? 0xa8482c : 0x5a6478 });
+      if (style === 'rome' || style === 'paris' || style === 'milan' || style === 'msk') roofs.push({ x, z, y: -2 + hgt, w: w, d: w, h: style === 'msk' ? 2.5 : 4, ry: 0, c: style === 'paris' ? 0x5a6478 : style === 'msk' ? 0xf4f7fa : 0xa8482c });
     }
   }
   // build building instances
@@ -784,7 +1020,7 @@ AH.buildCity = (city, scene) => {
         if (crossAt(p.i, side)) continue;
         const lat = side * (W + 1.6);
         lamps.push({ x: p.x + p.rx * lat, y: p.y, z: p.z + p.rz * lat, ry: Math.atan2(p.rx * -side, p.rz * -side) });
-        if (!isBridge(p.i) && (style === 'rome' || style === 'paris' || style === 'waw' || (style === 'sf' && rnd() < 0.4))) {
+        if (!isBridge(p.i) && (style !== 'sky' && style !== 'sf' || (style === 'sf' && rnd() < 0.4))) {
           const tl = side * (W + SW - 1.8), ts = AH.sample(tr, s + 18, {});
           const tx = ts.x + ts.rx * tl, tz = ts.z + ts.rz * tl;
           if (!crossAt(ts.i, side) && !nearOther(tx, tz, W + SW - 3)) trees.push({ x: tx, y: ts.y + 0.2, z: tz, s: 0.8 + rnd() * 0.5 });
@@ -809,12 +1045,12 @@ AH.buildCity = (city, scene) => {
       root.add(pool);
     }
     if (trees.length) {
-      const cypress = style === 'rome';
-      const trunkI = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.25, 0.35, 3, 5).translate(0, 1.5, 0), std(0x5a4030), trees.length);
-      const fol = cypress ? new THREE.ConeGeometry(1.6, 9, 7).translate(0, 7, 0) : new THREE.IcosahedronGeometry(3, 0).translate(0, 5, 0);
-      const folI = new THREE.InstancedMesh(fol, std(cypress ? 0x2f4a2a : style === 'paris' ? 0x3f6a3a : 0x4f7a3a, { flatShading: true }), trees.length);
+      const cypress = style === 'rome', palm = style === 'rio' || style === 'bcn' || style === 'cairo', pine = style === 'msk';
+      const trunkI = new THREE.InstancedMesh(palm ? new THREE.CylinderGeometry(0.2, 0.32, 9, 6).translate(0, 4.5, 0) : new THREE.CylinderGeometry(0.25, 0.35, 3, 5).translate(0, 1.5, 0), std(palm ? 0x8a6a48 : 0x5a4030), trees.length);
+      const fol = cypress ? new THREE.ConeGeometry(1.6, 9, 7).translate(0, 7, 0) : palm ? new THREE.ConeGeometry(4.2, 2.2, 8, 1, true).translate(0, 8.6, 0) : pine ? new THREE.ConeGeometry(2.4, 8, 7).translate(0, 6, 0) : new THREE.IcosahedronGeometry(3, 0).translate(0, 5, 0);
+      const folI = new THREE.InstancedMesh(fol, std(cypress ? 0x2f4a2a : style === 'paris' ? 0x3f6a3a : pine ? 0xdfe8ee : 0x4f7a3a, { flatShading: true, side: palm ? THREE.DoubleSide : THREE.FrontSide }), trees.length);
       const col = new THREE.Color();
-      trees.forEach((t, k) => { d.position.set(t.x, t.y, t.z); d.rotation.set(0, t.s * 7, 0); d.scale.setScalar(t.s); d.updateMatrix(); trunkI.setMatrixAt(k, d.matrix); folI.setMatrixAt(k, d.matrix); folI.setColorAt(k, col.setHSL(0.27 + rnd() * 0.06, 0.4, (night > 0.5 ? 0.18 : 0.28) + rnd() * 0.08)); });
+      trees.forEach((t, k) => { d.position.set(t.x, t.y, t.z); d.rotation.set(0, t.s * 7, 0); d.scale.setScalar(t.s); d.updateMatrix(); trunkI.setMatrixAt(k, d.matrix); folI.setMatrixAt(k, d.matrix); folI.setColorAt(k, pine ? col.setHSL(0.4, 0.15 + rnd() * 0.2, 0.55 + rnd() * 0.3) : col.setHSL(0.27 + rnd() * 0.06, 0.4, (night > 0.5 ? 0.18 : 0.28) + rnd() * 0.08)); });
       trunkI.castShadow = folI.castShadow = true;
       root.add(trunkI, folI);
     }
